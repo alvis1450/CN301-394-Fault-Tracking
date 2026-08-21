@@ -2162,4 +2162,54 @@ initCloud();
     .savebar .inside{gap:8px !important;}
     .discard,.save-submit{flex:1;height:42px !important;font-size:14px !important;}
 }
+
+
+/* ===== Mobile v5 orientation fix ===== */
+@media (max-width:950px){
+  .column-head{display:none !important;}
+  .car{
+    display:block !important;
+    min-width:0 !important;
+    width:100% !important;
+  }
+  .head{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    grid-template-rows:auto auto auto !important;
+    min-height:130px !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:10px !important;
+  }
+  .head .unit-select{
+    grid-column:1 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .vehicle-no-wrap{
+    grid-column:2 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .carno{
+    grid-column:1 / -1 !important;
+    grid-row:2 !important;
+    white-space:normal !important;
+  }
+  .head .add-btn{
+    position:static !important;
+    grid-column:1 / -1 !important;
+    grid-row:3 !important;
+    justify-self:start !important;
+    display:inline-flex !important;
+    margin-top:6px !important;
+  }
+  .rows{padding:8px 0 !important;}
+}
+
+@media (max-width:680px){
+  .head{
+    min-height:145px !important;
+  }
+}
 </style>
