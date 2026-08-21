@@ -1792,7 +1792,107 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 @media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
 @media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
 @media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
-</style></head><body><div class="report-head"><h1>73G-HC 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>73G-HC Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">73G-HC Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+</style></head><body><div class="report-head"><h1>73G-HC 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>73G-HC Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">73G-HC Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div><style>
+.cloud-pill{min-width:150px}.cloud-pill #cloudStatus{font-weight:800}.cloud-pill #cloudStatus[data-state="ok"]{color:#b9f6ca}.cloud-pill #cloudStatus[data-state="syncing"]{color:#fff0a6}.cloud-pill #cloudStatus[data-state="pending"]{color:#ffe082}.cloud-pill #cloudStatus[data-state="error"]{color:#ffcdd2}.save-submit:disabled{opacity:.7;cursor:wait}
+
+/* =====================================
+   iPhone Final Responsive Fix
+   CN301-394 Fault Tracking System
+===================================== */
+@media(max-width:680px){
+    html,body{width:100%;overflow-x:hidden;}
+    main{padding:8px !important;width:100%;}
+    .table-panel{width:100%;border-radius:12px;overflow:hidden !important;}
+    .column-head{display:none !important;}
+    .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff;}
+    .head{
+        display:grid !important;
+        grid-template-columns:1fr 1fr !important;
+        grid-template-rows:auto auto auto !important;
+        gap:8px !important;
+        min-height:auto !important;
+        padding:10px !important;
+    }
+    .head .unit-select{grid-column:1;grid-row:1;width:100% !important;}
+    .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;}
+    .head .carno{grid-column:1 / -1 !important;grid-row:2;font-size:16px !important;}
+    .head .add-btn{
+        grid-column:1 / -1 !important;
+        grid-row:3;
+        position:static !important;
+        width:max-content !important;
+        margin-top:3px !important;
+    }
+    .rows{padding:8px 0 !important;}
+    .row{
+        display:grid !important;
+        grid-template-columns:1fr 32px !important;
+        gap:8px !important;
+        padding:10px !important;
+        border-radius:12px !important;
+        margin-bottom:10px !important;
+    }
+    .row>*:not(.delete-btn){grid-column:1 !important;}
+    .delete-btn{grid-column:2 !important;grid-row:1 !important;}
+    textarea{width:100% !important;min-height:70px !important;font-size:15px !important;background:#fff !important;border:1px solid #d8e2ef !important;border-radius:10px !important;}
+    .status-select{width:100% !important;height:40px !important;font-size:14px !important;}
+    .tech,.wit{width:100% !important;height:40px !important;font-size:14px !important;}
+    .savebar{padding:8px !important;}
+    .savebar .inside{gap:8px !important;}
+    .discard,.save-submit{flex:1;height:42px !important;font-size:14px !important;}
+}
+
+
+/* ===== Mobile v5 orientation fix ===== */
+@media (max-width:950px){
+  .column-head{display:none !important;}
+  .car{
+    display:block !important;
+    min-width:0 !important;
+    width:100% !important;
+  }
+  .head{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    grid-template-rows:auto auto auto !important;
+    min-height:130px !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:10px !important;
+  }
+  .head .unit-select{
+    grid-column:1 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .vehicle-no-wrap{
+    grid-column:2 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .carno{
+    grid-column:1 / -1 !important;
+    grid-row:2 !important;
+    white-space:normal !important;
+  }
+  .head .add-btn{
+    position:static !important;
+    grid-column:1 / -1 !important;
+    grid-row:3 !important;
+    justify-self:start !important;
+    display:inline-flex !important;
+    margin-top:6px !important;
+  }
+  .rows{padding:8px 0 !important;}
+}
+
+@media (max-width:680px){
+  .head{
+    min-height:145px !important;
+  }
+}
+</style>
+</body></html>`;
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-HC_Daily_Fault_Report_${dateText}.doc`);
 }
 function statusText(s){
@@ -1856,6 +1956,106 @@ window.addEventListener("beforeunload",e=>{
 render();
 initCloud();
 </script>
+<style>
+.cloud-pill{min-width:150px}.cloud-pill #cloudStatus{font-weight:800}.cloud-pill #cloudStatus[data-state="ok"]{color:#b9f6ca}.cloud-pill #cloudStatus[data-state="syncing"]{color:#fff0a6}.cloud-pill #cloudStatus[data-state="pending"]{color:#ffe082}.cloud-pill #cloudStatus[data-state="error"]{color:#ffcdd2}.save-submit:disabled{opacity:.7;cursor:wait}
+
+/* =====================================
+   iPhone Final Responsive Fix
+   CN301-394 Fault Tracking System
+===================================== */
+@media(max-width:680px){
+    html,body{width:100%;overflow-x:hidden;}
+    main{padding:8px !important;width:100%;}
+    .table-panel{width:100%;border-radius:12px;overflow:hidden !important;}
+    .column-head{display:none !important;}
+    .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff;}
+    .head{
+        display:grid !important;
+        grid-template-columns:1fr 1fr !important;
+        grid-template-rows:auto auto auto !important;
+        gap:8px !important;
+        min-height:auto !important;
+        padding:10px !important;
+    }
+    .head .unit-select{grid-column:1;grid-row:1;width:100% !important;}
+    .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;}
+    .head .carno{grid-column:1 / -1 !important;grid-row:2;font-size:16px !important;}
+    .head .add-btn{
+        grid-column:1 / -1 !important;
+        grid-row:3;
+        position:static !important;
+        width:max-content !important;
+        margin-top:3px !important;
+    }
+    .rows{padding:8px 0 !important;}
+    .row{
+        display:grid !important;
+        grid-template-columns:1fr 32px !important;
+        gap:8px !important;
+        padding:10px !important;
+        border-radius:12px !important;
+        margin-bottom:10px !important;
+    }
+    .row>*:not(.delete-btn){grid-column:1 !important;}
+    .delete-btn{grid-column:2 !important;grid-row:1 !important;}
+    textarea{width:100% !important;min-height:70px !important;font-size:15px !important;background:#fff !important;border:1px solid #d8e2ef !important;border-radius:10px !important;}
+    .status-select{width:100% !important;height:40px !important;font-size:14px !important;}
+    .tech,.wit{width:100% !important;height:40px !important;font-size:14px !important;}
+    .savebar{padding:8px !important;}
+    .savebar .inside{gap:8px !important;}
+    .discard,.save-submit{flex:1;height:42px !important;font-size:14px !important;}
+}
+
+
+/* ===== Mobile v5 orientation fix ===== */
+@media (max-width:950px){
+  .column-head{display:none !important;}
+  .car{
+    display:block !important;
+    min-width:0 !important;
+    width:100% !important;
+  }
+  .head{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    grid-template-rows:auto auto auto !important;
+    min-height:130px !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:10px !important;
+  }
+  .head .unit-select{
+    grid-column:1 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .vehicle-no-wrap{
+    grid-column:2 !important;
+    grid-row:1 !important;
+    width:100% !important;
+  }
+  .head .carno{
+    grid-column:1 / -1 !important;
+    grid-row:2 !important;
+    white-space:normal !important;
+  }
+  .head .add-btn{
+    position:static !important;
+    grid-column:1 / -1 !important;
+    grid-row:3 !important;
+    justify-self:start !important;
+    display:inline-flex !important;
+    margin-top:6px !important;
+  }
+  .rows{padding:8px 0 !important;}
+}
+
+@media (max-width:680px){
+  .head{
+    min-height:145px !important;
+  }
+}
+</style>
 </body>
 </html>
 <style>
