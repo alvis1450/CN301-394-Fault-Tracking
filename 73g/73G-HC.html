@@ -1147,6 +1147,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SYSTEM_ID="73G-HC";
 const SUPABASE_URL="https://jyjgbduvmfmzlhhciylc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -1223,7 +1224,8 @@ function faultToDbRow(r){
     witness:r.wit||"",
     created_at:r.createdAt||new Date().toISOString(),
     status_updated_at:r.statusAt||r.createdAt||new Date().toISOString(),
-    updated_at:new Date().toISOString()
+    updated_at:new Date().toISOString(),
+    system_id:SYSTEM_ID
   };
   if(r.dbId)obj.id=r.dbId;
   return obj;
@@ -1241,14 +1243,15 @@ function metaToDbRow(car){
     repair_technician:"",
     witness:"",
     status_updated_at:null,
-    updated_at:new Date().toISOString()
+    updated_at:new Date().toISOString(),
+    system_id:SYSTEM_ID
   };
   if(metaDbIds[car])obj.id=metaDbIds[car];
   return obj;
 }
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
-  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").order("id",{ascending:true});
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("system_id",SYSTEM_ID).order("id",{ascending:true});
   if(error){
     console.error("Supabase load error",error);
     setCloudStatus("連線失敗","error");
@@ -1325,6 +1328,7 @@ async function saveToCloud(){
     if(error)throw error;
   }
   if(newFaults.length){
+    newFaults.forEach(r=>r.system_id=SYSTEM_ID);
     const {error}=await supabaseClient.from("fault_records").insert(newFaults);
     if(error)throw error;
   }
@@ -1335,6 +1339,7 @@ async function saveToCloud(){
     if(error)throw error;
   }
   if(newMeta.length){
+    newMeta.forEach(r=>r.system_id=SYSTEM_ID);
     const {error}=await supabaseClient.from("fault_records").insert(newMeta);
     if(error)throw error;
   }
