@@ -1945,6 +1945,23 @@ window.addEventListener("beforeunload",e=>{
 render();
 initCloud();
 </script>
+
+<style>
+/* ===== iPhone Override v2 ===== */
+@media (max-width:680px){
+  .table-panel{overflow:visible !important;width:100% !important;}
+  .car{display:block !important;min-width:0 !important;width:100% !important;grid-template-columns:1fr !important;}
+  .head{display:grid !important;grid-template-columns:1fr 1fr !important;grid-template-rows:auto auto auto !important;width:100% !important;}
+  .rows{display:block !important;width:100% !important;}
+  .row{display:flex !important;flex-direction:column !important;width:100% !important;min-width:0 !important;gap:8px !important;}
+  .row>*{width:100% !important;grid-column:auto !important;}
+  .delete-btn{position:absolute !important;right:10px;top:10px;width:28px !important;}
+  .row{position:relative !important;padding-right:45px !important;}
+  .status-wrap,.status-select,.row textarea,.tech,.wit{width:100% !important;max-width:100% !important;}
+  textarea{height:70px !important;min-height:70px !important;}
+  .column-head,.column-head-right{display:none !important;}
+}
+</style>
 </body>
 </html>
 <style>
