@@ -1494,7 +1494,7 @@ async function saveToCloud(){
 }
 function subscribeRealtime(){
   supabaseClient.channel("fault-tracking-live")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records"},()=>{
+    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",filter:`model=eq.${TRAIN_MODEL}`},()=>{
       clearTimeout(realtimeReloadTimer);
       realtimeReloadTimer=setTimeout(()=>loadFromCloud({force:false}),650);
     })
