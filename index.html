@@ -1156,6 +1156,66 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
   }
 
 }
+
+/* ===== Mobile v6 Portrait Identity Fix ===== */
+@media (max-width:680px) and (orientation:portrait){
+
+  .car{
+    display:block !important;
+    min-width:0 !important;
+    width:100% !important;
+  }
+
+  .head{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    grid-template-rows:auto !important;
+    min-height:180px !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:12px !important;
+    gap:8px !important;
+  }
+
+  .head .unit-select{
+    display:block !important;
+    grid-column:1 !important;
+    grid-row:auto !important;
+    width:100% !important;
+    height:40px !important;
+  }
+
+  .head .vehicle-no-wrap{
+    display:flex !important;
+    grid-column:1 !important;
+    grid-row:auto !important;
+    width:100% !important;
+  }
+
+  .head .vehicle-no-select,
+  .head .vehicle-no-custom{
+    width:100% !important;
+    height:40px !important;
+  }
+
+  .head .carno{
+    display:block !important;
+    grid-column:1 !important;
+    grid-row:auto !important;
+    font-size:18px !important;
+    white-space:normal !important;
+  }
+
+  .head .add-btn{
+    display:inline-flex !important;
+    grid-column:1 !important;
+    grid-row:auto !important;
+    position:static !important;
+    width:max-content !important;
+    margin-top:4px !important;
+    overflow:visible !important;
+  }
+}
 </style>
 </head>
 <body>
