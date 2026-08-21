@@ -2019,7 +2019,28 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 <button style="flex:1;border-radius:10px;">列印</button>
 </div>
 
-</body></html>`;
+</body>
+<style>
+/* ===== 73G mobile layout match index.html ===== */
+@media(max-width:950px){
+  .column-head{display:none !important;}
+  .table-panel{overflow:visible !important;}
+  .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff !important;border-radius:14px !important;margin-bottom:10px !important;}
+  .head{display:grid !important;grid-template-columns:92px minmax(0,1fr) !important;grid-template-rows:auto auto auto !important;gap:8px !important;min-height:0 !important;padding:10px !important;background:#f7faff !important;border:1px solid #dce6f3 !important;border-radius:12px !important;}
+  .head .rownum{display:none !important;}
+  .head .unit-select{grid-column:1 !important;grid-row:1 !important;width:100% !important;height:42px !important;background:#eaf3ff !important;border-color:#b8d3ef !important;}
+  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;background:#fff7e8 !important;border:1px solid #ead39c !important;border-radius:10px !important;min-height:42px !important;}
+  .head .vehicle-no-select{background:transparent !important;border:0 !important;height:40px !important;}
+  .head .carno{grid-column:1 / -1 !important;grid-row:2 !important;padding:10px 12px !important;border-radius:10px !important;background:#eaf8f0 !important;border:1px solid #b7ddc5 !important;color:#0c3b78 !important;font-size:18px !important;white-space:nowrap !important;}
+  .head .add-btn{position:static !important;grid-column:1 / -1 !important;grid-row:3 !important;justify-self:start !important;margin:0 !important;}
+  .rows{padding:8px 0 0 !important;}
+}
+@media(max-width:680px){
+  .head{grid-template-columns:1fr !important;}
+  .head .unit-select,.head .vehicle-no-wrap,.head .carno,.head .add-btn{grid-column:1 !important;}
+}
+</style>
+</html>`;
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-3_Daily_Fault_Report_${dateText}.doc`);
 }
 function statusText(s){
@@ -2184,6 +2205,27 @@ initCloud();
 }
 </style>
 </body>
+
+<style>
+/* ===== 73G mobile layout match index.html ===== */
+@media(max-width:950px){
+  .column-head{display:none !important;}
+  .table-panel{overflow:visible !important;}
+  .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff !important;border-radius:14px !important;margin-bottom:10px !important;}
+  .head{display:grid !important;grid-template-columns:92px minmax(0,1fr) !important;grid-template-rows:auto auto auto !important;gap:8px !important;min-height:0 !important;padding:10px !important;background:#f7faff !important;border:1px solid #dce6f3 !important;border-radius:12px !important;}
+  .head .rownum{display:none !important;}
+  .head .unit-select{grid-column:1 !important;grid-row:1 !important;width:100% !important;height:42px !important;background:#eaf3ff !important;border-color:#b8d3ef !important;}
+  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;background:#fff7e8 !important;border:1px solid #ead39c !important;border-radius:10px !important;min-height:42px !important;}
+  .head .vehicle-no-select{background:transparent !important;border:0 !important;height:40px !important;}
+  .head .carno{grid-column:1 / -1 !important;grid-row:2 !important;padding:10px 12px !important;border-radius:10px !important;background:#eaf8f0 !important;border:1px solid #b7ddc5 !important;color:#0c3b78 !important;font-size:18px !important;white-space:nowrap !important;}
+  .head .add-btn{position:static !important;grid-column:1 / -1 !important;grid-row:3 !important;justify-self:start !important;margin:0 !important;}
+  .rows{padding:8px 0 0 !important;}
+}
+@media(max-width:680px){
+  .head{grid-template-columns:1fr !important;}
+  .head .unit-select,.head .vehicle-no-wrap,.head .carno,.head .add-btn{grid-column:1 !important;}
+}
+</style>
 </html>
 <style>
 /* ===== STATUS FULL TEXT VISIBILITY FIX ===== */
