@@ -1400,7 +1400,7 @@ function metaToDbRow(car){
 }
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
-  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("model",TRAIN_MODEL).order("id",{ascending:true});
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").order("id",{ascending:true});
   if(error){
     console.error("Supabase load error",error);
     setCloudStatus("連線失敗","error");
@@ -1493,8 +1493,8 @@ async function saveToCloud(){
   await loadFromCloud({force:true});
 }
 function subscribeRealtime(){
-  supabaseClient.channel("fault-tracking-live")
-    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",filter:`model=eq.${TRAIN_MODEL}`},()=>{
+  supabaseClient.channel("fault-tracking-live-index")
+    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",},()=>{
       clearTimeout(realtimeReloadTimer);
       realtimeReloadTimer=setTimeout(()=>loadFromCloud({force:false}),650);
     })
