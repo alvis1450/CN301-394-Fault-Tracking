@@ -1318,11 +1318,12 @@ async function saveToCloud(){
   const currentDbIds=new Set(data.filter(r=>r.dbId).map(r=>Number(r.dbId)));
   const deleteIds=savedData.filter(r=>r.dbId&&!currentDbIds.has(Number(r.dbId))).map(r=>Number(r.dbId));
   if(deleteIds.length){
-    const {error}=await supabaseClient.from("fault_records").delete().in("id",deleteIds);
+    const {error}=await supabaseClient.from("fault_records").delete().eq("system_id",SYSTEM_ID).in("id",deleteIds);
     if(error)throw error;
   }
   const existingFaults=data.filter(r=>r.dbId).map(faultToDbRow);
   const newFaults=data.filter(r=>!r.dbId).map(faultToDbRow);
+  existingFaults.forEach(r=>r.system_id=SYSTEM_ID);
   if(existingFaults.length){
     const {error}=await supabaseClient.from("fault_records").upsert(existingFaults,{onConflict:"id"});
     if(error)throw error;
@@ -1334,6 +1335,7 @@ async function saveToCloud(){
   }
   const existingMeta=cars.filter(c=>metaDbIds[c]).map(metaToDbRow);
   const newMeta=cars.filter(c=>!metaDbIds[c]).map(metaToDbRow);
+  existingMeta.forEach(r=>r.system_id=SYSTEM_ID);
   if(existingMeta.length){
     const {error}=await supabaseClient.from("fault_records").upsert(existingMeta,{onConflict:"id"});
     if(error)throw error;
