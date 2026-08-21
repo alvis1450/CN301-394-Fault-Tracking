@@ -2055,7 +2055,176 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 @media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
 @media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
 @media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
-</style></head><body><div class="report-head"><h1>CN301-394 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>CN301-394 Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">CN301-394 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+</style></head><body><div class="report-head"><h1>CN301-394 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>CN301-394 Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">CN301-394 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div>
+<style>
+/* ===== Mobile v7 UI Separation Enhancement ===== */
+
+/* 車廂卡片區分 */
+.car{
+    border-radius:16px !important;
+    margin-bottom:14px !important;
+    border:1px solid #d8e4f1 !important;
+    background:#ffffff !important;
+    overflow:hidden !important;
+    box-shadow:0 3px 12px rgba(20,60,100,.08) !important;
+}
+
+/* 車廂標題強化 */
+.carno{
+    display:inline-flex !important;
+    align-items:center;
+    background:#173b70 !important;
+    color:#ffffff !important;
+    padding:5px 12px !important;
+    border-radius:8px !important;
+    font-size:16px !important;
+}
+
+/* 左側車廂資訊區 */
+.head{
+    background:linear-gradient(180deg,#f4f8fd,#ffffff) !important;
+    border-bottom:1px solid #e1eaf5 !important;
+    padding:10px !important;
+}
+
+/* 故障內容區 */
+.rows{
+    background:#fbfdff !important;
+    padding:10px !important;
+}
+
+/* 每筆故障紀錄 */
+.row{
+    background:#ffffff !important;
+    border:1px solid #e0e9f3 !important;
+    border-radius:12px !important;
+    margin-bottom:10px !important;
+    padding:10px !important;
+}
+
+/* 地點區清楚分離 */
+.car-location{
+    background:#f1f7ff !important;
+    border-top:1px solid #d8e5f4 !important;
+    padding:10px !important;
+    border-left:0 !important;
+    border-radius:0 0 16px 16px !important;
+}
+
+.location-select,
+.location-detail{
+    background:#ffffff !important;
+    border-color:#c9d9eb !important;
+}
+
+/* 手機版間距 */
+@media(max-width:680px){
+
+    .car{
+        margin-bottom:16px !important;
+    }
+
+    .head{
+        min-height:120px !important;
+    }
+
+    .carno{
+        margin-top:6px !important;
+    }
+
+    .rows{
+        padding:12px !important;
+    }
+
+}
+</style>
+
+
+<style>
+/* ===== Mobile v8 Field Operation UI ===== */
+
+/* stronger carriage separation */
+@media(max-width:900px){
+
+.car{
+    background:#ffffff !important;
+    border:2px solid #c9d9ec !important;
+    border-radius:18px !important;
+    margin:0 0 18px 0 !important;
+    overflow:hidden !important;
+    box-shadow:0 5px 16px rgba(20,55,100,.12) !important;
+}
+
+/* carriage identity header */
+.head{
+    background:linear-gradient(135deg,#eaf3ff,#ffffff) !important;
+    border-bottom:3px solid #173b70 !important;
+    padding:12px !important;
+    min-height:140px !important;
+}
+
+.carno{
+    background:#173b70 !important;
+    color:#fff !important;
+    padding:8px 14px !important;
+    border-radius:10px !important;
+    font-size:18px !important;
+    display:inline-flex !important;
+}
+
+/* add fault button */
+.add-btn{
+    background:#ffffff !important;
+    border:2px dashed #6d99c9 !important;
+    color:#173b70 !important;
+    font-weight:700 !important;
+    padding:7px 12px !important;
+}
+
+/* fault record blocks */
+.row{
+    background:#fff8f8 !important;
+    border-left:5px solid #e85b66 !important;
+    border-radius:12px !important;
+    margin-bottom:12px !important;
+    padding:12px !important;
+}
+
+/* location belongs to carriage */
+.car-location{
+    background:#eaf4ff !important;
+    border-top:2px solid #c3d9ef !important;
+    padding:12px !important;
+}
+
+.location-select,
+.location-detail{
+    border-radius:10px !important;
+    background:#ffffff !important;
+}
+
+/* make empty records visible */
+.empty{
+    background:#f7faff !important;
+    border-radius:10px !important;
+    min-height:60px !important;
+    margin:8px !important;
+}
+
+/* portrait and landscape mobile */
+}
+
+@media(max-width:680px){
+.head{
+    min-height:150px !important;
+}
+.carno{
+    font-size:17px !important;
+}
+}
+
+</style>
+</body></html>`;
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`CN301-394_Daily_Fault_Report_${dateText}.doc`);
 }
 function statusText(s){
@@ -2135,6 +2304,175 @@ initCloud();
   textarea{height:70px !important;min-height:70px !important;}
   .column-head,.column-head-right{display:none !important;}
 }
+</style>
+
+<style>
+/* ===== Mobile v7 UI Separation Enhancement ===== */
+
+/* 車廂卡片區分 */
+.car{
+    border-radius:16px !important;
+    margin-bottom:14px !important;
+    border:1px solid #d8e4f1 !important;
+    background:#ffffff !important;
+    overflow:hidden !important;
+    box-shadow:0 3px 12px rgba(20,60,100,.08) !important;
+}
+
+/* 車廂標題強化 */
+.carno{
+    display:inline-flex !important;
+    align-items:center;
+    background:#173b70 !important;
+    color:#ffffff !important;
+    padding:5px 12px !important;
+    border-radius:8px !important;
+    font-size:16px !important;
+}
+
+/* 左側車廂資訊區 */
+.head{
+    background:linear-gradient(180deg,#f4f8fd,#ffffff) !important;
+    border-bottom:1px solid #e1eaf5 !important;
+    padding:10px !important;
+}
+
+/* 故障內容區 */
+.rows{
+    background:#fbfdff !important;
+    padding:10px !important;
+}
+
+/* 每筆故障紀錄 */
+.row{
+    background:#ffffff !important;
+    border:1px solid #e0e9f3 !important;
+    border-radius:12px !important;
+    margin-bottom:10px !important;
+    padding:10px !important;
+}
+
+/* 地點區清楚分離 */
+.car-location{
+    background:#f1f7ff !important;
+    border-top:1px solid #d8e5f4 !important;
+    padding:10px !important;
+    border-left:0 !important;
+    border-radius:0 0 16px 16px !important;
+}
+
+.location-select,
+.location-detail{
+    background:#ffffff !important;
+    border-color:#c9d9eb !important;
+}
+
+/* 手機版間距 */
+@media(max-width:680px){
+
+    .car{
+        margin-bottom:16px !important;
+    }
+
+    .head{
+        min-height:120px !important;
+    }
+
+    .carno{
+        margin-top:6px !important;
+    }
+
+    .rows{
+        padding:12px !important;
+    }
+
+}
+</style>
+
+
+<style>
+/* ===== Mobile v8 Field Operation UI ===== */
+
+/* stronger carriage separation */
+@media(max-width:900px){
+
+.car{
+    background:#ffffff !important;
+    border:2px solid #c9d9ec !important;
+    border-radius:18px !important;
+    margin:0 0 18px 0 !important;
+    overflow:hidden !important;
+    box-shadow:0 5px 16px rgba(20,55,100,.12) !important;
+}
+
+/* carriage identity header */
+.head{
+    background:linear-gradient(135deg,#eaf3ff,#ffffff) !important;
+    border-bottom:3px solid #173b70 !important;
+    padding:12px !important;
+    min-height:140px !important;
+}
+
+.carno{
+    background:#173b70 !important;
+    color:#fff !important;
+    padding:8px 14px !important;
+    border-radius:10px !important;
+    font-size:18px !important;
+    display:inline-flex !important;
+}
+
+/* add fault button */
+.add-btn{
+    background:#ffffff !important;
+    border:2px dashed #6d99c9 !important;
+    color:#173b70 !important;
+    font-weight:700 !important;
+    padding:7px 12px !important;
+}
+
+/* fault record blocks */
+.row{
+    background:#fff8f8 !important;
+    border-left:5px solid #e85b66 !important;
+    border-radius:12px !important;
+    margin-bottom:12px !important;
+    padding:12px !important;
+}
+
+/* location belongs to carriage */
+.car-location{
+    background:#eaf4ff !important;
+    border-top:2px solid #c3d9ef !important;
+    padding:12px !important;
+}
+
+.location-select,
+.location-detail{
+    border-radius:10px !important;
+    background:#ffffff !important;
+}
+
+/* make empty records visible */
+.empty{
+    background:#f7faff !important;
+    border-radius:10px !important;
+    min-height:60px !important;
+    margin:8px !important;
+}
+
+/* portrait and landscape mobile */
+}
+
+@media(max-width:680px){
+.head{
+    min-height:150px !important;
+}
+.carno{
+    font-size:17px !important;
+}
+}
+
 </style>
 </body>
 </html>
