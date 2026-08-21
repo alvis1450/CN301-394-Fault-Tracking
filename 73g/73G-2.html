@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>73G-2 Fault Tracking System</title>
+<style>
+:root{
+  --navy:#082d63;
+  --page:#fff5f6;
+  --group:#fff0f2;
+  --row:#f8fbff;
+  --line:#dce6f3;
+  --text:#071f4d;
+  --muted:#7890b2;
+  --cyan:#c9f8fb;
+  --cyan-line:#35dbe8;
+  --cyan-text:#08718a;
+  --fault-bg:#ffd9dd;
+  --fault-line:#ff8f9a;
+  --fault-text:#a31625;
+  --repair-bg:#fff0c7;
+  --repair-line:#efc455;
+  --repair-text:#8a5b00;
+  --fixed-bg:#cdf6df;
+  --fixed-line:#64d79a;
+  --fixed-text:#08733d;
+  --pending-bg:#e8e0ff;
+  --pending-line:#ab91ee;
+  --pending-text:#5e3aa8;
+  --clear-bg:#d8efff;
+  --clear-line:#76bce9;
+  --clear-text:#155f91;
+  --success:#19b85a;
+  --unsaved:#fff8df;
+  --unsaved-border:#efbf58;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,"Microsoft JhengHei",sans-serif;background:var(--page);margin:0;color:var(--text);padding-bottom:74px}
+.topbar{background:linear-gradient(110deg,#17386d 0%,#284c88 55%,#365d9b 100%);color:#fff;padding:18px 26px;box-shadow:0 3px 14px rgba(8,45,99,.16)}
+.topbar-inner{max-width:1780px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand-wrap{display:flex;align-items:center;gap:16px;min-width:0}.brand-icon{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.13);display:grid;place-items:center;font-size:30px;border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+.brand-text h1{font-size:25px;margin:0 0 8px;font-weight:850;letter-spacing:.02em;white-space:nowrap}.brand-text h1 span{font-size:16px;font-weight:500;color:#d4def0;margin-left:12px}.brand-meta{display:flex;align-items:center;gap:14px;font-size:14px;color:#dbe4f3;flex-wrap:wrap}.brand-meta b{color:#fff}.meta-sep{opacity:.45}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.header-pill,.header-btn{height:42px;border-radius:22px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.11);color:#fff;display:inline-flex;align-items:center;gap:8px;padding:0 16px;font-size:14px;white-space:nowrap;backdrop-filter:blur(4px)}.header-pill{cursor:default}.header-btn{cursor:pointer;transition:.18s}.header-btn:hover{background:rgba(255,255,255,.19);transform:translateY(-1px)}.header-btn.primary{background:#fff;color:#17386d;border-color:#fff;font-weight:800}.header-btn.primary:hover{background:#f2f6fc}
+.status-strip{max-width:1780px;margin:12px auto 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.stat-chip{background:#fff;border:1px solid #dbe5f1;border-radius:18px;padding:8px 13px;font-size:12px;color:#56708f;box-shadow:0 2px 8px rgba(8,45,99,.04)}.stat-chip b{color:#102f62;font-size:14px;margin-left:5px}.stat-chip.alert b{color:var(--fault-text)}.stat-chip.ok b{color:var(--fixed-text)}
+main{width:100%;max-width:1780px;margin:auto;padding:12px 12px 38px;overflow-x:hidden}
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px;background:#fff;border:1px solid #e0e7f0;border-radius:14px;padding:10px 12px;box-shadow:0 3px 12px rgba(8,45,99,.04)}
+.toolbar-note{font-size:12px;color:#7890b2}
+#search{width:290px;border:1px solid #d6dfec;border-radius:10px;background:#fff;padding:9px 12px;outline:none}
+#search:focus{border-color:#7ba7df;box-shadow:0 0 0 2px #e0ecfb}
+.car{display:grid;grid-template-columns:320px minmax(0,1fr);background:var(--group);border-bottom:1px solid #f0dfe2;min-height:82px}
+.head{grid-column:1;display:grid;grid-template-columns:40px 110px minmax(80px,1fr);align-items:center;gap:10px;padding:12px 10px 12px 4px;position:relative}
+.rownum{width:40px;color:#7990b2;font-size:14px;text-align:left}
+.carno{font-size:18px;font-weight:800;color:#082d63;min-width:74px}.unit-select{width:110px;height:36px;border:1px solid #cbd8e8;border-radius:10px;background:#fff;color:#17386d;padding:0 9px;font-size:13px;font-weight:700;outline:none}.unit-select:focus{border-color:#7ba7df;box-shadow:0 0 0 2px #e0ecfb}
+.add-btn{position:absolute;left:160px;bottom:7px;border:1px dashed #b9cbe2;background:#fff;color:#385d8c;border-radius:16px;cursor:pointer;padding:4px 10px;font-size:11px;opacity:.85}
+.add-btn:hover{background:#f3f8ff;border-style:solid}
+.rows{grid-column:2;padding:4px 0 4px 12px;min-width:0}
+.row{display:grid;grid-template-columns:245px minmax(420px,1fr) 175px 175px 28px;gap:9px;align-items:center;min-height:66px;margin:0 0 8px;padding:9px 8px;background:var(--row);border:1px solid var(--line);border-radius:14px;transition:.15s}
+.row:last-child{margin-bottom:0}
+.row.unsaved{background:var(--unsaved);border-color:var(--unsaved-border);box-shadow:0 0 0 1px #f6dfa3 inset}
+.status-wrap{min-width:0;display:flex;flex-direction:column;gap:3px}
+.status-time{font-size:10px;line-height:1.15;color:#7a8da6;padding-left:5px;white-space:nowrap;letter-spacing:.05px}.row.unsaved .status-time{color:#8b6a20}.status-time b{font-weight:700;color:#536b88}
+.status-select{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Microsoft JhengHei UI","Microsoft JhengHei",sans-serif;width:100%;height:36px;font-weight:700;border-radius:18px;border:1px solid var(--cyan-line);padding:5px 15px;background:var(--cyan);color:var(--cyan-text);cursor:pointer;outline:none;transition:.15s}
+.status-select.status-fault{background:var(--fault-bg);border-color:var(--fault-line);color:var(--fault-text)}
+.status-select.status-repair{background:var(--repair-bg);border-color:var(--repair-line);color:var(--repair-text)}
+.status-select.status-fixed{background:var(--fixed-bg);border-color:var(--fixed-line);color:var(--fixed-text)}
+.status-select.status-pending{background:var(--pending-bg);border-color:var(--pending-line);color:var(--pending-text)}
+.status-select.status-clear{background:var(--clear-bg);border-color:var(--clear-line);color:var(--clear-text)}
+input,select,textarea,button{font:inherit}
+input,textarea{width:100%;border:1px solid #dce5f0;border-radius:12px;background:#fbfdff;color:#071f4d;padding:8px 12px;outline:none}
+input:focus,textarea:focus{border-color:#72b6d8;box-shadow:0 0 0 2px #dff4fa}
+textarea{height:44px;min-height:44px;resize:vertical;border-color:transparent;background:transparent;padding-left:0;font-size:17px;line-height:1.35}
+textarea:focus{background:#fff;border-color:#b8d8e8;padding-left:10px}
+.tech,.cat,.wit{height:36px}
+.delete-btn{width:28px;height:34px;border:0;background:transparent;color:#91a8c6;font-size:29px;line-height:28px;font-weight:200;border-radius:50%;cursor:pointer;padding:0}
+.delete-btn:hover{background:#ffe8eb;color:#c8505b}
+.empty{height:74px;display:flex;align-items:center;color:#9ba9bb;font-size:13px;padding-left:10px}
+.savebar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#102f62;color:#fff;min-height:58px;padding:10px 18px;display:none;align-items:center;box-shadow:0 -2px 8px #0002}
+.savebar.show{display:flex}.savebar .inside{width:min(1760px,100%);margin:auto;display:flex;align-items:center;gap:12px}.savebar .msg{font-size:13px;flex:1}
+.discard{background:#263d6e;color:#fff;border:1px solid #6679a1;border-radius:8px;padding:8px 14px;cursor:pointer}.save-submit{background:var(--success);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer}
+.toast{position:fixed;left:18px;bottom:72px;background:#163c2a;color:#fff;padding:9px 13px;border-radius:7px;font-size:12px;box-shadow:0 3px 12px #0003;opacity:0;transform:translateY(6px);pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:translateY(0)}
+
+/* Refined table header and visual hierarchy */
+.table-panel{width:100%;min-width:0;border:1px solid #d9e2ee;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 8px 28px rgba(8,45,99,.08)}
+.column-head{display:grid;grid-template-columns:320px minmax(0,1fr);background:linear-gradient(135deg,#163b73,#102f62);color:#fff;min-height:72px;border-bottom:1px solid #294b7c}
+.column-head-left{display:grid;grid-template-columns:40px 110px minmax(0,1fr);align-items:center;padding:0 10px 0 4px;gap:12px}
+.column-head-right{display:grid;grid-template-columns:245px minmax(420px,1fr) 175px 175px 28px;gap:9px;align-items:center;padding:0 8px 0 12px}
+.col-title{font-size:14px;font-weight:800;letter-spacing:.02em;line-height:1.15;white-space:nowrap}
+.col-title small{display:block;margin-top:5px;font-size:11px;font-weight:500;color:#c9d7eb;letter-spacing:.01em}
+.col-action{text-align:center}
+#app{background:#fff}
+.car{background:#fff;border-bottom:1px solid #e8edf4;min-height:86px}
+.car:last-child{border-bottom:0}
+.car:hover{background:#fbfdff}
+.head{background:#fafcff;border-right:1px solid #edf1f6}
+.rownum{color:#9aabc2;font-size:13px;text-align:center}
+.carno{font-size:17px;letter-spacing:.01em}
+.rows{padding:8px 10px 8px 12px}
+.row{min-height:60px;margin-bottom:7px;padding:8px 8px;background:#f8fafc;border-color:#e1e8f0;border-radius:12px;box-shadow:0 1px 2px rgba(8,45,99,.025)}
+.row:hover{border-color:#c9d7e8;background:#fbfdff;box-shadow:0 4px 14px rgba(8,45,99,.06)}
+.status-select{height:36px;font-size:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+textarea{font-size:15px;line-height:1.45;height:42px;min-height:42px}
+.tech,.cat,.wit{height:36px;background:#fff;font-size:14px}
+.add-btn{left:160px;bottom:8px;background:#fff;border-color:#9db5d2;color:#365d8d;padding:5px 11px}
+.add-btn:hover{background:#eef5fd;border-color:#6f97c7;color:#173f72}
+.empty{background:#fbfcfe;border-radius:10px;margin:2px 0;color:#9ba9bb}
+
+@media(max-width:1400px){.car,.column-head{grid-template-columns:250px minmax(0,1fr)}.head,.column-head-left{grid-template-columns:28px 96px minmax(0,1fr);gap:7px}.unit-select{width:96px}.row,.column-head-right{grid-template-columns:205px minmax(220px,1fr) 140px 140px 26px;gap:7px}.rows{padding-left:8px}.rownum{width:28px}.add-btn{left:126px}.col-title{font-size:13px}.col-title small{font-size:10px}}
+@media(max-width:1150px){.car,.column-head{grid-template-columns:205px minmax(0,1fr)}.head,.column-head-left{grid-template-columns:78px minmax(0,1fr);gap:6px}.column-head-left .h-index,.rownum{display:none}.unit-select{width:78px}.carno{font-size:15px}.row,.column-head-right{grid-template-columns:168px minmax(150px,1fr) 112px 112px 24px;gap:5px}.rows{padding:6px}.row{padding:6px;min-height:54px}.status-select,.tech,.wit{height:34px;font-size:12px;padding-left:9px;padding-right:9px}textarea{font-size:13px;line-height:1.3;min-height:38px;height:38px}.delete-btn{width:24px;font-size:24px}.add-btn{left:88px}.col-title{font-size:11px}.col-title small{font-size:9px}}
+@media(max-width:900px){.car,.column-head{grid-template-columns:180px minmax(0,1fr)}.head,.column-head-left{grid-template-columns:70px minmax(0,1fr);gap:5px;padding-left:5px}.unit-select{width:70px;font-size:11px}.row,.column-head-right{grid-template-columns:145px minmax(120px,1fr) 92px 92px 22px;gap:4px}.rows{padding:5px}.status-select,.tech,.wit{font-size:11px;height:32px;padding:4px 6px}textarea{font-size:12px;min-height:36px;height:36px}.col-title{font-size:10px}.col-title small{font-size:8px}.add-btn{left:78px;padding:4px 7px}.delete-btn{font-size:21px;width:22px}}
+@media(max-width:1050px){.topbar-inner{align-items:flex-start;flex-direction:column}.header-actions{width:100%;justify-content:flex-start}.brand-text h1{white-space:normal}}
+@media(max-width:650px){.topbar{padding:14px 12px}.brand-icon{width:44px;height:44px;font-size:24px}.brand-text h1{font-size:20px}.brand-text h1 span{display:block;margin:3px 0 0;font-size:13px}.header-actions{gap:7px}.header-pill,.header-btn{height:38px;padding:0 11px;font-size:12px}.toolbar{align-items:stretch;flex-direction:column}#search{width:100%}main{padding:8px}.table-panel{border-radius:12px}.column-head{display:none}.car{display:block;padding:7px}.head{height:48px;border-right:0}.add-btn{left:auto;right:5px;bottom:8px}.rows{padding:0}.row{grid-template-columns:1fr 28px}.row>*:not(.delete-btn){grid-column:1}.delete-btn{grid-column:2;grid-row:1}.savebar .msg{font-size:11px}.discard,.save-submit{padding:8px;font-size:11px}}
+@media print{body{background:#fff;padding:0}.topbar{background:#17386d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.header-actions,.toolbar,.add-btn,.delete-btn,.savebar,.toast{display:none!important}main{max-width:none;padding:10px}.table-panel{box-shadow:none}.row{break-inside:avoid}.car{break-inside:avoid}}
+
+
+/* ===== 2026 Final UI refinement ===== */
+:root{
+  --navy-950:#0b234d;
+  --navy-900:#12366b;
+  --navy-800:#1d477f;
+  --ink:#10233f;
+  --sub:#60738d;
+  --canvas:#f4f7fb;
+  --panel:#ffffff;
+  --soft:#f8fafc;
+  --border:#dbe4ef;
+  --border-strong:#c7d5e6;
+  --shadow:0 8px 26px rgba(24,54,95,.07);
+}
+html{font-size:16px;background:var(--canvas)}
+body{
+  font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC","Segoe UI",Arial,sans-serif;
+  background:var(--canvas);
+  color:var(--ink);
+  letter-spacing:.005em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  padding-bottom:70px;
+}
+.topbar{
+  background:linear-gradient(115deg,var(--navy-950) 0%,var(--navy-900) 58%,#315892 100%);
+  padding:16px 24px;
+  box-shadow:0 5px 18px rgba(14,42,82,.16);
+}
+.topbar-inner{max-width:1840px;gap:20px}
+.brand-wrap{gap:14px}.brand-icon{width:46px;height:46px;border-radius:12px;font-size:26px}
+.brand-text h1{font-size:24px;line-height:1.15;margin:0 0 6px;font-weight:800;letter-spacing:.01em}
+.brand-text h1 span{font-size:15px;margin-left:10px;color:#cbd7ea;font-weight:500}
+.brand-meta{gap:11px;font-size:13px;color:#ccd7e8}.brand-meta b{font-variant-numeric:tabular-nums}
+.header-actions{gap:8px}.header-pill,.header-btn{height:38px;border-radius:12px;padding:0 13px;font-size:13px}
+.header-btn{font-weight:650}.header-btn.primary{box-shadow:0 2px 7px rgba(0,0,0,.12)}
+.status-strip{max-width:1840px;margin:10px auto;padding:0 12px;gap:8px}
+.stat-chip{border-radius:10px;padding:7px 11px;font-size:12px;box-shadow:none;background:#fff}.stat-chip b{font-size:13px}
+main{max-width:1840px;padding:0 12px 30px}
+.toolbar{margin:0 0 10px;border-radius:12px;padding:8px 10px;min-height:48px;box-shadow:none;background:#fff;border-color:var(--border)}
+#search{width:min(430px,38vw);height:36px;border-radius:9px;padding:7px 11px;font-size:13px;background:#fbfdff}
+.toolbar-note{font-size:11.5px;color:#7a8da6}
+.table-panel{border-radius:15px;border-color:var(--border);box-shadow:var(--shadow);overflow:hidden}
+.column-head{
+  grid-template-columns:clamp(245px,18vw,300px) minmax(0,1fr);
+  min-height:64px;
+  background:linear-gradient(100deg,#15366b,#1d477f);
+  position:sticky;top:0;z-index:8;
+}
+.column-head-left,.head{grid-template-columns:32px 104px minmax(92px,1fr);gap:8px}
+.column-head-left{padding:0 10px}
+.column-head-right,.row{
+  grid-template-columns:clamp(174px,13vw,225px) minmax(245px,1fr) clamp(108px,9vw,148px) clamp(108px,9vw,148px) 30px;
+  gap:7px;
+}
+.column-head-right{padding:0 9px 0 10px}
+.col-title{font-size:13px;font-weight:800;line-height:1.12;letter-spacing:.01em}
+.col-title small{font-size:10px;margin-top:4px;color:#ccd9ec;font-weight:500}
+.car{grid-template-columns:clamp(245px,18vw,300px) minmax(0,1fr);min-height:70px;background:#fff;border-bottom:1px solid #e8edf4}
+.head{padding:8px 10px;min-height:70px;background:#fbfcfe;border-right:1px solid #edf1f6}
+.rownum{width:32px;font-size:12px;color:#8da0b8;text-align:center;font-variant-numeric:tabular-nums}
+.unit-select{width:104px;height:34px;border-radius:9px;padding:0 8px;font-size:12px;font-weight:700;color:#17386d}
+.carno{font-size:16px;font-weight:800;letter-spacing:.015em;color:#0b356e;white-space:nowrap}
+.add-btn{left:154px;bottom:5px;padding:4px 9px;border-radius:12px;font-size:10.5px;color:#466c9a;background:#fff}
+.rows{padding:6px 8px 6px 10px}
+.row{min-height:52px;margin:0 0 5px;padding:6px 7px;border-radius:10px;background:#f9fbfd;border-color:#e2e9f1;box-shadow:none}
+.row:hover{background:#fff;border-color:#cfdbea;box-shadow:0 3px 11px rgba(27,61,105,.05)}
+.row.unsaved{background:#fff9e8;border-color:#e8bd59;box-shadow:inset 3px 0 0 #e8bd59}
+.status-select{height:34px;border-radius:10px;padding:4px 10px;font-size:12.5px;font-weight:800;white-space:nowrap}
+textarea{height:36px;min-height:36px;font-size:13.5px;line-height:1.3;padding:7px 6px;border-radius:8px;resize:vertical}
+textarea:focus{padding-left:8px}
+.tech,.wit{height:34px;border-radius:9px;padding:6px 9px;font-size:12.5px;background:#fff}
+.delete-btn{width:28px;height:30px;font-size:23px;line-height:26px;color:#91a4bd}
+.empty{height:52px;min-height:52px;margin:0;padding-left:14px;border-radius:8px;background:#fbfcfe;font-size:12px;color:#9aa9ba}
+.savebar{min-height:56px;padding:8px 16px;background:rgba(15,47,98,.98);backdrop-filter:blur(8px)}
+.savebar .inside{width:min(1810px,100%)}.savebar .msg{font-size:12.5px}.discard,.save-submit{height:38px;border-radius:9px;padding:0 14px;font-size:12.5px}.save-submit{box-shadow:0 3px 10px rgba(12,125,63,.25)}
+.toast{bottom:68px;border-radius:9px}
+
+@media(max-width:1380px){
+  .column-head,.car{grid-template-columns:225px minmax(0,1fr)}
+  .column-head-left,.head{grid-template-columns:26px 88px minmax(82px,1fr);gap:6px}
+  .unit-select{width:88px}.add-btn{left:122px}.carno{font-size:14px}
+  .column-head-right,.row{grid-template-columns:164px minmax(200px,1fr) 105px 105px 28px;gap:5px}
+  .status-select{font-size:11.5px;padding-left:8px;padding-right:8px}.tech,.wit{font-size:11.5px;padding:5px 7px}textarea{font-size:12.5px}
+  .col-title{font-size:11.5px}.col-title small{font-size:9px}
+}
+@media(max-width:1120px){
+  .topbar{padding:13px 14px}.brand-text h1{font-size:20px}.brand-text h1 span{font-size:13px}.brand-meta{font-size:12px}
+  .column-head,.car{grid-template-columns:195px minmax(0,1fr)}
+  .column-head-left,.head{grid-template-columns:76px minmax(82px,1fr)}
+  .column-head-left .h-index,.rownum{display:none}.unit-select{width:76px;font-size:10.5px}.add-btn{left:84px}
+  .column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px 24px;gap:4px}
+  .rows{padding:5px}.row{padding:5px;min-height:48px}.status-select,.tech,.wit{height:32px;font-size:10.5px}textarea{height:34px;min-height:34px;font-size:11.5px}
+  .delete-btn{width:24px;font-size:20px}.col-title{font-size:10.5px}.col-title small{font-size:8.5px}
+}
+@media(max-width:860px){
+  main{padding:0 8px 24px}.status-strip{padding:0 8px}.toolbar{align-items:stretch;flex-direction:column}#search{width:100%}
+  .column-head{display:none}.car{display:block;padding:7px}.head{display:grid;grid-template-columns:86px 1fr;min-height:50px;border-right:0;border-bottom:1px solid #edf1f6;padding:7px 8px}.unit-select{width:86px}.carno{font-size:15px}.add-btn{left:auto;right:8px;bottom:7px}
+  .rows{padding:6px 0 0}.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) 24px;gap:4px}
+}
+@media(max-width:680px){
+  .brand-wrap{align-items:flex-start}.brand-icon{display:none}.brand-text h1{font-size:18px}.brand-text h1 span{display:block;margin:3px 0 0}.header-actions{width:100%}.header-pill{flex:1}.header-btn{padding:0 10px}.status-strip{overflow:auto;flex-wrap:nowrap}.stat-chip{white-space:nowrap}
+  .row{grid-template-columns:1fr 26px;padding:7px}.row>*:not(.delete-btn){grid-column:1}.delete-btn{grid-column:2;grid-row:1}.status-wrap{grid-row:1}.row textarea{grid-row:2}.row .tech{grid-row:3}.row .wit{grid-row:4}.savebar .inside{gap:7px}.savebar .msg{display:none}.discard,.save-submit{flex:1}
+}
+
+
+/* ===== Premium UI palette & typography — Final master ===== */
+:root{
+  --brand:#173b70;
+  --brand-2:#28558f;
+  --brand-3:#eaf1f9;
+  --ink:#17263a;
+  --sub:#687b92;
+  --canvas:#f3f6fa;
+  --panel:#ffffff;
+  --soft:#f8fafc;
+  --border:#dde5ef;
+  --line-soft:#eaf0f6;
+  --shadow:0 10px 30px rgba(21,50,89,.075);
+}
+html,body{background:var(--canvas)}
+body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC","Segoe UI",Arial,sans-serif;color:var(--ink);font-size:14px}
+.topbar{background:linear-gradient(120deg,#123263 0%,#1b4279 54%,#315c96 100%);padding:15px 24px;border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 5px 20px rgba(14,39,76,.14)}
+.brand-icon{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.14);box-shadow:none}
+.brand-text h1{font-size:23px;font-weight:800;letter-spacing:.005em}.brand-text h1 span{font-size:14px;color:#d2dceb}
+.brand-meta{font-size:12.5px;color:#cdd8e8}.header-pill,.header-btn{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2);box-shadow:none}.header-btn.primary{background:#fff;color:#173b70}
+.status-strip{margin-top:9px;margin-bottom:9px}.stat-chip{border:1px solid var(--border);background:#fff;color:#71839a}.stat-chip b{color:#173b70}
+.toolbar{background:#fff;border-color:var(--border);box-shadow:0 2px 10px rgba(22,51,90,.035)}
+#search{background:#f9fbfd;border-color:#d7e1ed;color:#20324a}.toolbar-note{color:#8090a4}
+.table-panel{border-color:#d7e1ec;box-shadow:var(--shadow);background:#fff}
+.column-head{background:linear-gradient(105deg,#17386c,#204c85);border-bottom-color:#315888}
+.col-title{font-size:12.5px}.col-title small{color:#cbd7e8;font-size:9.5px}
+.car{background:#fff;border-bottom:1px solid var(--line-soft)}.car:hover{background:#fcfdff}.head{background:#fbfcfe;border-right-color:#eef2f6}
+.row{background:#f8fafc;border-color:#e2e9f1}.row:hover{background:#fff;border-color:#cdd9e7;box-shadow:0 3px 12px rgba(20,53,92,.045)}
+.row.unsaved{background:#fffaf0;border-color:#e8bd61;box-shadow:inset 3px 0 0 #e8bd61}
+.carno{color:#123d74;font-weight:800}.rownum{color:#93a3b8}.unit-select,.tech,.wit{background:#fff;border-color:#d6e0eb;color:#243a57}
+textarea{color:#17263a}.add-btn{color:#406895;border-color:#a9bfd8}.add-btn:hover{background:#edf4fb;color:#173b70;border-color:#7e9fc5}
+.status-select.status-fault{background:#fff0f1;border-color:#f1a1a8;color:#a91c2a}
+.status-select.status-repair{background:#fff7e6;border-color:#e4bd6a;color:#845400}
+.status-select.status-fixed{background:#eaf8f0;border-color:#86d2a7;color:#126a40}
+.status-select.status-pending{background:#f0edff;border-color:#b5a4e6;color:#59439a}
+.status-select.status-clear{background:#edf6fc;border-color:#98c7e4;color:#286287}
+.empty{background:#fafbfd;color:#9aa8ba}.savebar{background:rgba(18,53,103,.98);box-shadow:0 -5px 18px rgba(14,37,72,.16)}.save-submit{background:#16a75a}.discard{background:#294a7d;border-color:#6580aa}
+@media(max-width:1380px){body{font-size:13px}}
+
+
+
+/* ===== Timestamp layout alignment fix ===== */
+/* Keep the left carriage information vertically centered as the right side grows. */
+.car{align-items:stretch}
+.head{
+  display:grid;
+  grid-template-columns:32px 104px minmax(92px,1fr);
+  grid-template-rows:auto auto;
+  align-content:center;
+  align-items:center;
+  column-gap:8px;
+  row-gap:6px;
+  min-height:100%;
+  padding:10px 10px;
+}
+.head .rownum{grid-column:1;grid-row:1 / span 2;align-self:center}
+.head .unit-select{grid-column:2;grid-row:1 / span 2;align-self:center}
+.head .carno{grid-column:3;grid-row:1;align-self:end;line-height:1.15;white-space:nowrap}
+.head .add-btn{
+  position:static;
+  grid-column:3;
+  grid-row:2;
+  justify-self:start;
+  align-self:start;
+  margin:0;
+  max-width:100%;
+  white-space:nowrap;
+}
+.status-wrap{justify-content:center}
+.status-time{min-height:11px;margin-top:1px;padding-left:8px;font-size:9.5px;line-height:1;color:#75879d}
+.row{align-items:center}
+
+@media(max-width:1380px){
+  .head{grid-template-columns:26px 88px minmax(82px,1fr);column-gap:6px}
+}
+@media(max-width:1120px){
+  .head{grid-template-columns:76px minmax(82px,1fr);grid-template-rows:auto auto}
+  .head .rownum{display:none}
+  .head .unit-select{grid-column:1;grid-row:1 / span 2}
+  .head .carno{grid-column:2;grid-row:1}
+  .head .add-btn{grid-column:2;grid-row:2}
+}
+@media(max-width:760px){
+  .head{grid-template-columns:86px minmax(0,1fr);grid-template-rows:auto auto;min-height:58px;padding:7px 8px}
+  .head .unit-select{grid-column:1;grid-row:1 / span 2}
+  .head .carno{grid-column:2;grid-row:1}
+  .head .add-btn{grid-column:2;grid-row:2;font-size:10px;padding:3px 8px}
+  .status-time{font-size:9px}
+}
+
+/* ===== Add Fault button final alignment fix ===== */
+/* Give the carriage-number area enough room so the Add Fault button never wraps or spills. */
+.head{
+  grid-template-columns:32px 96px minmax(124px,1fr) !important;
+  grid-template-rows:auto 28px !important;
+  column-gap:8px !important;
+  row-gap:4px !important;
+  align-content:center !important;
+  overflow:hidden;
+}
+.head .unit-select{grid-column:2;grid-row:1 / span 2;width:96px !important;align-self:center}
+.head .carno{grid-column:3;grid-row:1;align-self:end;min-width:0}
+.head .add-btn{
+  position:static !important;
+  grid-column:3 !important;
+  grid-row:2 !important;
+  justify-self:start !important;
+  align-self:start !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  max-width:100%;
+  height:26px;
+  padding:3px 9px !important;
+  margin:0 !important;
+  font-size:10px !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  overflow:hidden;
+  text-overflow:clip;
+}
+@media(max-width:1380px){
+  .head{grid-template-columns:26px 82px minmax(112px,1fr) !important;column-gap:6px !important}
+  .head .unit-select{width:82px !important}
+  .head .add-btn{font-size:9.5px !important;padding:3px 7px !important}
+}
+@media(max-width:1120px){
+  .head{grid-template-columns:74px minmax(118px,1fr) !important;grid-template-rows:auto 28px !important}
+  .head .rownum{display:none}
+  .head .unit-select{grid-column:1;grid-row:1 / span 2;width:74px !important}
+  .head .carno{grid-column:2;grid-row:1}
+  .head .add-btn{grid-column:2 !important;grid-row:2 !important}
+}
+@media(max-width:760px){
+  .head{grid-template-columns:82px minmax(128px,1fr) !important;grid-template-rows:auto 28px !important;min-height:64px}
+  .head .unit-select{width:82px !important}
+  .head .add-btn{font-size:9.5px !important}
+}
+
+
+/* ===== Vehicle No. column ===== */
+.column-head{grid-template-columns:clamp(390px,27vw,470px) minmax(0,1fr)}
+.column-head-left,.head{grid-template-columns:30px 96px 138px minmax(100px,1fr);gap:7px}
+.car{grid-template-columns:clamp(390px,27vw,470px) minmax(0,1fr)}
+.unit-select{width:96px}
+.vehicle-no-wrap{width:138px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.vehicle-no-select,.vehicle-no-custom{width:100%;height:34px;border:1px solid var(--border-strong);border-radius:9px;background:#fff;color:#17386d;font:700 12px/1.2 inherit;padding:0 7px;outline:none}
+.vehicle-no-select:focus,.vehicle-no-custom:focus{border-color:#7ba7df;box-shadow:0 0 0 2px #e0ecfb}
+.vehicle-no-custom{height:28px;font-weight:600;font-size:11px}
+.add-btn{left:276px}
+.head-unsaved{background:#fff9e8}
+@media(max-width:1380px){
+  .column-head,.car{grid-template-columns:340px minmax(0,1fr)}
+  .column-head-left,.head{grid-template-columns:24px 78px 116px minmax(88px,1fr);gap:5px}
+  .unit-select{width:78px}.vehicle-no-wrap{width:116px}.vehicle-no-select{font-size:10.5px;padding:0 5px}.vehicle-no-custom{font-size:10px}
+  .add-btn{left:224px}
+  .column-head-right,.row{grid-template-columns:150px minmax(180px,1fr) 94px 94px 26px}
+}
+@media(max-width:1120px){
+  .column-head,.car{grid-template-columns:315px minmax(0,1fr)}
+  .column-head-left,.head{grid-template-columns:72px 112px minmax(84px,1fr);gap:5px}
+  .column-head-left .h-index,.rownum{display:none}.unit-select{width:72px}.vehicle-no-wrap{width:112px}
+  .add-btn{left:193px}
+}
+@media(max-width:860px){
+  .car{display:block;padding:7px}.head{display:grid;grid-template-columns:86px 130px 1fr;min-height:56px;border-right:0;border-bottom:1px solid #edf1f6;padding:7px 8px}
+  .unit-select{width:86px}.vehicle-no-wrap{width:130px}.add-btn{left:auto;right:8px;bottom:7px}
+}
+@media(max-width:680px){
+  .head{grid-template-columns:1fr 1fr;gap:6px;padding-bottom:44px}.unit-select,.vehicle-no-wrap{width:100%}.carno{grid-column:1 / -1}.add-btn{right:8px;bottom:7px}
+}
+
+
+/* ===== FINAL VEHICLE / CARRIAGE LAYOUT FIX =====
+   Keep Unit → Vehicle No. → Carriage No. in one row.
+   Add Fault stays directly under the carriage number. */
+@media (min-width: 861px){
+  .column-head,.car{
+    grid-template-columns:clamp(470px,28vw,540px) minmax(0,1fr) !important;
+  }
+  .column-head-left,.head{
+    grid-template-columns:32px 112px 158px minmax(150px,1fr) !important;
+    grid-template-rows:auto 30px !important;
+    column-gap:10px !important;
+    row-gap:5px !important;
+  }
+  .column-head-left{
+    grid-template-rows:1fr !important;
+  }
+  .head{
+    min-height:78px !important;
+    padding:10px 12px 10px 8px !important;
+    align-items:center !important;
+  }
+  .head .rownum{
+    display:block !important;
+    grid-column:1 !important;
+    grid-row:1 / span 2 !important;
+    align-self:center !important;
+    justify-self:center !important;
+  }
+  .head .unit-select{
+    grid-column:2 !important;
+    grid-row:1 / span 2 !important;
+    width:112px !important;
+    align-self:center !important;
+  }
+  .head .vehicle-no-wrap{
+    grid-column:3 !important;
+    grid-row:1 / span 2 !important;
+    width:158px !important;
+    align-self:center !important;
+  }
+  .head .carno{
+    grid-column:4 !important;
+    grid-row:1 !important;
+    align-self:end !important;
+    justify-self:start !important;
+    white-space:nowrap !important;
+    min-width:0 !important;
+    font-size:17px !important;
+    line-height:1.1 !important;
+  }
+  .head .add-btn{
+    position:static !important;
+    left:auto !important;
+    right:auto !important;
+    top:auto !important;
+    bottom:auto !important;
+    grid-column:4 !important;
+    grid-row:2 !important;
+    align-self:start !important;
+    justify-self:start !important;
+    width:max-content !important;
+    max-width:100% !important;
+    white-space:nowrap !important;
+    margin:0 !important;
+    padding:4px 10px !important;
+    font-size:10.5px !important;
+    line-height:1.2 !important;
+  }
+}
+@media (min-width:861px) and (max-width:1380px){
+  .column-head,.car{grid-template-columns:430px minmax(0,1fr) !important}
+  .column-head-left,.head{grid-template-columns:28px 92px 138px minmax(142px,1fr) !important;column-gap:7px !important}
+  .head .unit-select{width:92px !important}
+  .head .vehicle-no-wrap{width:138px !important}
+  .head .carno{font-size:15px !important}
+}
+@media (min-width:861px) and (max-width:1120px){
+  .column-head,.car{grid-template-columns:390px minmax(0,1fr) !important}
+  .column-head-left,.head{grid-template-columns:82px 126px minmax(150px,1fr) !important;column-gap:7px !important}
+  .column-head-left .h-index,.head .rownum{display:none !important}
+  .head .unit-select{grid-column:1 !important;width:82px !important}
+  .head .vehicle-no-wrap{grid-column:2 !important;width:126px !important}
+  .head .carno{grid-column:3 !important}
+  .head .add-btn{grid-column:3 !important}
+}
+@media (max-width:860px){
+  .car{display:block !important;padding:7px !important}
+  .head{
+    display:grid !important;
+    grid-template-columns:88px 132px minmax(130px,1fr) !important;
+    grid-template-rows:auto 30px !important;
+    gap:6px !important;
+    min-height:72px !important;
+    padding:8px !important;
+    border-right:0 !important;
+    border-bottom:1px solid #edf1f6 !important;
+  }
+  .head .rownum{display:none !important}
+  .head .unit-select{grid-column:1 !important;grid-row:1 / span 2 !important;width:88px !important}
+  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 / span 2 !important;width:132px !important}
+  .head .carno{grid-column:3 !important;grid-row:1 !important;align-self:end !important;font-size:15px !important;white-space:nowrap !important}
+  .head .add-btn{position:static !important;grid-column:3 !important;grid-row:2 !important;justify-self:start !important;align-self:start !important;white-space:nowrap !important;margin:0 !important}
+}
+@media (max-width:620px){
+  .head{
+    grid-template-columns:1fr 1fr !important;
+    grid-template-rows:auto auto 30px !important;
+    min-height:112px !important;
+  }
+  .head .unit-select{grid-column:1 !important;grid-row:1 !important;width:100% !important}
+  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important}
+  .head .carno{grid-column:1 / -1 !important;grid-row:2 !important;align-self:center !important}
+  .head .add-btn{grid-column:1 / -1 !important;grid-row:3 !important}
+}
+
+
+/* ===== FINAL COMPACT 3-ZONE LAYOUT ===== */
+.table-panel{overflow:hidden}
+.column-head,.car{display:grid !important;grid-template-columns:clamp(430px,25vw,500px) minmax(0,1fr) clamp(190px,12vw,225px) !important}
+.column-head-left,.head{grid-template-columns:28px 96px 142px minmax(125px,1fr) !important;gap:7px !important}
+.column-head-right,.row{grid-template-columns:clamp(150px,10vw,178px) minmax(220px,1fr) clamp(105px,8vw,132px) clamp(105px,8vw,132px) 26px !important;gap:6px !important}
+.column-head-location{display:flex;align-items:center;padding:0 12px;border-left:1px solid rgba(255,255,255,.14)}
+.column-head-location .col-title{width:100%}
+.head{min-height:76px !important;padding:10px 8px !important}
+.rows{padding:8px 7px !important;min-width:0}
+.row{min-height:58px !important;margin-bottom:6px !important;padding:7px 7px !important;border-radius:12px !important}
+.row:last-child{margin-bottom:0 !important}
+.status-select{height:36px !important;font-size:12.5px !important;padding:0 30px 0 10px !important}
+.status-time{font-size:10.5px !important;margin-top:3px !important}
+.row textarea{height:42px !important;min-height:42px !important;font-size:13px !important;line-height:1.35 !important;padding:9px 10px !important}
+.tech,.wit{height:36px !important;font-size:12px !important;padding:0 9px !important}
+.delete-btn{width:24px !important;height:32px !important;font-size:21px !important}
+.car-location{display:flex;flex-direction:column;justify-content:center;gap:7px;padding:10px 12px;border-left:1px solid #e2e9f2;background:#fbfdff;min-width:0}
+.car-location.head-unsaved{background:#fff9ea;box-shadow:inset 3px 0 0 #efbc4e}
+.location-select,.location-detail{width:100%;height:36px;border:1px solid #cfdbea;border-radius:10px;background:#fff;color:#17386d;font-size:12.5px;outline:none;min-width:0}
+.location-select{padding:0 9px;font-weight:700}.location-detail{padding:7px 9px}
+.location-select:focus,.location-detail:focus{border-color:#6b9ed3;box-shadow:0 0 0 2px #e7f0fa}
+.empty{min-height:58px !important;margin:0 !important;display:flex;align-items:center;padding:0 16px !important;border-radius:12px !important}
+.action-spacer{min-width:20px}
+@media(max-width:1450px){
+  .column-head,.car{grid-template-columns:390px minmax(0,1fr) 185px !important}
+  .column-head-left,.head{grid-template-columns:24px 82px 124px minmax(110px,1fr) !important;gap:5px !important}
+  .column-head-right,.row{grid-template-columns:142px minmax(180px,1fr) 96px 96px 24px !important;gap:4px !important}
+  .vehicle-no-select,.vehicle-no-custom,.unit-select{font-size:11.5px !important}
+  .carno{font-size:16px !important}
+  .car-location{padding:8px}.location-select,.location-detail{font-size:11px}
+}
+@media(max-width:1120px){
+  .table-panel{overflow-x:auto}
+  .column-head,.car{min-width:1040px;grid-template-columns:335px minmax(520px,1fr) 185px !important}
+  .column-head-left,.head{grid-template-columns:72px 112px minmax(115px,1fr) !important}
+  .column-head-left .h-index,.head .rownum{display:none !important}
+  .column-head-right,.row{grid-template-columns:135px minmax(180px,1fr) 90px 90px 24px !important}
+}
+@media(max-width:680px){
+  .table-panel{overflow:visible}
+  .column-head{display:none !important}
+  .car{display:grid !important;min-width:0 !important;grid-template-columns:1fr !important;padding:7px !important}
+  .head{grid-template-columns:1fr 1fr !important;grid-template-rows:auto auto 30px !important;min-height:112px !important;border-bottom:1px solid #edf1f6 !important}
+  .head .unit-select{grid-column:1 !important;grid-row:1 !important;width:100% !important}
+  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important}
+  .head .carno{grid-column:1 / -1 !important;grid-row:2 !important}
+  .head .add-btn{grid-column:1 / -1 !important;grid-row:3 !important;position:static !important;justify-self:start !important}
+  .rows{padding:6px 0 !important}
+  .row{grid-template-columns:1fr 26px !important;padding:7px !important}
+  .row>*:not(.delete-btn){grid-column:1 !important}.delete-btn{grid-column:2 !important;grid-row:1 !important}
+  .row textarea,.row .tech,.row .wit{grid-row:auto !important}
+  .car-location{border-left:0;border-top:1px solid #e2e9f2;padding:9px 8px;display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px}
+  .car-location .location-detail:only-child{grid-column:1/-1}
+}
+
+
+/* ===== FINAL READABILITY + SUMMARY CARD POLISH ===== */
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif !important;
+  color:#102b53 !important;
+  background:#f4f7fb !important;
+  font-size:14px;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Header typography */
+.brand-text h1{font-weight:800 !important;letter-spacing:.15px !important;color:#fff !important}
+.brand-text h1 span{font-weight:500 !important;color:#dbe6f7 !important}
+.brand-meta{font-weight:500 !important;color:#d4dfef !important}
+.brand-meta b{font-weight:800 !important;color:#fff !important}
+.header-pill,.header-btn{font-weight:650 !important}
+
+/* Keep total carriage card in the main UI (was only styled inside report CSS) */
+.status-summary-wrap{
+  max-width:1840px !important;
+  margin:12px auto 10px !important;
+  padding:0 14px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  flex-wrap:wrap !important;
+}
+.total-card{
+  flex:0 0 168px !important;
+  width:168px !important;
+  min-height:86px !important;
+  padding:10px 14px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  background:linear-gradient(180deg,#ffffff 0%,#f6f9fd 100%) !important;
+  border:1px solid #d8e2ef !important;
+  border-radius:15px !important;
+  box-shadow:0 4px 14px rgba(19,57,106,.06) !important;
+}
+.total-number{
+  font-size:32px !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+  color:#153b72 !important;
+  letter-spacing:.2px !important;
+  font-variant-numeric:tabular-nums;
+}
+.total-label{
+  margin-top:6px !important;
+  color:#425f84 !important;
+  font-size:13px !important;
+  line-height:1.15 !important;
+  font-weight:800 !important;
+}
+.total-label small{
+  display:block !important;
+  margin-top:2px !important;
+  color:#7386a0 !important;
+  font-size:10.5px !important;
+  font-weight:550 !important;
+}
+.status-summary-wrap .status-strip{
+  flex:1 1 720px !important;
+  max-width:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  flex-wrap:wrap !important;
+}
+.stat-chip{
+  min-height:42px !important;
+  padding:0 14px !important;
+  border-radius:12px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  font-size:13px !important;
+  font-weight:650 !important;
+  color:#536b89 !important;
+  background:#fff !important;
+  border:1px solid #d9e3ef !important;
+  box-shadow:0 2px 7px rgba(20,55,100,.035) !important;
+  white-space:nowrap !important;
+}
+.stat-chip b{
+  margin-left:3px !important;
+  font-size:17px !important;
+  line-height:1 !important;
+  font-weight:850 !important;
+  color:#173b70 !important;
+  font-variant-numeric:tabular-nums;
+}
+.status-strip .stat-fault{background:#fff4f5 !important;border-color:#f3c3c8 !important;color:#a62835 !important}.status-strip .stat-fault b{color:#b31f2d !important}
+.status-strip .stat-repair{background:#fff9ed !important;border-color:#ecd6a8 !important;color:#8a610e !important}.status-strip .stat-repair b{color:#8a5900 !important}
+.status-strip .stat-pending{background:#f6f3ff !important;border-color:#d2c7ef !important;color:#654da1 !important}.status-strip .stat-pending b{color:#5b4198 !important}
+.status-strip .stat-fixed{background:#eff9f3 !important;border-color:#b8dec8 !important;color:#26724d !important}.status-strip .stat-fixed b{color:#12643d !important}
+.status-strip .stat-clear{background:#f0f7fc !important;border-color:#bdd9ea !important;color:#3b6e91 !important}.status-strip .stat-clear b{color:#286287 !important}
+
+/* Toolbar */
+.toolbar{background:#fff !important;border-color:#dbe4ef !important}
+#search{
+  color:#17365f !important;
+  font-weight:550 !important;
+  border-color:#d4dfec !important;
+  background:#fbfdff !important;
+}
+#search::placeholder{color:#657b98 !important;opacity:1 !important;font-weight:500 !important}
+.toolbar-note{color:#6f829c !important;font-weight:500 !important}
+
+/* Table header and labels */
+.table-panel{background:#fff !important;border:1px solid #dce5ef !important;box-shadow:0 4px 18px rgba(17,52,96,.045) !important}
+.column-head{background:linear-gradient(100deg,#183e74,#244f86) !important}
+.col-title{font-size:13px !important;font-weight:800 !important;line-height:1.15 !important;color:#fff !important;letter-spacing:.08px !important}
+.col-title small{display:block !important;margin-top:4px !important;font-size:10.5px !important;font-weight:500 !important;color:#d9e5f5 !important;letter-spacing:0 !important}
+
+/* Left identity area */
+.rownum{font-weight:650 !important;color:#8aa0bd !important}
+.carno{font-weight:850 !important;color:#0c3b78 !important;letter-spacing:.1px !important}
+.unit-select,.vehicle-no-select,.vehicle-no-custom{
+  color:#173b70 !important;
+  font-weight:700 !important;
+  border-color:#cfdcea !important;
+  background:#fff !important;
+}
+.add-btn{
+  color:#54759c !important;
+  font-weight:650 !important;
+  border-color:#b8cce4 !important;
+  background:#fff !important;
+}
+.add-btn:hover{color:#1d4d85 !important;border-color:#83a8d0 !important;background:#f5f9fe !important}
+
+/* Record row readability */
+.row{background:#fbfdff !important;border-color:#dbe5f0 !important}
+.row textarea,.tech,.wit,.location-select,.location-detail{
+  color:#183451 !important;
+  font-weight:520 !important;
+  border-color:#d1ddea !important;
+  background:#fff !important;
+}
+.row textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::placeholder{color:#7588a1 !important;opacity:1 !important}
+.status-select{font-weight:800 !important;letter-spacing:.03px !important}
+.status-time{color:#667d99 !important;font-weight:550 !important}
+.empty{color:#8da0b8 !important;font-weight:500 !important}
+
+/* Location zone */
+.car-location{background:#fbfdff !important}
+.location-select{font-weight:750 !important}
+
+/* Save bar */
+.savebar{box-shadow:0 -5px 18px rgba(8,40,84,.11) !important}
+.savebar .msg{font-weight:650 !important}
+.discard,.save-submit{font-weight:750 !important}
+
+@media(max-width:1000px){
+  .status-summary-wrap{padding:0 8px !important;gap:8px !important}
+  .total-card{flex-basis:145px !important;width:145px !important;min-height:78px !important}
+  .total-number{font-size:28px !important}
+  .stat-chip{min-height:38px !important;padding:0 11px !important;font-size:12px !important}
+  .stat-chip b{font-size:15px !important}
+}
+@media(max-width:680px){
+  .status-summary-wrap{display:block !important}
+  .total-card{width:100% !important;min-height:68px !important;display:grid !important;grid-template-columns:auto 1fr !important;column-gap:12px !important;text-align:left !important;margin-bottom:8px !important}
+  .total-number{font-size:28px !important}
+  .total-label{margin-top:0 !important;text-align:left !important}
+  .status-summary-wrap .status-strip{display:flex !important;overflow-x:auto !important;flex-wrap:nowrap !important;padding-bottom:3px !important}
+}
+
+
+/* ===== Dashboard summary final layout fix ===== */
+.dashboard-summary{
+  width:min(1840px,calc(100% - 28px));
+  margin:12px auto 10px;
+  display:grid;
+  grid-template-columns:178px minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+  box-sizing:border-box;
+}
+.dashboard-total-card{
+  min-width:0;
+  min-height:96px;
+  box-sizing:border-box;
+  padding:12px 14px 11px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:linear-gradient(180deg,#ffffff 0%,#f5f8fc 100%);
+  border:1px solid #d7e2ef;
+  border-radius:16px;
+  box-shadow:0 4px 14px rgba(18,56,104,.055);
+  overflow:hidden;
+}
+.dashboard-total-number{
+  margin:0;
+  font-size:34px;
+  line-height:1;
+  font-weight:850;
+  color:#143b73;
+  letter-spacing:.2px;
+  font-variant-numeric:tabular-nums;
+}
+.dashboard-total-title{
+  margin-top:7px;
+  font-size:13.5px;
+  line-height:1.15;
+  font-weight:800;
+  color:#3f5f87;
+}
+.dashboard-total-subtitle{
+  margin-top:2px;
+  font-size:11px;
+  line-height:1.15;
+  font-weight:600;
+  color:#6f83a0;
+}
+.dashboard-status-cards{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  align-content:center;
+  gap:9px;
+  flex-wrap:wrap;
+}
+.dashboard-status-card{
+  box-sizing:border-box;
+  min-height:46px;
+  padding:0 14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  background:#fff;
+  border:1px solid #d9e4ef;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(18,56,104,.035);
+  color:#536c8d;
+  white-space:nowrap;
+}
+.dashboard-status-card .stat-name{
+  font-size:13px;
+  line-height:1;
+  font-weight:700;
+}
+.dashboard-status-card b{
+  font-size:18px;
+  line-height:1;
+  font-weight:850;
+  color:#153b72;
+  font-variant-numeric:tabular-nums;
+}
+.dashboard-status-card.stat-fault{background:#fff4f5;border-color:#f1c1c7;color:#a62936}.dashboard-status-card.stat-fault b{color:#b11f2d}
+.dashboard-status-card.stat-repair{background:#fff9ed;border-color:#ecd6a8;color:#865e0e}.dashboard-status-card.stat-repair b{color:#8b5900}
+.dashboard-status-card.stat-pending{background:#f6f3ff;border-color:#d2c7ef;color:#654da1}.dashboard-status-card.stat-pending b{color:#5b4198}
+.dashboard-status-card.stat-fixed{background:#eff9f3;border-color:#b8dec8;color:#26724d}.dashboard-status-card.stat-fixed b{color:#12643d}
+.dashboard-status-card.stat-clear{background:#f0f7fc;border-color:#bdd9ea;color:#3b6e91}.dashboard-status-card.stat-clear b{color:#286287}
+
+/* Global readability hierarchy */
+body{color:#162d4b;font-weight:450}
+.toolbar-note{font-size:12.5px !important;color:#687f9e !important;font-weight:600 !important}
+.col-title{font-size:13.5px !important;font-weight:850 !important}.col-title small{font-size:10.5px !important;font-weight:600 !important;color:#dce7f5 !important}
+.carno{font-weight:850 !important;color:#0c3b74 !important}
+.unit-select,.vehicle-select,.vehicle-custom-input,.location-select,.location-detail,.tech,.wit{font-weight:600 !important;color:#17365f !important}
+textarea{font-weight:500 !important;color:#132f52 !important}
+textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::placeholder,.vehicle-custom-input::placeholder{color:#70839e !important;opacity:1 !important;font-weight:500 !important}
+.add-btn{font-weight:650 !important;color:#55769d !important}
+.status-select{font-weight:800 !important}
+.status-time{font-weight:600 !important;color:#667d99 !important}
+
+@media(max-width:1100px){
+  .dashboard-summary{grid-template-columns:150px minmax(0,1fr);gap:9px}
+  .dashboard-total-card{min-height:82px;padding:9px 10px}.dashboard-total-number{font-size:29px}.dashboard-total-title{font-size:12.5px}.dashboard-total-subtitle{font-size:10px}
+  .dashboard-status-card{min-height:42px;padding:0 11px}.dashboard-status-card .stat-name{font-size:12px}.dashboard-status-card b{font-size:16px}
+}
+@media(max-width:760px){
+  .dashboard-summary{grid-template-columns:1fr;gap:8px;width:calc(100% - 16px);margin-top:8px}
+  .dashboard-total-card{min-height:68px;display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:12px;justify-content:start;text-align:left;padding:10px 14px}
+  .dashboard-total-number{grid-row:1/3;font-size:30px;align-self:center}.dashboard-total-title{margin:0;align-self:end}.dashboard-total-subtitle{margin:1px 0 0;align-self:start}
+  .dashboard-status-cards{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}
+  .dashboard-status-card{flex:0 0 auto}
+}
+
+/* ===== COMPACT UNIT/VEHICLE + LOCATION ICON POLISH ===== */
+@media (min-width:861px){
+  .column-head,.car{grid-template-columns:clamp(390px,23vw,440px) minmax(0,1fr) clamp(190px,12vw,220px) !important}
+  .column-head-left,.head{grid-template-columns:26px 78px 122px minmax(135px,1fr) !important;column-gap:6px !important}
+  .head .unit-select,.unit-select{width:78px !important;height:34px !important;padding:0 7px !important;font-size:12px !important}
+  .head .vehicle-no-wrap,.vehicle-no-wrap{width:122px !important}
+  .vehicle-no-select{height:34px !important;font-size:11.5px !important;padding:0 6px !important}
+  .vehicle-no-custom{height:27px !important;font-size:10.5px !important;padding:0 6px !important}
+  .head .carno{font-size:16px !important}
+  .head .add-btn{font-size:10px !important;padding:4px 8px !important}
+}
+.location-select{font-weight:800 !important;letter-spacing:.01em}
+.location-select option{font-weight:650}
+@media (min-width:861px) and (max-width:1380px){
+  .column-head,.car{grid-template-columns:360px minmax(0,1fr) 185px !important}
+  .column-head-left,.head{grid-template-columns:22px 70px 112px minmax(130px,1fr) !important;column-gap:5px !important}
+  .head .unit-select,.unit-select{width:70px !important;font-size:11px !important}
+  .head .vehicle-no-wrap,.vehicle-no-wrap{width:112px !important}
+  .vehicle-no-select{font-size:10.5px !important}
+  .head .carno{font-size:15px !important}
+}
+
+
+/* Dropdown readability refinement */
+.head .unit-select,
+.vehicle-no-select,
+.location-select{
+  font-size:14px !important;
+  font-weight:750 !important;
+  letter-spacing:.01em;
+}
+.head .unit-select option,
+.vehicle-no-select option,
+.location-select option{
+  font-size:14px;
+  font-weight:650;
+}
+.vehicle-no-custom,
+.location-detail{
+  font-size:13.5px !important;
+}
+@media(max-width:1150px){
+  .head .unit-select,.vehicle-no-select,.location-select{font-size:13px !important;}
+  .head .unit-select option,.vehicle-no-select option,.location-select option{font-size:13px;}
+}
+
+/* Saved fault description: clean text view. Click text to edit again. */
+.desc-display{
+  min-width:0;
+  width:100%;
+  padding:7px 8px;
+  font-size:13.5px;
+  line-height:1.5;
+  font-weight:500;
+  color:#132f52;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  cursor:text;
+}
+.desc-display:hover{background:#f5f8fc;border-color:#e5ebf3}
+.desc-display.empty{color:#70839e;font-weight:500}
+.row.unsaved textarea{background:#fff;border-color:#c8d8ea}
+@media(max-width:1150px){.desc-display{font-size:13px;padding:6px 5px}}
+@media(max-width:900px){.desc-display{font-size:12px;padding:6px 4px}}
+
+/* ===== LOCATION COLUMN COMPACT FINAL ===== */
+@media (min-width:1381px){
+  .column-head,.car{grid-template-columns:clamp(390px,23vw,440px) minmax(0,1fr) clamp(150px,10vw,172px) !important;}
+  .car-location{padding:9px 8px !important;gap:6px !important;}
+  .location-select,.location-detail{height:34px !important;padding-left:8px !important;padding-right:8px !important;}
+}
+@media (min-width:861px) and (max-width:1380px){
+  .column-head,.car{grid-template-columns:360px minmax(0,1fr) 158px !important;}
+  .car-location{padding:7px 6px !important;gap:5px !important;}
+  .location-select,.location-detail{height:32px !important;padding-left:6px !important;padding-right:6px !important;}
+}
+
+
+/* ===== IMPORT / EXPORT MENU ===== */
+.io-wrap{position:relative;display:inline-flex}
+.io-menu{position:absolute;right:0;top:50px;z-index:120;width:248px;padding:8px;background:#fff;border:1px solid #d7e2ef;border-radius:14px;box-shadow:0 16px 38px rgba(8,45,99,.20);display:none;color:#17345f}
+.io-menu.show{display:block}
+.io-menu-title{padding:7px 10px 8px;font-size:12px;font-weight:800;color:#6d819c;border-bottom:1px solid #edf2f7;margin-bottom:5px}
+.io-item{width:100%;border:0;background:transparent;border-radius:9px;padding:10px 11px;display:flex;align-items:center;gap:10px;text-align:left;font-family:inherit;font-size:13.5px;font-weight:700;color:#17345f;cursor:pointer}
+.io-item:hover{background:#f1f6fc}.io-item small{display:block;font-size:11px;font-weight:500;color:#8293a9;margin-top:2px}
+.io-sep{height:1px;background:#edf2f7;margin:5px 4px}
+.io-icon{width:25px;height:25px;border-radius:7px;background:#edf4fc;display:grid;place-items:center;flex:0 0 25px}
+@media(max-width:900px){.io-menu{right:auto;left:0}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-wrap">
+      <div class="brand-icon">🚆</div>
+      <div class="brand-text">
+        <h1>73G-2 故障追蹤系統 <span>Fault Tracking System</span></h1>
+        <div class="brand-meta">
+          <span>作業單位 Unit：<b>2C</b></span><span class="meta-sep">|</span>
+          <span>車廂總數 Total：<b id="vehicleTotal">--</b> carriages</span><span class="meta-sep">|</span>
+          <span>紀錄數 Records：<b id="recordTotal">0</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="header-pill">🕘 最後更新 <span id="lastUpdated">--</span></div>
+      <div class="header-pill cloud-pill">☁️ 雲端 <span id="cloudStatus">連線中...</span></div>
+      <button class="header-btn" onclick="backupData()">📥 備份 Backup</button>
+      <div class="io-wrap">
+        <button class="header-btn" id="ioMenuBtn" onclick="toggleIOMenu(event)">⇄ 匯入 / 匯出 <span style="font-size:10px">▼</span></button>
+        <div class="io-menu" id="ioMenu">
+          <div class="io-menu-title">資料交換 Import / Export</div>
+          <button class="io-item" onclick="chooseImportFile()"><span class="io-icon">📤</span><span>匯入資料<small>Import CSV / JSON</small></span></button>
+          <button class="io-item" onclick="exportCsvData()"><span class="io-icon">📊</span><span>匯出 CSV<small>可用 Excel 開啟與編輯</small></span></button>
+          <button class="io-item" onclick="backupData()"><span class="io-icon">💾</span><span>匯出 JSON<small>完整系統備份</small></span></button>
+          <div class="io-sep"></div>
+          <button class="io-item" onclick="downloadCsvTemplate()"><span class="io-icon">📋</span><span>下載匯入範本<small>CSV Import Template</small></span></button>
+        </div>
+      </div>
+      <button class="header-btn primary" onclick="exportWordReport()">📄 報告 Report</button>
+      <input id="importFileInput" type="file" accept=".csv,.json,text/csv,application/json" hidden onchange="handleImportFile(this.files[0]);this.value=''">
+    </div>
+  </div>
+</div>
+<section class="dashboard-summary" aria-label="系統統計摘要">
+  <div class="dashboard-total-card" title="目前系統車廂總數">
+    <div class="dashboard-total-number" id="statVehicleTotal">0</div>
+    <div class="dashboard-total-title">總車廂數</div>
+    <div class="dashboard-total-subtitle">Total Carriages</div>
+  </div>
+  <div class="dashboard-status-cards">
+    <div class="dashboard-status-card stat-all"><span class="stat-name">全部紀錄</span><b id="statAll">0</b></div>
+    <div class="dashboard-status-card stat-fault"><span class="stat-name">🚨 故障</span><b id="statFault">0</b></div>
+    <div class="dashboard-status-card stat-repair"><span class="stat-name">🛠️ 維修中</span><b id="statRepair">0</b></div>
+    <div class="dashboard-status-card stat-pending"><span class="stat-name">⏳ 待確認</span><b id="statPending">0</b></div>
+    <div class="dashboard-status-card stat-fixed"><span class="stat-name">✅ 已修復</span><b id="statFixed">0</b></div>
+    <div class="dashboard-status-card stat-clear"><span class="stat-name">🟢 均完成</span><b id="statClear">0</b></div>
+  </div>
+</section>
+<main>
+  <div class="toolbar">
+    <input id="search" placeholder="🔎 搜尋單位 / 車號 / 車廂號碼 / 地點 / Search" oninput="render()">
+    <div class="toolbar-note">資料修改後請按下方「儲存並送出」才會正式保存</div>
+  </div>
+  <div class="table-panel">
+    <div class="column-head">
+      <div class="column-head-left">
+        <div class="col-title h-index">#</div>
+        <div class="col-title">單位<small>Unit</small></div>
+        <div class="col-title">車號<small>Vehicle No.</small></div>
+        <div class="col-title">車廂號碼<small>Carriage No.</small></div>
+      </div>
+      <div class="column-head-right">
+        <div class="col-title">狀態<small>Status</small></div>
+        <div class="col-title">故障描述<small>Fault Description</small></div>
+        <div class="col-title">維修人員<small>Repair Technician</small></div>
+        <div class="col-title h-wit">見證人<small>Witness</small></div>
+        <div class="col-title action-spacer"></div>
+      </div>
+      <div class="column-head-location"><div class="col-title">地點<small>Location</small></div></div>
+    </div>
+    <div id="app"></div>
+  </div>
+</main>
+
+<div id="savebar" class="savebar">
+  <div class="inside">
+    <div class="msg">💾 你有 <b id="changeCount">0</b> 項變更尚未儲存 <span style="opacity:.75">/ Unsaved changes</span></div>
+    <button class="discard" onclick="discardChanges()">✕ 放棄變更 / Discard</button>
+    <button class="save-submit" onclick="saveChanges()">💾 儲存並送出 / Save &amp; Submit</button>
+  </div>
+</div>
+<div id="toast" class="toast">✅ 已成功儲存 / Saved &amp; synced</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://jyjgbduvmfmzlhhciylc.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let cloudUpdatedAt=null;
+let metaDbIds={};
+let realtimeReloadTimer=null;
+let cloudReady=false;
+
+const PAGE_ID="73G-2";
+const PAGE_UNIT="2C";
+const cars=["CN-B-319","CN-B-320","CN-B-321","CN-B-322","CN-B-323","CN-B-324","CN-B-325","CN-B-326","CN-B-327","CN-B-328","CN-B-329","CN-B-330","CN-B-331","CN-B-332","CN-B-333","CN-B-334","CN-B-335"];
+const STORAGE_KEY="cn_fault_73g_2_final";
+const UNIT_STORAGE_KEY="cn_fault_73g_2_units";
+const VEHICLE_STORAGE_KEY="cn_fault_73g_2_vehicle_numbers";
+const LOCATION_STORAGE_KEY="cn_fault_73g_2_car_locations";
+const UPDATED_KEY="cn_fault_73g_2_last_updated";
+const UNIT_OPTIONS=["2C"];
+const VEHICLE_OPTIONS=[
+"軍2-24467","軍2-24481","軍2-24485","軍2-24486","軍2-24493","軍2-24580","軍2-24584","軍2-24585","軍2-24586","軍2-24588","軍2-24594","軍2-24596","軍2-24641","軍2-24587","軍2-24590","軍2-24591","軍2-24477","軍2-24480","軍2-24581","軍2-22988","軍2-24640","軍2-22712","軍2-24582","軍2-22777","軍2-24495","軍2-24497","軍2-24441","軍2-22711","軍2-24483","軍2-24597","軍2-24489","軍2-24577","軍2-24479","軍2-24544","軍2-24474","軍2-24445","軍2-24554","軍2-24556","軍2-24577","軍2-24477","軍2-24446","軍2-24502","軍2-24434","軍2-24567","軍2-24563","軍2-24452","軍2-24454","軍2-24589","軍2-24620","軍2-24424","軍2-24612","軍2-24656","軍2-24605","軍2-24659","軍2-24490","軍2-24642","軍2-24655","軍2-24606","軍2-24664","軍2-24460","軍2-24651","軍2-24645","軍2-24458","軍2-22747","軍2-24595","軍2-24653","軍2-24662","軍2-24647","軍2-24633","軍2-24637","軍2-22717","軍2-23826","軍2-24629","軍2-24631","軍2-22740","軍2-24630","軍2-24507","軍2-22834","軍2-24592","軍2-24593","軍2-24583","軍2-24498","軍2-24602","軍2-22705","軍2-24636","軍2-24450"
+];
+const VEHICLE_OPTION_SET=new Set(VEHICLE_OPTIONS);
+const LOCATION_OPTIONS=["外臺","演訓","營區","其他"];
+let savedData=readSaved();
+let data=clone(savedData);
+let savedUnits=readUnits();
+let units=clone(savedUnits);
+let savedVehicleNos=readVehicleNos();
+let vehicleNos=clone(savedVehicleNos);
+let savedLocations=readLocations();
+let locations=clone(savedLocations);
+let customVehicleMode={};
+let dirtyIds=new Set();
+let deletedCount=0;
+// Independent-unit guard: this page owns only its assigned carriages.
+savedData=savedData.filter(r=>cars.includes(normalizeCarId(r.car))).map(r=>({...r,car:normalizeCarId(r.car),unit:PAGE_UNIT}));
+data=clone(savedData);
+cars.forEach(c=>{savedUnits[c]=PAGE_UNIT;units[c]=PAGE_UNIT;});
+
+function setCloudStatus(text,state=""){
+  const el=document.getElementById("cloudStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.dataset.state=state;
+}
+function dbRowToRecord(row){
+  return {
+    id:"db_"+row.id,
+    dbId:row.id,
+    car:normalizeCarId(row.carriage_no),
+    unit:PAGE_UNIT,
+    vehicleNo:row.vehicle_no||"",
+    status:row.status||"Fault / 故障",
+    desc:row.description||"",
+    tech:row.repair_technician||"",
+    cat:"",
+    wit:row.witness||"",
+    locationType:row.location_type||"",
+    locationDetail:row.location_detail||"",
+    createdAt:row.created_at||new Date().toISOString(),
+    statusAt:row.status_updated_at||row.created_at||new Date().toISOString(),
+    date:row.created_at||""
+  };
+}
+function faultToDbRow(r){
+  const obj={
+    unit:PAGE_UNIT,
+    vehicle_no:r.vehicleNo||vehicleNos[r.car]||"",
+    carriage_no:r.car,
+    location_type:r.locationType||locations[r.car]?.type||"",
+    location_detail:r.locationDetail||locations[r.car]?.detail||"",
+    status:r.status||"Fault / 故障",
+    description:r.desc||"",
+    repair_technician:r.tech||"",
+    witness:r.wit||"",
+    created_at:r.createdAt||new Date().toISOString(),
+    status_updated_at:r.statusAt||r.createdAt||new Date().toISOString(),
+    updated_at:new Date().toISOString()
+  };
+  if(r.dbId)obj.id=r.dbId;
+  return obj;
+}
+function metaToDbRow(car){
+  const loc=locations[car]||{type:"",detail:""};
+  const obj={
+    unit:PAGE_UNIT,
+    vehicle_no:vehicleNos[car]||"",
+    carriage_no:car,
+    location_type:loc.type||"",
+    location_detail:loc.detail||"",
+    status:"__CAR_META__",
+    description:"",
+    repair_technician:"",
+    witness:"",
+    status_updated_at:null,
+    updated_at:new Date().toISOString()
+  };
+  if(metaDbIds[car])obj.id=metaDbIds[car];
+  return obj;
+}
+async function loadFromCloud({force=false,initial=false}={}){
+  setCloudStatus("同步中...","syncing");
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").order("id",{ascending:true});
+  if(error){
+    console.error("Supabase load error",error);
+    setCloudStatus("連線失敗","error");
+    return false;
+  }
+  cloudReady=true;
+  const cloudRows=(rows||[]).filter(row=>cars.includes(normalizeCarId(row.carriage_no)));
+  // First migration safety: if cloud is empty but this browser already has local data,
+  // keep local data and let Save & Submit upload it instead of wiping it.
+  if(initial && cloudRows.length===0 && (savedData.length>0 || Object.keys(savedUnits).length>0 || Object.keys(savedVehicleNos).length>0 || Object.keys(savedLocations).length>0)){
+    setCloudStatus("待上傳舊資料","pending");
+    return true;
+  }
+  if(!force && changesCount()>0){
+    setCloudStatus("雲端有更新・請先儲存","pending");
+    return true;
+  }
+  const nextData=[];
+  const nextUnits={};
+  const nextVehicles={};
+  const nextLocations={};
+  const nextMetaIds={};
+  let latest=null;
+  cloudRows.forEach(row=>{
+    const car=normalizeCarId(row.carriage_no);
+    const stamp=row.updated_at||row.status_updated_at||row.created_at;
+    if(stamp && (!latest || new Date(stamp)>new Date(latest))) latest=stamp;
+    if(row.status==="__CAR_META__"){
+      nextMetaIds[car]=row.id;
+      nextUnits[car]=PAGE_UNIT;
+      nextVehicles[car]=row.vehicle_no||"";
+      nextLocations[car]={type:row.location_type||"",detail:row.location_detail||""};
+      return;
+    }
+    const r=dbRowToRecord(row);
+    nextData.push(r);
+    nextUnits[car]=PAGE_UNIT;
+    if(r.vehicleNo&&!nextVehicles[car])nextVehicles[car]=r.vehicleNo;
+    if((r.locationType||r.locationDetail)&&!nextLocations[car])nextLocations[car]={type:r.locationType||"",detail:r.locationDetail||""};
+  });
+  data=nextData;
+  units=nextUnits;
+  vehicleNos=nextVehicles;
+  locations=nextLocations;
+  metaDbIds=nextMetaIds;
+  savedData=clone(data);
+  savedUnits=clone(units);
+  savedVehicleNos=clone(vehicleNos);
+  savedLocations=clone(locations);
+  dirtyIds.clear(); deletedCount=0;
+  cloudUpdatedAt=latest||new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(savedData));
+  localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
+  localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
+  localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+  localStorage.setItem(UPDATED_KEY,cloudUpdatedAt);
+  render();
+  setCloudStatus("已同步","ok");
+  return true;
+}
+async function saveToCloud(){
+  setCloudStatus("儲存中...","syncing");
+  // Delete only fault rows removed by the user. Metadata rows are maintained separately.
+  const currentDbIds=new Set(data.filter(r=>r.dbId).map(r=>Number(r.dbId)));
+  const deleteIds=savedData.filter(r=>r.dbId&&!currentDbIds.has(Number(r.dbId))).map(r=>Number(r.dbId));
+  if(deleteIds.length){
+    const {error}=await supabaseClient.from("fault_records").delete().in("id",deleteIds);
+    if(error)throw error;
+  }
+  const existingFaults=data.filter(r=>r.dbId).map(faultToDbRow);
+  const newFaults=data.filter(r=>!r.dbId).map(faultToDbRow);
+  if(existingFaults.length){
+    const {error}=await supabaseClient.from("fault_records").upsert(existingFaults,{onConflict:"id"});
+    if(error)throw error;
+  }
+  if(newFaults.length){
+    const {error}=await supabaseClient.from("fault_records").insert(newFaults);
+    if(error)throw error;
+  }
+  const existingMeta=cars.filter(c=>metaDbIds[c]).map(metaToDbRow);
+  const newMeta=cars.filter(c=>!metaDbIds[c]).map(metaToDbRow);
+  if(existingMeta.length){
+    const {error}=await supabaseClient.from("fault_records").upsert(existingMeta,{onConflict:"id"});
+    if(error)throw error;
+  }
+  if(newMeta.length){
+    const {error}=await supabaseClient.from("fault_records").insert(newMeta);
+    if(error)throw error;
+  }
+  await loadFromCloud({force:true});
+}
+function subscribeRealtime(){
+  supabaseClient.channel(`fault-tracking-live-${PAGE_ID}`)
+    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records"},()=>{
+      clearTimeout(realtimeReloadTimer);
+      realtimeReloadTimer=setTimeout(()=>loadFromCloud({force:false}),650);
+    })
+    .subscribe(status=>{
+      if(status==="SUBSCRIBED") setCloudStatus("已連線","ok");
+      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT") setCloudStatus("即時連線失敗","error");
+    });
+}
+async function initCloud(){
+  await loadFromCloud({force:true,initial:true});
+  subscribeRealtime();
+}
+
+function clone(v){return JSON.parse(JSON.stringify(v));}
+function readSaved(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}
+  catch(e){return [];}
+}
+function readUnits(){
+  try{return JSON.parse(localStorage.getItem(UNIT_STORAGE_KEY)||"{}");}
+  catch(e){return {};}
+}
+function readVehicleNos(){
+  try{return JSON.parse(localStorage.getItem(VEHICLE_STORAGE_KEY)||"{}");}
+  catch(e){return {};}
+}
+function readLocations(){
+  try{return JSON.parse(localStorage.getItem(LOCATION_STORAGE_KEY)||"{}");}
+  catch(e){return {};}
+}
+function normalizeCarId(car){
+  const value=String(car||"");
+  if(value==="CN301") return "CN-D-301";
+  const m=value.match(/^CN(\d{3})$/);
+  if(m){
+    const n=Number(m[1]);
+    if(n>=302 && n<=378) return `CN-B-${n}`;
+  }
+  const nms=value.match(/^NMS-?(38[1-4])$/);
+  if(nms) return `NMS-${nms[1]}`;
+  const sss=value.match(/^SSS-?(39[1-4])$/);
+  if(sss) return `SSS-${sss[1]}`;
+  return value;
+}
+function migrateLegacyData(){
+  let changed=false;
+  savedData.forEach(r=>{
+    const nextCar=normalizeCarId(r.car);
+    if(nextCar!==r.car){r.car=nextCar;changed=true;}
+    if(r.unit!==PAGE_UNIT){r.unit=PAGE_UNIT;changed=true;}
+  });
+  const migratedUnits={};
+  Object.entries(savedUnits||{}).forEach(([car,unit])=>{
+    const nextCar=normalizeCarId(car);
+    const nextUnit=unit==="73G-HQ"?"73G-HC":unit;
+    migratedUnits[nextCar]=nextUnit;
+    if(nextCar!==car || nextUnit!==unit) changed=true;
+  });
+  savedUnits=migratedUnits;
+  const migratedVehicleNos={};
+  Object.entries(savedVehicleNos||{}).forEach(([car,no])=>{
+    const nextCar=normalizeCarId(car);
+    migratedVehicleNos[nextCar]=no;
+    if(nextCar!==car) changed=true;
+  });
+  savedVehicleNos=migratedVehicleNos;
+  const migratedLocations={};
+  Object.entries(savedLocations||{}).forEach(([car,loc])=>{
+    const nextCar=normalizeCarId(car);
+    migratedLocations[nextCar]={type:String(loc?.type||""),detail:String(loc?.detail||"")};
+    if(nextCar!==car) changed=true;
+  });
+  savedLocations=migratedLocations;
+  savedData.forEach(r=>{
+    if(r.vehicleNo && !savedVehicleNos[r.car]){savedVehicleNos[r.car]=r.vehicleNo;changed=true;}
+    if((r.locationType||r.locationDetail) && !savedLocations[r.car]){
+      savedLocations[r.car]={type:String(r.locationType||""),detail:String(r.locationDetail||"")};changed=true;
+    }
+  });
+  if(changed){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(savedData));
+    localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
+    localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
+    localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+  }
+}
+function esc(v){
+  return String(v??"").replace(/[&<>\"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[ch]));
+}
+function newId(){return "r_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function ensureIds(arr){
+  let changed=false;
+  arr.forEach(r=>{
+    if(!r.id){r.id=newId();changed=true;}
+    // Backward compatibility: old versions used `date` only.
+    if(!r.createdAt){r.createdAt=r.date||new Date().toISOString();changed=true;}
+    if(!r.statusAt){r.statusAt=r.createdAt;changed=true;}
+    if(typeof r.locationType!=="string"){r.locationType="";changed=true;}
+    if(typeof r.locationDetail!=="string"){r.locationDetail="";changed=true;}
+  });
+  return changed;
+}
+migrateLegacyData();
+if(ensureIds(savedData)) localStorage.setItem(STORAGE_KEY,JSON.stringify(savedData));
+data=clone(savedData);
+units=clone(savedUnits);
+vehicleNos=clone(savedVehicleNos);
+locations=clone(savedLocations);
+// Backward compatibility: keep any existing record unit / vehicle number values.
+data.forEach(r=>{
+  if(r.unit && !units[r.car]) units[r.car]=r.unit;
+  if(r.vehicleNo && !vehicleNos[r.car]) vehicleNos[r.car]=r.vehicleNo;
+});
+
+function color(s){
+  if((s||"").includes("Fault")||(s||"").includes("故障"))return"fault";
+  if((s||"").includes("Repair")||(s||"").includes("維修"))return"repair";
+  if((s||"").includes("Fixed")||(s||"").includes("修復"))return"fixed";
+  if((s||"").includes("Pending")||(s||"").includes("待確認"))return"pending";
+  return"clear";
+}
+function markDirty(id){
+  dirtyIds.add(id);
+  updateSavebar();
+}
+function updateUnit(car,value){
+  units[car]=value;
+  data.forEach(r=>{if(r.car===car) r.unit=value;});
+  markDirty("unit:"+car);
+  render();
+}
+function updateVehicleNo(car,value){
+  if(value==="__custom__"){
+    customVehicleMode[car]=true;
+    const current=vehicleNos[car]||"";
+    if(VEHICLE_OPTION_SET.has(current)) vehicleNos[car]="";
+  }else{
+    customVehicleMode[car]=false;
+    vehicleNos[car]=value;
+  }
+  data.forEach(r=>{if(r.car===car) r.vehicleNo=vehicleNos[car]||"";});
+  markDirty("vehicle:"+car);
+  render();
+  if(value==="__custom__") setTimeout(()=>document.querySelector(`[data-custom-vehicle="${car}"]`)?.focus(),0);
+}
+function updateCustomVehicleNo(car,value){
+  customVehicleMode[car]=true;
+  vehicleNos[car]=value;
+  data.forEach(r=>{if(r.car===car) r.vehicleNo=value;});
+  markDirty("vehicle:"+car);
+  document.querySelector(`[data-car-head="${car}"]`)?.classList.add("head-unsaved");
+}
+function updateCarLocationType(car,value){
+  const cur=locations[car]||{type:"",detail:""};
+  locations[car]={type:value,detail:value?String(cur.detail||""):""};
+  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=locations[car].detail;}});
+  markDirty("location:"+car);
+  render();
+  if(value) setTimeout(()=>document.querySelector(`[data-car-location-detail="${car}"]`)?.focus(),0);
+}
+function updateCarLocationDetail(car,value){
+  const cur=locations[car]||{type:"",detail:""};
+  locations[car]={type:String(cur.type||""),detail:value};
+  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=value;}});
+  markDirty("location:"+car);
+  document.querySelector(`[data-car-location="${car}"]`)?.classList.add("head-unsaved");
+}
+
+function add(car){
+  const stamp=nowISO();
+  const r={id:newId(),car,unit:PAGE_UNIT,vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  data.push(r);
+  markDirty(r.id);
+  render();
+  setTimeout(()=>document.querySelector(`[data-id="${r.id}"] textarea`)?.focus(),0);
+}
+function beginEditDesc(id){
+  const r=data.find(x=>x.id===id);
+  if(!r)return;
+  markDirty(id);
+  render();
+  setTimeout(()=>{
+    const el=document.querySelector(`[data-id="${id}"] textarea`);
+    if(el){el.focus(); const n=el.value.length; el.setSelectionRange(n,n);}
+  },0);
+}
+function updateField(id,field,value,rerender=false){
+  const r=data.find(x=>x.id===id);
+  if(!r)return;
+  const previous=r[field];
+  r[field]=value;
+  if(field==="status" && previous!==value) r.statusAt=nowISO();
+  markDirty(id);
+  if(rerender) render();
+  else document.querySelector(`[data-id="${id}"]`)?.classList.add("unsaved");
+}
+function updateLocationType(id,value){
+  const r=data.find(x=>x.id===id);
+  if(!r)return;
+  r.locationType=value;
+  if(!value) r.locationDetail="";
+  markDirty(id);
+  render();
+  if(value) setTimeout(()=>document.querySelector(`[data-location-detail="${id}"]`)?.focus(),0);
+}
+function removeRow(id){
+  const existed=savedData.some(x=>x.id===id);
+  data=data.filter(x=>x.id!==id);
+  dirtyIds.delete(id);
+  if(existed) deletedCount++;
+  updateSavebar();
+  render();
+}
+function changesCount(){return dirtyIds.size+deletedCount;}
+function updateSavebar(){
+  const n=changesCount();
+  document.getElementById("changeCount").textContent=n;
+  document.getElementById("savebar").classList.toggle("show",n>0);
+}
+async function saveChanges(){
+  const btn=document.querySelector(".save-submit");
+  const oldText=btn?btn.innerHTML:"";
+  try{
+    if(btn){btn.disabled=true;btn.innerHTML="☁️ 雲端儲存中...";}
+    await saveToCloud();
+    const t=document.getElementById("toast");
+    t.textContent="✅ 已儲存到雲端 / Saved & synced";
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),1800);
+  }catch(error){
+    console.error("Supabase save error",error);
+    setCloudStatus("儲存失敗","error");
+    alert("雲端儲存失敗，資料尚未正式送出。\n\n"+(error?.message||error));
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML=oldText||"💾 儲存並送出 / Save & Submit";}
+  }
+}
+function discardChanges(){
+  data=clone(savedData);
+  units=clone(savedUnits);
+  vehicleNos=clone(savedVehicleNos);
+  locations=clone(savedLocations);
+  dirtyIds.clear();
+  deletedCount=0;
+  updateSavebar();
+  render();
+}
+function formatTime(v){
+  const d=v?new Date(v):null;
+  if(!d||Number.isNaN(d.getTime())) return "尚未儲存";
+  return d.toLocaleString("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false});
+}
+function nowISO(){return new Date().toISOString();}
+function formatRecordTime(v,compact=false){
+  const d=v?new Date(v):null;
+  if(!d||Number.isNaN(d.getTime())) return "—";
+  const opt=compact
+    ? {month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}
+    : {year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false};
+  return d.toLocaleString("zh-TW",opt).replace(/\//g,"-");
+}
+function updateDashboard(){
+  const all=data.length;
+  const counts={fault:0,repair:0,pending:0,fixed:0,clear:0};
+  data.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
+  document.getElementById("vehicleTotal").textContent=cars.length;
+  document.getElementById("statVehicleTotal").textContent=cars.length;
+  document.getElementById("recordTotal").textContent=all;
+  document.getElementById("statAll").textContent=all;
+  document.getElementById("statFault").textContent=counts.fault;
+  document.getElementById("statRepair").textContent=counts.repair;
+  document.getElementById("statPending").textContent=counts.pending;
+  document.getElementById("statFixed").textContent=counts.fixed;
+  document.getElementById("statClear").textContent=counts.clear;
+  document.getElementById("lastUpdated").textContent=formatTime(cloudUpdatedAt||localStorage.getItem(UPDATED_KEY));
+}
+function downloadBlob(content,type,filename){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function toggleIOMenu(ev){
+  ev?.stopPropagation();
+  document.getElementById("ioMenu")?.classList.toggle("show");
+}
+document.addEventListener("click",e=>{
+  const wrap=e.target.closest?.(".io-wrap");
+  if(!wrap) document.getElementById("ioMenu")?.classList.remove("show");
+});
+function chooseImportFile(){
+  document.getElementById("ioMenu")?.classList.remove("show");
+  document.getElementById("importFileInput")?.click();
+}
+function csvEscape(v){
+  const t=String(v??"");
+  return /[",\r\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;
+}
+function statusToImportText(status){
+  const c=color(status);
+  return c==="fault"?"故障":c==="repair"?"維修中":c==="fixed"?"已修復":c==="pending"?"待確認":"均完成";
+}
+function normalizeImportedStatus(v){
+  const t=String(v||"").trim().toLowerCase();
+  if(!t) return "Fault / 故障";
+  if(t.includes("repair")||t.includes("維修")) return "Under Repair / 維修中";
+  if(t.includes("fixed")||t.includes("修復")) return "Fixed / 已修復";
+  if(t.includes("pending")||t.includes("待確認")) return "Pending / 待確認";
+  if(t.includes("clear")||t.includes("均完成")||t.includes("完成")) return "All Clear / 均完成";
+  return "Fault / 故障";
+}
+function exportCsvData(){
+  document.getElementById("ioMenu")?.classList.remove("show");
+  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const rows=[];
+  cars.forEach(car=>{
+    const rr=data.filter(r=>r.car===car);
+    const base=[units[car]||"",vehicleNos[car]||"",car,locations[car]?.type||"",locations[car]?.detail||""];
+    if(rr.length){
+      rr.forEach(r=>rows.push([...base,statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
+    }else{
+      rows.push([...base,"","","","","",""]);
+    }
+  });
+  const csv='\ufeff'+[headers,...rows].map(row=>row.map(csvEscape).join(",")).join("\r\n");
+  downloadBlob(csv,"text/csv;charset=utf-8",`73G-2_Data_${new Date().toISOString().slice(0,10)}.csv`);
+}
+function csvTemplateText(){
+  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const examples=[
+    ["1C","軍2-24586","CN-D-301","外臺","南側機房","故障","伺服器故障","Mason","王先生","2026-08-21 10:20","2026-08-21 10:20"],
+    ["2C","軍2-24481","CN-B-302","營區","車庫A區","已修復","網路線接頭鬆脫","Emma","林先生","2026-08-21 08:30","2026-08-21 10:10"]
+  ];
+  return '\ufeff'+[headers,...examples].map(row=>row.map(csvEscape).join(",")).join("\r\n");
+}
+function downloadCsvTemplate(){
+  document.getElementById("ioMenu")?.classList.remove("show");
+  downloadBlob(csvTemplateText(),"text/csv;charset=utf-8","73G-2_Import_Template.csv");
+}
+function parseCSV(text){
+  text=String(text||"").replace(/^\ufeff/,"");
+  const rows=[];let row=[],field="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"' && text[i+1]==='"'){field+='"';i++;}
+      else if(ch==='"'){quoted=false;}
+      else field+=ch;
+    }else{
+      if(ch==='"') quoted=true;
+      else if(ch===','){row.push(field);field="";}
+      else if(ch==='\n'){row.push(field.replace(/\r$/, ""));rows.push(row);row=[];field="";}
+      else field+=ch;
+    }
+  }
+  if(field!==""||row.length){row.push(field.replace(/\r$/, ""));rows.push(row);}
+  return rows.filter(r=>r.some(v=>String(v).trim()!==""));
+}
+function findColumn(headers,names){
+  const normalized=headers.map(h=>String(h||"").trim().toLowerCase().replace(/\s+/g," "));
+  for(const name of names){
+    const n=name.toLowerCase();
+    const exact=normalized.indexOf(n); if(exact>=0)return exact;
+    const partial=normalized.findIndex(h=>h.includes(n)); if(partial>=0)return partial;
+  }
+  return -1;
+}
+function parseImportDate(v){
+  const t=String(v||"").trim();
+  if(!t) return nowISO();
+  let d=new Date(t);
+  if(Number.isNaN(d.getTime())) d=new Date(t.replace(/-/g,"/"));
+  return Number.isNaN(d.getTime())?nowISO():d.toISOString();
+}
+function importCsvText(text){
+  const table=parseCSV(text);
+  if(table.length<2) throw new Error("CSV 沒有可匯入的資料");
+  const h=table[0];
+  const idx={
+    unit:findColumn(h,["單位 unit","單位","unit"]),
+    vehicle:findColumn(h,["車號 vehicle no.","車號","vehicle no","vehicle"]),
+    car:findColumn(h,["車廂號碼 carriage no.","車廂號碼","carriage no","carriage"]),
+    loc:findColumn(h,["地點 location","地點","location"]),
+    detail:findColumn(h,["詳細地點 location detail","詳細地點","location detail"]),
+    status:findColumn(h,["狀態 status","狀態","status"]),
+    desc:findColumn(h,["故障描述 fault description","故障描述","fault description"]),
+    tech:findColumn(h,["維修人員 repair technician","維修人員","repair technician"]),
+    wit:findColumn(h,["見證人 witness","見證人","witness"]),
+    created:findColumn(h,["建立時間 created at","建立時間","created at"]),
+    updated:findColumn(h,["狀態時間 status updated at","狀態時間","status updated at"])
+  };
+  if(idx.car<0) throw new Error("找不到『車廂號碼 Carriage No.』欄位");
+  let count=0,metaCount=0,skipped=0;
+  table.slice(1).forEach(row=>{
+    const rawCar=String(row[idx.car]||"").trim();
+    if(!rawCar)return;
+    const car=normalizeCarId(rawCar);
+    if(!cars.includes(car)){skipped++;return;}
+    const get=k=>idx[k]>=0?String(row[idx[k]]??"").trim():"";
+    const unit=get("unit"),vehicle=get("vehicle"),loc=get("loc"),detail=get("detail");
+    if(unit){units[car]=unit;metaCount++;}
+    if(vehicle){vehicleNos[car]=vehicle;metaCount++;}
+    if(loc||detail){locations[car]={type:loc,detail};metaCount++;}
+    const desc=get("desc"),statusRaw=get("status"),tech=get("tech"),wit=get("wit");
+    if(desc||statusRaw||tech||wit){
+      const created=idx.created>=0&&get("created")?parseImportDate(get("created")):nowISO();
+      const updated=idx.updated>=0&&get("updated")?parseImportDate(get("updated")):created;
+      data.push({id:newId(),car,unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||locations[car]?.type||"",locationDetail:detail||locations[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
+      count++;
+    }
+  });
+  return {count,metaCount,skipped};
+}
+function importJsonText(text){
+  const obj=JSON.parse(text);
+  if(Array.isArray(obj)){
+    // Simple record array compatibility.
+    const incoming=obj.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
+    incoming.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
+    data=incoming;
+    units={};vehicleNos={};locations={};
+    incoming.forEach(r=>{if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;if(r.locationType||r.locationDetail)locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+    return incoming.length;
+  }
+  if(!obj||!Array.isArray(obj.records)) throw new Error("JSON 格式不符合系統備份格式");
+  const recs=obj.records.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
+  recs.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
+  data=recs;
+  units={}; Object.entries(obj.units||{}).forEach(([k,v])=>units[normalizeCarId(k)]=v);
+  vehicleNos={}; Object.entries(obj.vehicleNumbers||obj.vehicleNos||{}).forEach(([k,v])=>vehicleNos[normalizeCarId(k)]=v);
+  locations={}; Object.entries(obj.locations||{}).forEach(([k,v])=>locations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
+  recs.forEach(r=>{if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;if((r.locationType||r.locationDetail)&&!locations[r.car])locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+  return recs.length;
+}
+async function handleImportFile(file){
+  if(!file)return;
+  try{
+    const text=await file.text();
+    const lower=file.name.toLowerCase();
+    if(lower.endsWith(".json")){
+      if(!confirm("匯入 JSON 會以備份內容取代目前未儲存的資料。確定繼續？")) return;
+      const n=importJsonText(text);
+      dirtyIds=new Set(["import-json"]);deletedCount=0;
+      render();updateSavebar();
+      alert(`JSON 匯入完成：${n} 筆紀錄。請按「儲存並送出」正式保存。`);
+    }else if(lower.endsWith(".csv")){
+      const result=importCsvText(text);
+      dirtyIds.add("import-csv");
+      render();updateSavebar();
+      alert(`CSV 匯入完成：新增 ${result.count} 筆故障紀錄；已更新車廂基本資料。${result.skipped?`\n略過 ${result.skipped} 筆無效車廂號碼。`:""}\n請按「儲存並送出」正式保存。`);
+    }else throw new Error("只支援 CSV 或 JSON 檔案");
+  }catch(err){
+    console.error(err);alert("匯入失敗："+(err?.message||err));
+  }
+}
+function backupData(){
+  const payload={system:"73G-2 Fault Tracking System",exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,records:data};
+  downloadBlob(JSON.stringify(payload,null,2),"application/json;charset=utf-8",`73G-2_Backup_${new Date().toISOString().slice(0,10)}.json`);
+}
+function wordEsc(v){
+  return String(v??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])).replace(/\n/g,"<br>");
+}
+function reportStatusClass(s){
+  const c=color(s);
+  return c==="fault"?"fault":c==="repair"?"repair":c==="fixed"?"fixed":c==="pending"?"pending":"clear";
+}
+function reportStatusText(s){
+  if((s||"").includes("Fixed")||(s||"").includes("修復")) return "已修復完成<br><span>Fixed</span>";
+  if((s||"").includes("Repair")||(s||"").includes("維修")) return "維修中<br><span>Under Repair</span>";
+  if((s||"").includes("Pending")||(s||"").includes("待確認")) return "待確認<br><span>Pending</span>";
+  if((s||"").includes("Clear")||(s||"").includes("均完成")) return "均完成<br><span>All Clear</span>";
+  return "故障<br><span>Fault</span>";
+}
+function exportWordReport(){
+  const today=new Date();
+  const dateText=today.toLocaleDateString("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit"}).replaceAll("/","-");
+  const records=data.slice();
+  const carsWithRecords=new Set(records.map(r=>r.car)).size;
+  const fault=records.filter(r=>color(r.status)==="fault").length;
+  const fixed=records.filter(r=>color(r.status)==="fixed").length;
+  const clear=records.filter(r=>color(r.status)==="clear").length;
+  const repair=records.filter(r=>color(r.status)==="repair").length;
+  const pending=records.filter(r=>color(r.status)==="pending").length;
+  const unitOrder=[...UNIT_OPTIONS,"未指定"];
+  const carUnit=c=>units[c]||records.find(r=>r.car===c)?.unit||"未指定";
+  const sections=unitOrder.map(unit=>{
+    const unitCars=cars.filter(c=>carUnit(c)===unit);
+    if(!unitCars.length) return "";
+    const body=unitCars.map(c=>{
+      const rr=records.filter(r=>r.car===c);
+      const rows=rr.length?rr.map((r,i)=>{
+        const st=reportStatusClass(r.status);
+        const pal={
+          fault:{rowBg:"#FFF2F3",statusBg:"#FFD9DD",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
+          repair:{rowBg:"#FFF8E8",statusBg:"#FFE7B8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
+          pending:{rowBg:"#F5F1FF",statusBg:"#E4DAFA",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
+          fixed:{rowBg:"#EDF9F2",statusBg:"#D4F0DF",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
+          clear:{rowBg:"#EEF8FC",statusBg:"#D8EFF8",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
+        }[st];
+        const cell=`background-color:${pal.rowBg};`;
+        const statusStyle=`background-color:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar};text-align:center;`;
+        const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
+        const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
+        return `<tr><td class="num" bgcolor="${pal.rowBg}" style="${cell}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="${statusStyle}"><div class="status-text" style="background-color:${pal.statusBg};color:${pal.text};font-weight:800;border:0;padding:0;margin:0">${statusHtml}</div><div class="report-time" style="background-color:${pal.statusBg};color:${pal.sub};font-weight:500;border:0;padding:2pt 0 0;margin:0">${timeHtml}</div></td><td class="desc" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc([locations[c]?.type,locations[c]?.detail].filter(Boolean).join("｜"))||"—"}</td></tr>`;
+      }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
+      const vehicleLabel=vehicleNos[c]||records.find(r=>r.car===c)?.vehicleNo||"未指定";
+      return `<div class="car-block"><div class="car-title"><span class="car-badge">${wordEsc(c)}</span><span class="vehicle-badge">車號 Vehicle No.：${wordEsc(vehicleLabel)}</span></div><table class="fault-table"><thead><tr><th class="c-num">#</th><th class="c-status">狀態<br><small>Status</small></th><th class="c-desc">故障描述<br><small>Fault Description</small></th><th class="c-tech">維修人員<br><small>Repair Technician</small></th><th class="c-wit">見證人<br><small>Witness</small></th><th class="c-location">地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }).join("");
+    return `<div class="unit-section"><div class="unit-title"><span>單位 Unit：${wordEsc(unit)}</span><span class="unit-count">車廂數 Carriages：${unitCars.length}</span></div>${body}</div>`;
+  }).join("");
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><style>
+@page{size:A4;margin:13mm 13mm 14mm 13mm}
+body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans CJK TC","Segoe UI",Aptos,Calibri,Arial,sans-serif;color:#1d2b3d;font-size:9.4pt;line-height:1.38;margin:0;background:#fff;-webkit-font-smoothing:antialiased}
+.report-head{text-align:center;border-bottom:1.5pt solid #244b7c;padding:0 0 9pt;margin-bottom:12pt}
+h1{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Segoe UI",Aptos,Arial,sans-serif;text-align:center;font-size:20pt;line-height:1.18;margin:0 0 7pt;font-weight:800;letter-spacing:.1pt;color:#17263a}
+h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;color:#60728a;margin:0}.meta b{color:#2c425f;font-weight:700}
+.summary-title{font-size:11pt;font-weight:800;margin:0 0 6pt;color:#22344c}.summary-title span{font-size:8.8pt;font-weight:500;color:#7d8ba0;margin-left:3pt}
+.summary{width:100%;margin:0 0 15pt;border-collapse:separate;border-spacing:2pt 0;text-align:center;table-layout:fixed}.summary th{color:#fff;padding:5pt 2pt 4pt;font-size:7.9pt;line-height:1.2;font-weight:700;border:0}.summary th small{font-size:7.1pt;font-weight:500;color:#f3f6fa}.summary td{font-size:16pt;font-weight:800;padding:6pt 2pt 7pt;color:#17263a;border-bottom:1pt solid #dfe6ee;background:#fbfcfe}.s-total{background:#334b65}.s-record{background:#29415d}.s-fault{background:#c92b38}.s-fixed{background:#238b8f}.s-repair{background:#a36a13}.s-pending{background:#6756a8}.s-clear{background:#357aa2}
+.unit-section{margin-top:13pt;page-break-inside:auto}.unit-title{background:#20334e;color:#fff;font-size:10.2pt;font-weight:800;padding:5.5pt 8pt;display:block;border-left:4pt solid #4a74a9}.unit-count{float:right;font-size:8.8pt;font-weight:600;color:#e6edf6}
+.car-block{page-break-inside:avoid;margin:0 0 9pt;padding-top:5pt}.car-title{font-size:12.5pt;font-weight:800;color:#17263a;margin:0 0 4pt}.car-badge{display:inline-block;padding:0 0 1pt;border-bottom:1.5pt solid #4b6f9d}.vehicle-badge{display:inline-block;margin-left:9pt;font-size:8.7pt;font-weight:650;color:#5d718a}
+.fault-table{width:100%;margin:0;border-collapse:collapse;table-layout:fixed;border:1pt solid #d9e1ea}.fault-table thead{display:table-header-group}.fault-table th{background:#315989;color:#fff;padding:4.5pt 4pt;font-size:7.9pt;line-height:1.15;font-weight:700;border-right:.5pt solid #6f8db3}.fault-table th:last-child{border-right:0}.fault-table th small{font-size:7pt;font-weight:500;color:#edf3fa}.c-num{width:4%}.c-status{width:16%}.c-desc{width:36%}.c-tech{width:14%}.c-wit{width:13%}.c-location{width:17%}
+.fault-table td{padding:5pt 4.5pt;vertical-align:middle;border-bottom:.5pt solid #e1e7ee;border-right:.5pt solid #eef2f6;font-size:8.7pt;line-height:1.32}
+.fault-table td{mso-pattern:auto none}.fault-table td:last-child{border-right:0}.fault-table tr:last-child td{border-bottom:0}.num{text-align:center;color:#687a90}.status{text-align:center;font-weight:800}.status span{display:block;font-weight:500;color:#69798c;font-size:7.2pt;margin-top:.5pt}.status .report-time{display:block;font-size:6.7pt;line-height:1.2;color:#7c8999;margin:1.8pt 0 0;padding:0;border:0!important;background:transparent!important;mso-border-alt:none;mso-shading:transparent}.status .status-text{display:block;border:0!important;margin:0;padding:0;background:transparent!important}.desc{text-align:left;word-wrap:break-word}.person{text-align:center;word-wrap:break-word}.place{text-align:left;word-wrap:break-word;font-size:8.2pt}.fixed td{background:#f3fbf7}.fault td{background:#fff6f6}.repair td{background:#fffaf0}.pending td{background:#f7f5ff}.clear td{background:#f2f9fc}
+.fixed .status{background:#d9f3e5!important;color:#0f6b42!important;border-left:3pt solid #22a06b}
+.fault .status{background:#ffe0e3!important;color:#b4232f!important;border-left:3pt solid #e5484d}
+.repair .status{background:#ffedcc!important;color:#8a5600!important;border-left:3pt solid #d98900}
+.pending .status{background:#e8e1fb!important;color:#5a3ea1!important;border-left:3pt solid #7c5cc4}
+.clear .status{background:#dff2fa!important;color:#1f6587!important;border-left:3pt solid #3a91b7}
+.fixed .status span{color:#3f7f63}.fault .status span{color:#9d4b53}.repair .status span{color:#8c6c39}.pending .status span{color:#6d5a9d}.clear .status span{color:#4d7b91}.none{font-style:italic;color:#8c99aa;padding:6pt 7pt;text-align:left;background:#fafbfd}.none span{color:#a7b0bd;margin-left:3pt}.footer{margin-top:13pt;border-top:.7pt solid #d2dae4;padding-top:5pt;text-align:right;color:#8996a6;font-size:7.2pt}
+
+/* Summary quantity card */
+.status-summary-wrap{max-width:1840px;margin:12px auto 0;padding:0 12px;display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
+.total-card{width:170px;min-height:100px;border:1px solid #d9e4f0;border-radius:16px;background:linear-gradient(180deg,#ffffff 0%,#f7faff 100%);box-shadow:0 5px 18px rgba(18,55,105,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;text-align:center}
+.total-card .total-number{font-size:34px;line-height:1;font-weight:850;color:#153b72;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.total-card .total-label{margin-top:7px;font-size:13px;font-weight:750;color:#516d90;line-height:1.25}
+.total-card .total-label small{display:block;margin-top:2px;font-size:11px;font-weight:500;color:#7f91a8}
+.status-summary-wrap .status-strip{flex:1;max-width:none;margin:0;padding:0;align-content:center}
+@media(max-width:900px){.status-summary-wrap{padding:0 8px;gap:8px}.total-card{width:135px;min-height:82px;border-radius:13px}.total-card .total-number{font-size:28px}.total-card .total-label{font-size:12px}.status-summary-wrap .status-strip{overflow:auto;flex-wrap:nowrap}}
+@media(max-width:680px){.status-summary-wrap{display:block}.total-card{width:100%;min-height:74px;flex-direction:row;gap:12px;margin-bottom:8px}.total-card .total-label{margin-top:0;text-align:left}.status-summary-wrap .status-strip{display:flex}}
+/* Dashboard status counters mirror the actual row statuses 1:1 */
+.status-strip .stat-chip{display:inline-flex;align-items:center;gap:4px;font-weight:650}
+.status-strip .stat-chip b{margin-left:2px;font-variant-numeric:tabular-nums}
+.status-strip .stat-fault{background:#fff0f1;border-color:#f1a1a8;color:#a91c2a}.status-strip .stat-fault b{color:#a91c2a}
+.status-strip .stat-repair{background:#fff7e6;border-color:#e4bd6a;color:#845400}.status-strip .stat-repair b{color:#845400}
+.status-strip .stat-pending{background:#f0edff;border-color:#b5a4e6;color:#59439a}.status-strip .stat-pending b{color:#59439a}
+.status-strip .stat-fixed{background:#eaf8f0;border-color:#86d2a7;color:#126a40}.status-strip .stat-fixed b{color:#126a40}
+.status-strip .stat-clear{background:#edf6fc;border-color:#98c7e4;color:#286287}.status-strip .stat-clear b{color:#286287}
+
+/* ===== LOCATION COLUMN FINAL LAYOUT ===== */
+.col-location{text-align:left}
+.location-cell{display:grid;grid-template-columns:86px minmax(95px,1fr) 24px;gap:5px;align-items:center;min-width:0}
+.location-select,.location-detail{height:34px;border:1px solid #d7e1ed;border-radius:9px;background:#fff;color:#17386d;font-size:12px;outline:none;min-width:0}
+.location-select{padding:0 6px;font-weight:700}.location-detail{padding:6px 8px}
+.location-select:focus,.location-detail:focus{border-color:#72a8d8;box-shadow:0 0 0 2px #e4f0fb}
+.location-cell .delete-btn{position:static;width:24px;height:28px;font-size:22px;line-height:24px;justify-self:end}
+@media (min-width:1381px){.column-head-right,.row{grid-template-columns:205px minmax(320px,1fr) 138px 138px minmax(220px,260px) !important;gap:7px !important}}
+@media (min-width:1121px) and (max-width:1380px){.column-head-right,.row{grid-template-columns:172px minmax(220px,1fr) 108px 108px minmax(190px,220px) !important;gap:5px !important}.location-cell{grid-template-columns:72px minmax(82px,1fr) 22px}.location-select,.location-detail{font-size:10.5px}}
+@media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
+@media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
+@media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
+</style></head><body><div class="report-head"><h1>73G-2 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>73G-2 Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">73G-2 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+  downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-2_Daily_Fault_Report_${dateText}.doc`);
+}
+function statusText(s){
+  if((s||"").includes("Fixed")||(s||"").includes("修復")) return "✅  已修復完成 Fixed";
+  if((s||"").includes("Repair")||(s||"").includes("維修")) return "🛠️  維修中 Repair";
+  if((s||"").includes("Pending")||(s||"").includes("待確認")) return "⏳  待確認 Pending";
+  if((s||"").includes("Clear")||(s||"").includes("均完成")) return "🟢  均完成 All Clear";
+  return "🚨  故障 Fault";
+}
+function render(){
+  const k=(document.getElementById("search").value||"").toUpperCase();
+  let h="";
+  cars.filter(c=>c.includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
+    const rows=data.filter(r=>r.car===c);
+    const vehicleValue=vehicleNos[c]||"";
+    const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
+    const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
+    const loc=locations[c]||{type:"",detail:""};
+    h+=`<div class="car">
+      <div class="head" data-car-head="${c}"><span class="rownum">${idx+1}</span><select class="unit-select" disabled title="此頁單位固定">${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select><div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div><span class="carno">${c}</span><button class="add-btn" onclick="add('${c}')">＋ Add Fault / 新增</button></div>
+      <div class="rows">`;
+    if(!rows.length){
+      h+=`<div class="empty">尚無故障紀錄 / No fault records</div>`;
+    }
+    rows.forEach(r=>{
+      const isDirty=dirtyIds.has(r.id);
+      h+=`<div class="row ${isDirty?'unsaved':''}" data-id="${r.id}">
+        <div class="status-wrap">
+          <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
+            <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
+            <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
+            <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
+            <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
+            <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
+          </select>
+          <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
+        </div>
+        ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障訊息 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障訊息 / Fault description'}</div>`}
+        <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
+        <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
+        <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
+      </div>`;
+    });
+    h+=`</div>
+      <div class="car-location ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
+        <select class="location-select" onchange="updateCarLocationType('${c}',this.value)">
+          <option value="">📍 選擇地點</option>
+          ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
+        </select>
+        ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById("app").innerHTML=h;
+  updateDashboard();
+  updateSavebar();
+}
+window.addEventListener("beforeunload",e=>{
+  if(changesCount()>0){e.preventDefault();e.returnValue="";}
+});
+render();
+initCloud();
+</script>
+</body>
+</html>
+<style>
+/* ===== STATUS FULL TEXT VISIBILITY FIX ===== */
+.column-head-right,.row{
+  grid-template-columns:clamp(188px,12vw,212px) minmax(190px,1fr) clamp(102px,8vw,126px) clamp(102px,8vw,126px) 24px !important;
+}
+.status-wrap{min-width:0 !important;overflow:visible !important}
+.status-select{
+  width:100% !important;
+  min-width:0 !important;
+  height:38px !important;
+  padding:0 30px 0 12px !important;
+  font-size:13.5px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  text-overflow:clip !important;
+  overflow:visible !important;
+}
+@media(max-width:1450px){
+  .column-head-right,.row{
+    grid-template-columns:178px minmax(165px,1fr) 92px 92px 24px !important;
+  }
+  .status-select{font-size:12.5px !important;padding-left:10px !important;padding-right:27px !important}
+}
+@media(max-width:1120px){
+  .column-head,.car{min-width:1120px !important}
+  .column-head-right,.row{
+    grid-template-columns:178px minmax(180px,1fr) 92px 92px 24px !important;
+  }
+}
+@media(max-width:680px){
+  .status-select{font-size:13.5px !important;max-width:100% !important}
+}
+</style>
+
+<style>
+.cloud-pill{min-width:150px}.cloud-pill #cloudStatus{font-weight:800}.cloud-pill #cloudStatus[data-state="ok"]{color:#b9f6ca}.cloud-pill #cloudStatus[data-state="syncing"]{color:#fff0a6}.cloud-pill #cloudStatus[data-state="pending"]{color:#ffe082}.cloud-pill #cloudStatus[data-state="error"]{color:#ffcdd2}.save-submit:disabled{opacity:.7;cursor:wait}
+</style>
