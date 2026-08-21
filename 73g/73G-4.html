@@ -1252,7 +1252,7 @@ function metaToDbRow(car){
 }
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
-  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("model",TRAIN_MODEL).eq("model",TRAIN_MODEL).order("id",{ascending:true});
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("model",TRAIN_MODEL).order("id",{ascending:true});
   if(error){
     console.error("Supabase load error",error);
     setCloudStatus("連線失敗","error");
