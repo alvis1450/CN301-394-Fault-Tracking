@@ -1197,7 +1197,6 @@ function dbRowToRecord(row){
     id:"db_"+row.id,
     dbId:row.id,
     car:normalizeCarId(row.carriage_no),
-    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicleNo:row.vehicle_no||"",
     status:row.status||"Fault / 故障",
@@ -1214,7 +1213,6 @@ function dbRowToRecord(row){
 }
 function faultToDbRow(r){
   const obj={
-    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicle_no:r.vehicleNo||vehicleNos[r.car]||"",
     carriage_no:r.car,
@@ -1234,7 +1232,6 @@ function faultToDbRow(r){
 function metaToDbRow(car){
   const loc=locations[car]||{type:"",detail:""};
   const obj={
-    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicle_no:vehicleNos[car]||"",
     carriage_no:car,
@@ -1252,7 +1249,7 @@ function metaToDbRow(car){
 }
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
-  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("model",TRAIN_MODEL).order("id",{ascending:true});
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").order("id",{ascending:true});
   if(error){
     console.error("Supabase load error",error);
     setCloudStatus("連線失敗","error");
@@ -1346,7 +1343,7 @@ async function saveToCloud(){
 }
 function subscribeRealtime(){
   supabaseClient.channel(`fault-tracking-live-${PAGE_ID}`)
-    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",filter:`model=eq.${TRAIN_MODEL}`},()=>{
+    .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",},()=>{
       clearTimeout(realtimeReloadTimer);
       realtimeReloadTimer=setTimeout(()=>loadFromCloud({force:false}),650);
     })
@@ -1517,7 +1514,7 @@ function updateCarLocationDetail(car,value){
 
 function add(car){
   const stamp=nowISO();
-  const r={id:newId(),car,model:TRAIN_MODEL,
+  const r={id:newId(),car,
     unit:PAGE_UNIT,vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
