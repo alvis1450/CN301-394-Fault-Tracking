@@ -947,6 +947,118 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 .io-sep{height:1px;background:#edf2f7;margin:5px 4px}
 .io-icon{width:25px;height:25px;border-radius:7px;background:#edf4fc;display:grid;place-items:center;flex:0 0 25px}
 @media(max-width:900px){.io-menu{right:auto;left:0}}
+
+/* ===== Mobile App Optimization ===== */
+@media (max-width:680px){
+
+ body{
+   padding-bottom:100px !important;
+ }
+
+ .topbar{
+   padding:12px !important;
+ }
+
+ .brand-text h1{
+   font-size:18px !important;
+   white-space:normal !important;
+ }
+
+ .header-actions{
+   width:100% !important;
+ }
+
+ .header-btn,.header-pill{
+   min-height:42px !important;
+ }
+
+ main{
+   padding:8px !important;
+ }
+
+ #search{
+   width:100% !important;
+   height:44px !important;
+   font-size:16px !important;
+ }
+
+ .table-panel{
+   overflow:visible !important;
+ }
+
+ .car{
+   display:block !important;
+   min-width:0 !important;
+   border-radius:14px !important;
+   margin-bottom:12px !important;
+ }
+
+ .head{
+   display:grid !important;
+   grid-template-columns:1fr 1fr !important;
+   padding:10px !important;
+ }
+
+ .unit-select{
+   width:100% !important;
+   height:44px !important;
+ }
+
+ .add-btn{
+   position:static !important;
+   width:100% !important;
+   height:40px !important;
+   margin-top:8px !important;
+ }
+
+ .rows{
+   padding:8px !important;
+ }
+
+ .row{
+   display:block !important;
+   min-height:auto !important;
+   padding:12px !important;
+   border-radius:14px !important;
+   margin-bottom:10px !important;
+ }
+
+ .status-select,
+ .tech,.wit,
+ input,select{
+   height:46px !important;
+   font-size:16px !important;
+ }
+
+ textarea{
+   min-height:100px !important;
+   height:100px !important;
+   font-size:16px !important;
+   padding:10px !important;
+ }
+
+ .delete-btn{
+   width:100% !important;
+   height:42px !important;
+ }
+
+ .savebar .inside{
+   flex-direction:column !important;
+ }
+
+ .discard,.save-submit{
+   width:100% !important;
+   height:46px !important;
+ }
+}
+
+/* hide mobile-only elements on desktop */
+@media (min-width:681px){
+ .mobile-app-bar{
+   display:none !important;
+ }
+}
+
 </style>
 </head>
 <body>
@@ -1892,6 +2004,13 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
   }
 }
 </style>
+
+<div class="mobile-app-bar" style="position:fixed;bottom:0;left:0;right:0;height:70px;background:#102f62;display:flex;gap:8px;padding:8px;z-index:999;">
+<button style="flex:1;border-radius:10px;">首頁</button>
+<button style="flex:1;border-radius:10px;">新增</button>
+<button style="flex:1;border-radius:10px;">列印</button>
+</div>
+
 </body></html>`;
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-4_Daily_Fault_Report_${dateText}.doc`);
 }
