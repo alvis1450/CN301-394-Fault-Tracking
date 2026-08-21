@@ -1156,6 +1156,7 @@ let realtimeReloadTimer=null;
 let cloudReady=false;
 
 const PAGE_ID="73G-4";
+const TRAIN_MODEL="73G-4";
 const PAGE_UNIT="4C";
 const cars=["CN-D-301","CN-B-353","CN-B-354","CN-B-355","CN-B-356","CN-B-357","CN-B-358","CN-B-359","CN-B-360","CN-B-361","CN-B-362","CN-B-363","CN-B-364","CN-B-365","CN-B-366","CN-B-367","CN-B-368"];
 const STORAGE_KEY="cn_fault_73g_4_final";
@@ -1196,6 +1197,7 @@ function dbRowToRecord(row){
     id:"db_"+row.id,
     dbId:row.id,
     car:normalizeCarId(row.carriage_no),
+    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicleNo:row.vehicle_no||"",
     status:row.status||"Fault / 故障",
@@ -1212,6 +1214,7 @@ function dbRowToRecord(row){
 }
 function faultToDbRow(r){
   const obj={
+    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicle_no:r.vehicleNo||vehicleNos[r.car]||"",
     carriage_no:r.car,
@@ -1231,6 +1234,7 @@ function faultToDbRow(r){
 function metaToDbRow(car){
   const loc=locations[car]||{type:"",detail:""};
   const obj={
+    model:TRAIN_MODEL,
     unit:PAGE_UNIT,
     vehicle_no:vehicleNos[car]||"",
     carriage_no:car,
@@ -1248,7 +1252,7 @@ function metaToDbRow(car){
 }
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
-  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").order("id",{ascending:true});
+  const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("model",TRAIN_MODEL).eq("model",TRAIN_MODEL).order("id",{ascending:true});
   if(error){
     console.error("Supabase load error",error);
     setCloudStatus("連線失敗","error");
@@ -1513,7 +1517,8 @@ function updateCarLocationDetail(car,value){
 
 function add(car){
   const stamp=nowISO();
-  const r={id:newId(),car,unit:PAGE_UNIT,vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  const r={id:newId(),car,model:TRAIN_MODEL,
+    unit:PAGE_UNIT,vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
   render();
@@ -1909,7 +1914,7 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 
 /* =====================================
    iPhone Final Responsive Fix
-   73G-4 Fault Tracking System
+   CN301-394 Fault Tracking System
 ===================================== */
 @media(max-width:680px){
     html,body{width:100%;overflow-x:hidden;}
@@ -2080,7 +2085,7 @@ initCloud();
 
 /* =====================================
    iPhone Final Responsive Fix
-   73G-4 Fault Tracking System
+   CN301-394 Fault Tracking System
 ===================================== */
 @media(max-width:680px){
     html,body{width:100%;overflow-x:hidden;}
