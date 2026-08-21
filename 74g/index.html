@@ -1016,6 +1016,17 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 @media(min-width:681px) and (max-width:1200px){
   .column-head,.car{grid-template-columns:195px minmax(0,1fr);}
 }
+
+/* mobile card layout override */
+@media(max-width:650px){
+ .car{background:#fff;border:1px solid #dbe4ef;border-radius:14px;margin-bottom:10px;padding:10px;display:block;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+ .head{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:auto;padding:0 0 8px;background:#fff;border:0}
+ .unit-select{width:100%;background:#f4f8ff;height:38px;border-radius:10px}
+ .carno{background:#082d63;color:#fff;border-radius:10px;padding:9px;text-align:center;min-width:0;font-size:16px}
+ .add-btn{position:relative;left:auto;right:auto;bottom:auto;width:100%;margin:0 0 8px;background:#fff}
+ .rows{padding:0}
+ .row{border-radius:10px;background:#f8fafc}
+}
 </style>
 </head>
 <body>
@@ -1856,6 +1867,17 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 @media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
 @media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
 @media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
+
+/* mobile card layout override */
+@media(max-width:650px){
+ .car{background:#fff;border:1px solid #dbe4ef;border-radius:14px;margin-bottom:10px;padding:10px;display:block;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+ .head{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:auto;padding:0 0 8px;background:#fff;border:0}
+ .unit-select{width:100%;background:#f4f8ff;height:38px;border-radius:10px}
+ .carno{background:#082d63;color:#fff;border-radius:10px;padding:9px;text-align:center;min-width:0;font-size:16px}
+ .add-btn{position:relative;left:auto;right:auto;bottom:auto;width:100%;margin:0 0 8px;background:#fff}
+ .rows{padding:0}
+ .row{border-radius:10px;background:#f8fafc}
+}
 </style></head><body><div class="report-head"><h1>74G 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>74G Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">74G Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div>
 <div class="mobile-app-bar" style="position:fixed;bottom:0;left:0;right:0;height:70px;background:#102f62;display:flex;gap:8px;padding:8px;z-index:999;">
 <button style="flex:1;border-radius:10px;">首頁</button>
@@ -1962,8 +1984,30 @@ initCloud();
 @media(max-width:680px){
   .status-select{font-size:13.5px !important;max-width:100% !important}
 }
+
+/* mobile card layout override */
+@media(max-width:650px){
+ .car{background:#fff;border:1px solid #dbe4ef;border-radius:14px;margin-bottom:10px;padding:10px;display:block;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+ .head{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:auto;padding:0 0 8px;background:#fff;border:0}
+ .unit-select{width:100%;background:#f4f8ff;height:38px;border-radius:10px}
+ .carno{background:#082d63;color:#fff;border-radius:10px;padding:9px;text-align:center;min-width:0;font-size:16px}
+ .add-btn{position:relative;left:auto;right:auto;bottom:auto;width:100%;margin:0 0 8px;background:#fff}
+ .rows{padding:0}
+ .row{border-radius:10px;background:#f8fafc}
+}
 </style>
 
 <style>
 .cloud-pill{min-width:150px}.cloud-pill #cloudStatus{font-weight:800}.cloud-pill #cloudStatus[data-state="ok"]{color:#b9f6ca}.cloud-pill #cloudStatus[data-state="syncing"]{color:#fff0a6}.cloud-pill #cloudStatus[data-state="pending"]{color:#ffe082}.cloud-pill #cloudStatus[data-state="error"]{color:#ffcdd2}.save-submit:disabled{opacity:.7;cursor:wait}
+
+/* mobile card layout override */
+@media(max-width:650px){
+ .car{background:#fff;border:1px solid #dbe4ef;border-radius:14px;margin-bottom:10px;padding:10px;display:block;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+ .head{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:auto;padding:0 0 8px;background:#fff;border:0}
+ .unit-select{width:100%;background:#f4f8ff;height:38px;border-radius:10px}
+ .carno{background:#082d63;color:#fff;border-radius:10px;padding:9px;text-align:center;min-width:0;font-size:16px}
+ .add-btn{position:relative;left:auto;right:auto;bottom:auto;width:100%;margin:0 0 8px;background:#fff}
+ .rows{padding:0}
+ .row{border-radius:10px;background:#f8fafc}
+}
 </style>
