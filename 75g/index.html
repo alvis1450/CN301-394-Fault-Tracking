@@ -971,6 +971,51 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
  .discard,.save-submit{width:100%!important;height:46px!important}
 }
 
+
+/* 73G mobile layout aligned with index.html */
+@media(max-width:680px){
+  .column-head{display:none!important;}
+  .car{display:block!important;padding:7px;background:#fff!important;}
+  .head{
+    display:grid!important;
+    grid-template-columns:86px 1fr!important;
+    min-height:50px!important;
+    border-right:0!important;
+    border-bottom:1px solid #edf1f6!important;
+    padding:7px 8px!important;
+    align-items:center!important;
+    background:#fbfcfe!important;
+  }
+  .rownum{display:none!important;}
+  .unit-select{
+    width:86px!important;
+    height:34px!important;
+    background:#eaf7ff!important;
+    border-color:#9fd5ee!important;
+    font-weight:800!important;
+  }
+  .carno{
+    display:flex!important;
+    align-items:center!important;
+    min-height:34px!important;
+    padding:6px 10px!important;
+    border-radius:8px!important;
+    background:#e8eef9!important;
+  }
+  .add-btn{right:8px!important;left:auto!important;bottom:7px!important;}
+  .rows{padding:6px 0 0!important;}
+  .row{
+    display:grid!important;
+    grid-template-columns:1fr 26px!important;
+    padding:7px!important;
+    gap:5px!important;
+  }
+  .row>*:not(.delete-btn){grid-column:1!important;}
+  .delete-btn{grid-column:2!important;grid-row:1!important;}
+}
+@media(min-width:681px) and (max-width:1200px){
+  .column-head,.car{grid-template-columns:195px minmax(0,1fr);}
+}
 </style>
 </head>
 <body>
