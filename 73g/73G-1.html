@@ -1217,6 +1217,21 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
   }
 }
 </style>
+
+<style>
+/* ===== iPhone mobile input/save stability fix ===== */
+@media (max-width: 680px){
+  html,body{width:100% !important;max-width:100% !important;overflow-x:hidden !important;}
+  input,select,textarea,button,.unit-select,.vehicle-no-select,.vehicle-no-custom,.status-select,.tech,.wit,.location-select,.location-detail,#search,.filter-select,.filter-btn{font-size:16px !important;}
+  textarea,.row textarea{font-size:16px !important;line-height:1.45 !important;}
+  .savebar{left:0 !important;right:0 !important;width:100% !important;max-width:100vw !important;padding:8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;box-sizing:border-box !important;}
+  .savebar .inside{width:100% !important;max-width:100% !important;min-width:0 !important;display:grid !important;grid-template-columns:minmax(0,1fr) auto !important;align-items:center !important;gap:8px !important;}
+  .savebar .msg{display:block !important;min-width:0 !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;font-size:12px !important;}
+  .savebar .discard{display:none !important;}
+  .savebar .save-submit{min-width:0 !important;max-width:62vw !important;width:auto !important;height:44px !important;padding:0 14px !important;font-size:14px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;border-radius:10px !important;}
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom)) !important;}
+}
+</style>
 </head>
 <body>
 <div class="topbar">
@@ -2881,6 +2896,25 @@ requestAnimationFrame(applyQuickFilters);
   .car + .car{margin-top:2px !important;}
 }
 </style>
+
+<script>
+/* Keep save bar above iOS on-screen keyboard without changing page scale. */
+(function(){
+  const vv = window.visualViewport;
+  if(!vv) return;
+  const update = function(){
+    const bar = document.getElementById('savebar');
+    if(!bar) return;
+    const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    bar.style.transform = keyboard > 80 ? ('translateY(-' + keyboard + 'px)') : '';
+  };
+  vv.addEventListener('resize', update);
+  vv.addEventListener('scroll', update);
+  window.addEventListener('orientationchange', function(){setTimeout(update,150)});
+  document.addEventListener('focusin', function(){setTimeout(update,100)});
+  document.addEventListener('focusout', function(){setTimeout(update,180)});
+})();
+</script>
 </body>
 </html>
 
