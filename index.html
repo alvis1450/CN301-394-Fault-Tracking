@@ -2946,3 +2946,54 @@ main{background:transparent !important;}
   document.addEventListener('focusout',function(){setTimeout(update,180)});
 })();
 </script>
+
+
+<style>
+/* ===== Mobile landscape fault-row overflow fix =====
+   Keep Witness visible by using a two-row record layout on phones in landscape. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:500px){
+  .car{
+    grid-template-columns:minmax(230px,30%) minmax(0,1fr)!important;
+  }
+  .rows{min-width:0!important;overflow:hidden!important;}
+  .row{
+    display:grid!important;
+    grid-template-columns:minmax(135px,170px) minmax(0,1fr) 34px!important;
+    grid-template-areas:
+      "status desc delete"
+      "tech   wit  delete"!important;
+    gap:6px 7px!important;
+    align-items:center!important;
+    width:100%!important;
+    min-width:0!important;
+    padding:8px!important;
+  }
+  .row .status-wrap{grid-area:status!important;min-width:0!important;width:100%!important;}
+  .row .desc-display,
+  .row textarea{grid-area:desc!important;min-width:0!important;width:100%!important;}
+  .row .tech{grid-area:tech!important;min-width:0!important;width:100%!important;}
+  .row .wit{grid-area:wit!important;min-width:0!important;width:100%!important;}
+  .row .delete-btn{
+    grid-area:delete!important;
+    position:static!important;
+    align-self:stretch!important;
+    justify-self:stretch!important;
+    width:34px!important;
+    height:auto!important;
+    min-height:36px!important;
+  }
+  .status-select,.tech,.wit{font-size:11.5px!important;}
+}
+
+/* Extra-narrow landscape phones: give more room to text fields. */
+@media (orientation:landscape) and (max-width:760px) and (max-height:500px){
+  .car{grid-template-columns:minmax(210px,31%) minmax(0,1fr)!important;}
+  .row{
+    grid-template-columns:minmax(118px,145px) minmax(0,1fr) 32px!important;
+    gap:5px!important;
+    padding:7px!important;
+  }
+  .status-select,.tech,.wit{font-size:11px!important;padding-left:7px!important;padding-right:7px!important;}
+  .desc-display,.row textarea{font-size:11.5px!important;}
+}
+</style>
