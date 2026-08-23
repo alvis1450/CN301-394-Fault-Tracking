@@ -2249,26 +2249,6 @@ h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;
 }
 
 </style>
-
-<script id="v3-ios-keyboard-savebar-fix">
-/* Keep the save bar above the iOS on-screen keyboard without changing page scale. */
-(function(){
-  const vv=window.visualViewport;
-  if(!vv) return;
-  const update=function(){
-    const bar=document.getElementById('savebar');
-    if(!bar) return;
-    const keyboard=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
-    bar.style.transform=keyboard>80?('translateY(-'+keyboard+'px)'):'';
-  };
-  vv.addEventListener('resize',update);
-  vv.addEventListener('scroll',update);
-  window.addEventListener('orientationchange',function(){setTimeout(update,150)});
-  document.addEventListener('focusin',function(){setTimeout(update,100)});
-  document.addEventListener('focusout',function(){setTimeout(update,180)});
-})();
-</script>
-
 </body></html>`;
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`CN301-394_Daily_Fault_Report_${dateText}.doc`);
 }
@@ -2871,10 +2851,10 @@ main{background:transparent !important;}
 }
 </style>
 
+
 <style id="v3-mobile-input-save-final">
 /* ===== V3 Mobile Carriage Group — Natural Card + iPhone Input/Save Final ===== */
 @media (max-width:680px){
-  /* One complete carriage = one clear soft card. */
   .car{
     position:relative !important;
     margin:0 0 14px 0 !important;
@@ -2947,3 +2927,22 @@ main{background:transparent !important;}
   body{padding-bottom:calc(78px + env(safe-area-inset-bottom)) !important;}
 }
 </style>
+
+<script id="v3-ios-keyboard-savebar-fix">
+/* Keep the save bar above the iOS on-screen keyboard without changing page scale. */
+(function(){
+  const vv=window.visualViewport;
+  if(!vv) return;
+  const update=function(){
+    const bar=document.getElementById('savebar');
+    if(!bar) return;
+    const keyboard=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+    bar.style.transform=keyboard>80?('translateY(-'+keyboard+'px)'):'';
+  };
+  vv.addEventListener('resize',update);
+  vv.addEventListener('scroll',update);
+  window.addEventListener('orientationchange',function(){setTimeout(update,150)});
+  document.addEventListener('focusin',function(){setTimeout(update,100)});
+  document.addEventListener('focusout',function(){setTimeout(update,180)});
+})();
+</script>
