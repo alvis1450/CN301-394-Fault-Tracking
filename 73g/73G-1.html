@@ -2829,6 +2829,58 @@ requestAnimationFrame(applyQuickFilters);
   }
 }
 </style>
+
+<style>
+/* ===== V3 Mobile Carriage Group — Natural Card Refinement =====
+   Use one soft rounded card per carriage. No artificial navy rail/divider. */
+@media (max-width:680px){
+  .car{
+    position:relative !important;
+    margin:0 0 14px 0 !important;
+    padding:0 !important;
+    border:1px solid #d3dfeb !important;
+    border-left:1px solid #d3dfeb !important;
+    border-radius:14px !important;
+    overflow:hidden !important;
+    background:#ffffff !important;
+    box-shadow:0 3px 10px rgba(28,62,103,.07) !important;
+  }
+
+  .head{
+    border:0 !important;
+    border-bottom:1px solid #e3eaf2 !important;
+    border-radius:0 !important;
+    background:#ffffff !important;
+  }
+
+  .rows{
+    border:0 !important;
+    border-bottom:1px solid #e6edf4 !important;
+    background:#fbfcfe !important;
+  }
+
+  .car-location{
+    margin:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+    background:#f2f7fc !important;
+    padding:10px !important;
+  }
+
+  .car-location::after{display:none !important;content:none !important;}
+
+  /* The carriage number remains the strongest grouping cue. */
+  .head .carno{
+    background:#1f4f86 !important;
+    color:#fff !important;
+    border-radius:7px !important;
+    box-shadow:none !important;
+  }
+
+  /* Keep spacing between carriages as the primary boundary. */
+  .car + .car{margin-top:2px !important;}
+}
+</style>
 </body>
 </html>
 
