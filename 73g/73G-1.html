@@ -2766,6 +2766,69 @@ requestAnimationFrame(applyQuickFilters);
   .savebar{min-height:52px!important;padding:5px 8px!important}.save-submit{height:38px!important;min-width:118px!important;font-size:11.5px!important}
 }
 </style>
+
+<style>
+/* ===== V3 Mobile Carriage Group Boundary Fix =====
+   One carriage = identity header + fault records + location.
+   The navy end marker belongs at the very bottom of the carriage card. */
+@media (max-width:680px){
+  /* Make the whole carriage read as one continuous card. */
+  .car{
+    position:relative !important;
+    margin:0 0 16px 0 !important;
+    padding:0 !important;
+    border:1.5px solid #c8d8e9 !important;
+    border-left:4px solid #1f4f86 !important;
+    border-radius:15px !important;
+    overflow:hidden !important;
+    background:#ffffff !important;
+    box-shadow:0 4px 13px rgba(23,59,112,.08) !important;
+  }
+
+  /* Do NOT visually end the carriage immediately after Add Fault. */
+  .head{
+    border-bottom:1px solid #dbe6f1 !important;
+    border-radius:0 !important;
+    background:#f8fafc !important;
+  }
+
+  /* Fault record area remains inside the same carriage group. */
+  .rows{
+    border-top:0 !important;
+    border-bottom:1px solid #e2eaf3 !important;
+    background:#f8fafc !important;
+  }
+
+  /* Location is the final section of the SAME carriage. */
+  .car-location{
+    margin:0 !important;
+    border-top:0 !important;
+    border-left:0 !important;
+    border-right:0 !important;
+    border-bottom:4px solid #1f4f86 !important;
+    border-radius:0 !important;
+    background:#f2f7fc !important;
+    padding:10px !important;
+  }
+
+  /* Keep the final carriage boundary visually clear. */
+  .car-location::after{
+    content:"";
+    display:block;
+    grid-column:1 / -1;
+    height:0;
+  }
+
+  /* Avoid another heavy blue divider around the Add button. */
+  .head .add-btn{
+    border-style:solid !important;
+    border-width:1px !important;
+    border-color:#b8cee5 !important;
+    background:#edf5ff !important;
+    color:#194f89 !important;
+  }
+}
+</style>
 </body>
 </html>
 
