@@ -1305,7 +1305,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <div class="col-title h-wit">見證人<small>Witness</small></div>
         <div class="col-title action-spacer"></div>
       </div>
-      <div class="column-head-location"><div class="col-title">DK / 地點<small>DK Location</small></div></div>
+      <div class="column-head-location"><div class="col-title">地點<small>CN / DK Locations</small></div></div>
     </div>
     <div id="app"></div>
   </div>
@@ -1328,6 +1328,7 @@ const SUPABASE_PUBLISHABLE_KEY="sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let cloudUpdatedAt=null;
 let metaDbIds={};
+let dkMetaDbIds={};
 let realtimeReloadTimer=null;
 let cloudReady=false;
 
@@ -1336,6 +1337,7 @@ const STORAGE_KEY="cn_fault_final";
 const UNIT_STORAGE_KEY="cn_fault_units";
 const VEHICLE_STORAGE_KEY="cn_fault_vehicle_numbers";
 const LOCATION_STORAGE_KEY="cn_fault_car_locations";
+const DK_LOCATION_STORAGE_KEY="cn_fault_dk_locations";
 const UPDATED_KEY="cn_fault_last_updated";
 const UNIT_OPTIONS=["1C","2C","3C","4C","73G-HC","HQ","STC"];
 const VEHICLE_OPTIONS=[
@@ -1351,6 +1353,8 @@ let savedVehicleNos=readVehicleNos();
 let vehicleNos=clone(savedVehicleNos);
 let savedLocations=readLocations();
 let locations=clone(savedLocations);
+let savedDkLocations=readDkLocations();
+let dkLocations=clone(savedDkLocations);
 let customVehicleMode={};
 let dirtyIds=new Set();
 let deletedCount=0;
@@ -1418,6 +1422,25 @@ function metaToDbRow(car){
   if(metaDbIds[car])obj.id=metaDbIds[car];
   return obj;
 }
+function dkMetaToDbRow(car){
+  const loc=dkLocations[car]||{type:"",detail:""};
+  const obj={
+    unit:"",
+    vehicle_no:"",
+    carriage_no:car,
+    location_type:loc.type||"",
+    location_detail:loc.detail||"",
+    status:"__DK_META__",
+    description:getDkCode(car),
+    repair_technician:"",
+    witness:"",
+    status_updated_at:null,
+    updated_at:new Date().toISOString(),
+    system_id:SYSTEM_ID
+  };
+  if(dkMetaDbIds[car])obj.id=dkMetaDbIds[car];
+  return obj;
+}
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
   const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("system_id",SYSTEM_ID).order("id",{ascending:true});
@@ -1430,7 +1453,7 @@ async function loadFromCloud({force=false,initial=false}={}){
   const cloudRows=rows||[];
   // First migration safety: if cloud is empty but this browser already has local data,
   // keep local data and let Save & Submit upload it instead of wiping it.
-  if(initial && cloudRows.length===0 && (savedData.length>0 || Object.keys(savedUnits).length>0 || Object.keys(savedVehicleNos).length>0 || Object.keys(savedLocations).length>0)){
+  if(initial && cloudRows.length===0 && (savedData.length>0 || Object.keys(savedUnits).length>0 || Object.keys(savedVehicleNos).length>0 || Object.keys(savedLocations).length>0 || Object.keys(savedDkLocations).length>0)){
     setCloudStatus("待上傳舊資料","pending");
     return true;
   }
@@ -1442,12 +1465,19 @@ async function loadFromCloud({force=false,initial=false}={}){
   const nextUnits={};
   const nextVehicles={};
   const nextLocations={};
+  const nextDkLocations={};
   const nextMetaIds={};
+  const nextDkMetaIds={};
   let latest=null;
   cloudRows.forEach(row=>{
     const car=normalizeCarId(row.carriage_no);
     const stamp=row.updated_at||row.status_updated_at||row.created_at;
     if(stamp && (!latest || new Date(stamp)>new Date(latest))) latest=stamp;
+    if(row.status==="__DK_META__"){
+      nextDkMetaIds[car]=row.id;
+      nextDkLocations[car]={type:row.location_type||"",detail:row.location_detail||""};
+      return;
+    }
     if(row.status==="__CAR_META__"){
       nextMetaIds[car]=row.id;
       nextUnits[car]=row.unit||"";
@@ -1465,17 +1495,21 @@ async function loadFromCloud({force=false,initial=false}={}){
   units=nextUnits;
   vehicleNos=nextVehicles;
   locations=nextLocations;
+  dkLocations=nextDkLocations;
   metaDbIds=nextMetaIds;
+  dkMetaDbIds=nextDkMetaIds;
   savedData=clone(data);
   savedUnits=clone(units);
   savedVehicleNos=clone(vehicleNos);
   savedLocations=clone(locations);
+  savedDkLocations=clone(dkLocations);
   dirtyIds.clear(); deletedCount=0;
   cloudUpdatedAt=latest||new Date().toISOString();
   localStorage.setItem(STORAGE_KEY,JSON.stringify(savedData));
   localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
   localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
   localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+  localStorage.setItem(DK_LOCATION_STORAGE_KEY,JSON.stringify(savedDkLocations));
   localStorage.setItem(UPDATED_KEY,cloudUpdatedAt);
   render();
   setCloudStatus("已同步","ok");
@@ -1514,6 +1548,17 @@ async function saveToCloud(){
     const {error}=await supabaseClient.from("fault_records").insert(newMeta);
     if(error)throw error;
   }
+  const cnCars=cars.filter(isCnCar);
+  const existingDkMeta=cnCars.filter(c=>dkMetaDbIds[c]).map(dkMetaToDbRow);
+  const newDkMeta=cnCars.filter(c=>!dkMetaDbIds[c]).map(dkMetaToDbRow);
+  if(existingDkMeta.length){
+    const {error}=await supabaseClient.from("fault_records").upsert(existingDkMeta,{onConflict:"id"});
+    if(error)throw error;
+  }
+  if(newDkMeta.length){
+    const {error}=await supabaseClient.from("fault_records").insert(newDkMeta);
+    if(error)throw error;
+  }
   await loadFromCloud({force:true});
 }
 function subscribeRealtime(){
@@ -1547,6 +1592,10 @@ function readVehicleNos(){
 }
 function readLocations(){
   try{return JSON.parse(localStorage.getItem(LOCATION_STORAGE_KEY)||"{}");}
+  catch(e){return {};}
+}
+function readDkLocations(){
+  try{return JSON.parse(localStorage.getItem(DK_LOCATION_STORAGE_KEY)||"{}");}
   catch(e){return {};}
 }
 function normalizeCarId(car){
@@ -1627,6 +1676,8 @@ data=clone(savedData);
 units=clone(savedUnits);
 vehicleNos=clone(savedVehicleNos);
 locations=clone(savedLocations);
+savedDkLocations=readDkLocations();
+dkLocations=clone(savedDkLocations);
 // Backward compatibility: keep any existing record unit / vehicle number values.
 data.forEach(r=>{
   if(r.unit && !units[r.car]) units[r.car]=r.unit;
@@ -1685,6 +1736,21 @@ function updateCarLocationDetail(car,value){
   data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=value;}});
   markDirty("location:"+car);
   document.querySelector(`[data-car-location="${car}"]`)?.classList.add("head-unsaved");
+}
+function updateDkLocationType(car,value){
+  if(!isCnCar(car)) return;
+  const cur=dkLocations[car]||{type:"",detail:""};
+  dkLocations[car]={type:value,detail:value?String(cur.detail||""):""};
+  markDirty("dk-location:"+car);
+  render();
+  if(value) setTimeout(()=>document.querySelector(`[data-dk-location-detail="${car}"]`)?.focus(),0);
+}
+function updateDkLocationDetail(car,value){
+  if(!isCnCar(car)) return;
+  const cur=dkLocations[car]||{type:"",detail:""};
+  dkLocations[car]={type:String(cur.type||""),detail:value};
+  markDirty("dk-location:"+car);
+  document.querySelector(`[data-dk-location="${car}"]`)?.classList.add("head-unsaved");
 }
 
 function add(car){
@@ -1761,6 +1827,7 @@ function discardChanges(){
   units=clone(savedUnits);
   vehicleNos=clone(savedVehicleNos);
   locations=clone(savedLocations);
+  dkLocations=clone(savedDkLocations);
   dirtyIds.clear();
   deletedCount=0;
   updateSavebar();
@@ -1940,7 +2007,7 @@ function importJsonText(text){
     const incoming=obj.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
     incoming.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
     data=incoming;
-    units={};vehicleNos={};locations={};
+    units={};vehicleNos={};locations={};dkLocations={};
     incoming.forEach(r=>{if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;if(r.locationType||r.locationDetail)locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
     return incoming.length;
   }
@@ -1951,6 +2018,7 @@ function importJsonText(text){
   units={}; Object.entries(obj.units||{}).forEach(([k,v])=>units[normalizeCarId(k)]=v);
   vehicleNos={}; Object.entries(obj.vehicleNumbers||obj.vehicleNos||{}).forEach(([k,v])=>vehicleNos[normalizeCarId(k)]=v);
   locations={}; Object.entries(obj.locations||{}).forEach(([k,v])=>locations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
+  dkLocations={}; Object.entries(obj.dkLocations||{}).forEach(([k,v])=>dkLocations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
   recs.forEach(r=>{if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;if((r.locationType||r.locationDetail)&&!locations[r.car])locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
   return recs.length;
 }
@@ -1976,7 +2044,7 @@ async function handleImportFile(file){
   }
 }
 function backupData(){
-  const payload={system:"CN301-394 Fault Tracking System",exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,records:data};
+  const payload={system:"CN301-394 Fault Tracking System",exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,dkLocations,records:data};
   downloadBlob(JSON.stringify(payload,null,2),"application/json;charset=utf-8",`CN301-394_Backup_${new Date().toISOString().slice(0,10)}.json`);
 }
 function wordEsc(v){
@@ -2270,12 +2338,13 @@ function getDkCode(car){
 function render(){
   const k=(document.getElementById("search").value||"").toUpperCase();
   let h="";
-  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
+  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
     const rows=data.filter(r=>r.car===c);
     const vehicleValue=vehicleNos[c]||"";
     const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
     const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
     const loc=locations[c]||{type:"",detail:""};
+    const dkLoc=dkLocations[c]||{type:"",detail:""};
     const dkCode=getDkCode(c);
     h+=`<div class="car ${dkCode?'has-dk':'no-dk'}">
       <div class="head" data-car-head="${c}"><span class="rownum">${idx+1}</span><select class="unit-select" onchange="updateUnit('${c}',this.value)"><option value="">選擇單位</option>${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select><div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div><span class="carno">${c}</span><button class="add-btn" onclick="add('${c}')">＋ Add Fault / 新增</button></div>
@@ -2303,15 +2372,27 @@ function render(){
       </div>`;
     });
     h+=`</div>
-      <div class="car-location ${dkCode?'dk-location':'standard-location'} ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
-        ${dkCode?`<div class="dk-identity"><span class="dk-badge">${dkCode}</span><span class="dk-caption">DK Location</span></div>`:`<div class="location-identity"><span class="location-pin">📍</span><span>Location</span></div>`}
-        <div class="location-controls">
-          <select class="location-select" aria-label="${dkCode?dkCode+' 地點':'地點'}" onchange="updateCarLocationType('${c}',this.value)">
-            <option value="">📍 選擇地點</option>
-            ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
-          </select>
-          ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+      <div class="car-location ${dkCode?'dual-location':'standard-location'}">
+        <div class="location-panel cn-location-panel ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
+          <div class="location-identity cn-identity"><span class="cn-location-badge">${c}</span><span class="location-caption">CN Location</span></div>
+          <div class="location-controls">
+            <select class="location-select" aria-label="${c} 地點" onchange="updateCarLocationType('${c}',this.value)">
+              <option value="">📍 選擇 CN 地點</option>
+              ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
+            </select>
+            ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="CN：輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+          </div>
         </div>
+        ${dkCode?`<div class="location-panel dk-location-panel ${dirtyIds.has('dk-location:'+c)?'head-unsaved':''}" data-dk-location="${c}">
+          <div class="dk-identity"><span class="dk-badge">${dkCode}</span><span class="dk-caption">DK Location</span></div>
+          <div class="location-controls">
+            <select class="location-select dk-location-select" aria-label="${dkCode} 地點" onchange="updateDkLocationType('${c}',this.value)">
+              <option value="">📍 選擇 DK 地點</option>
+              ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${dkLoc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
+            </select>
+            ${dkLoc.type?`<input class="location-detail" data-dk-location-detail="${c}" value="${esc(dkLoc.detail)}" placeholder="${dkCode}：輸入${esc(dkLoc.type)}詳細位置" oninput="updateDkLocationDetail('${c}',this.value)">`:''}
+          </div>
+        </div>`:''}
       </div>
     </div>`;
   });
@@ -2946,6 +3027,22 @@ requestAnimationFrame(applyQuickFilters);
   }
   .dk-badge{font-size:13.5px;padding:7px 9px}
 }
+</style>
+
+<style>
+/* ===== CN + DK DUAL LOCATION — MASTER ===== */
+.car-location.dual-location{display:grid !important;grid-template-columns:1fr !important;gap:8px !important;background:#f4f8fd !important;padding:8px !important;}
+.location-panel{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid #d8e4f1;border-radius:11px;background:#fff;min-width:0;}
+.cn-location-panel{border-color:#cbdced;background:#fbfdff;}
+.dk-location-panel{border-color:#b9cee5;background:linear-gradient(180deg,#f5f9ff,#eef6ff);}
+.cn-identity,.dk-identity{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.cn-location-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border-radius:8px;background:#e7f0fb;color:#174579;font-size:10.5px;font-weight:850;white-space:nowrap;}
+.location-caption,.dk-caption{font-size:9px;font-weight:750;color:#7185a0;white-space:nowrap;}
+.location-panel.head-unsaved{background:#fff8e8 !important;box-shadow:inset 3px 0 0 #e7b64c !important;}
+.location-panel .location-controls{display:flex;flex-direction:column;gap:5px;}
+.location-panel .location-select,.location-panel .location-detail{width:100% !important;}
+@media(min-width:1180px){.car-location.dual-location{grid-template-columns:1fr 1fr !important;align-content:center;}.location-panel{height:100%;justify-content:center;}}
+@media(max-width:680px){.car-location.dual-location{grid-template-columns:1fr !important;padding:10px !important;gap:9px !important;}.location-panel{padding:9px !important;}.cn-location-badge,.dk-badge{font-size:12px !important;min-height:30px !important;}.location-panel .location-select,.location-panel .location-detail{height:44px !important;font-size:13px !important;}}
 </style>
 </html>
 
