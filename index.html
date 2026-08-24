@@ -2194,11 +2194,11 @@ function exportWordReport(){
   const unitOrder=activeUnit?[activeUnit]:[...UNIT_OPTIONS,"未指定"];
   const carUnit=c=>units[c]||records.find(r=>r.car===c)?.unit||"未指定";
   const palMap={
-    fault:{rowBg:"#FFF2F3",statusBg:"#FFD9DD",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
-    repair:{rowBg:"#FFF8E8",statusBg:"#FFE7B8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
-    pending:{rowBg:"#F5F1FF",statusBg:"#E4DAFA",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
-    fixed:{rowBg:"#EDF9F2",statusBg:"#D4F0DF",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
-    clear:{rowBg:"#EEF8FC",statusBg:"#D8EFF8",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
+    fault:{rowBg:"#FDE9EB",statusBg:"#F8CDD2",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
+    repair:{rowBg:"#FFF3D9",statusBg:"#FBE1A8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
+    pending:{rowBg:"#F0EBFA",statusBg:"#DED3F4",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
+    fixed:{rowBg:"#E7F5ED",statusBg:"#CDEAD9",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
+    clear:{rowBg:"#E8F4FA",statusBg:"#D0E9F4",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
   };
   const assetBlock=(c,assetType)=>{
     const isDk=assetType==="DK";
@@ -2211,7 +2211,7 @@ function exportWordReport(){
       const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
       const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
       const place=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"—";
-      return `<tr><td class="num" bgcolor="${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">${timeHtml}</div></td><td>${wordEsc(r.desc)||"&nbsp;"}</td><td class="person">${wordEsc(r.tech)||"—"}</td><td class="person">${wordEsc(r.wit)||"—"}</td><td class="place">${place}</td></tr>`;
+      return `<tr><td class="num" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="background:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">${timeHtml}</div></td><td bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${place}</td></tr>`;
     }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
     const placeText=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"未設定";
     const assetClass=isDk?'dk-block':assetType==='NMS'?'nms-block':assetType==='SSS'?'sss-block':'cn-block';
