@@ -1305,7 +1305,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <div class="col-title h-wit">見證人<small>Witness</small></div>
         <div class="col-title action-spacer"></div>
       </div>
-      <div class="column-head-location"><div class="col-title">地點<small>Location</small></div></div>
+      <div class="column-head-location"><div class="col-title">DK / 地點<small>DK Location</small></div></div>
     </div>
     <div id="app"></div>
   </div>
@@ -2259,16 +2259,25 @@ function statusText(s){
   if((s||"").includes("Clear")||(s||"").includes("均完成")) return "🟢  均完成 All Clear";
   return "🚨  故障 Fault";
 }
+function isCnCar(car){
+  return String(car||"").toUpperCase().startsWith("CN-");
+}
+function getDkCode(car){
+  if(!isCnCar(car)) return "";
+  const m=String(car).match(/(\d+)$/);
+  return m ? `DK${m[1]}` : "DK";
+}
 function render(){
   const k=(document.getElementById("search").value||"").toUpperCase();
   let h="";
-  cars.filter(c=>c.includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
+  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
     const rows=data.filter(r=>r.car===c);
     const vehicleValue=vehicleNos[c]||"";
     const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
     const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
     const loc=locations[c]||{type:"",detail:""};
-    h+=`<div class="car">
+    const dkCode=getDkCode(c);
+    h+=`<div class="car ${dkCode?'has-dk':'no-dk'}">
       <div class="head" data-car-head="${c}"><span class="rownum">${idx+1}</span><select class="unit-select" onchange="updateUnit('${c}',this.value)"><option value="">選擇單位</option>${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select><div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div><span class="carno">${c}</span><button class="add-btn" onclick="add('${c}')">＋ Add Fault / 新增</button></div>
       <div class="rows">`;
     if(!rows.length){
@@ -2294,12 +2303,15 @@ function render(){
       </div>`;
     });
     h+=`</div>
-      <div class="car-location ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
-        <select class="location-select" onchange="updateCarLocationType('${c}',this.value)">
-          <option value="">📍 選擇地點</option>
-          ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
-        </select>
-        ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+      <div class="car-location ${dkCode?'dk-location':'standard-location'} ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
+        ${dkCode?`<div class="dk-identity"><span class="dk-badge">${dkCode}</span><span class="dk-caption">DK Location</span></div>`:`<div class="location-identity"><span class="location-pin">📍</span><span>Location</span></div>`}
+        <div class="location-controls">
+          <select class="location-select" aria-label="${dkCode?dkCode+' 地點':'地點'}" onchange="updateCarLocationType('${c}',this.value)">
+            <option value="">📍 選擇地點</option>
+            ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
+          </select>
+          ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+        </div>
       </div>
     </div>`;
   });
@@ -2801,6 +2813,140 @@ requestAnimationFrame(applyQuickFilters);
 }
 </style>
 </body>
+
+<style>
+/* ===== DK LOCATION — FINAL MASTER ===== */
+.column-head-location{
+  background:rgba(255,255,255,.035) !important;
+}
+.car-location{
+  position:relative !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  gap:8px !important;
+  padding:10px !important;
+}
+.dk-location{
+  background:linear-gradient(180deg,#f3f8ff 0%,#edf5ff 100%) !important;
+  border-left:1px solid #d6e4f3 !important;
+}
+.dk-identity{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  min-width:0;
+}
+.dk-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:5px 11px;
+  border-radius:9px;
+  background:#173b70;
+  color:#fff;
+  font-size:13px;
+  line-height:1;
+  font-weight:850;
+  letter-spacing:.35px;
+  box-shadow:0 2px 7px rgba(23,59,112,.14);
+  white-space:nowrap;
+}
+.dk-caption{
+  color:#6d83a0;
+  font-size:9.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.location-controls{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+.dk-location .location-select{
+  border-color:#b9cee5 !important;
+  background:#fff !important;
+  color:#173b70 !important;
+  font-weight:750 !important;
+}
+.dk-location .location-select:focus,
+.dk-location .location-detail:focus{
+  border-color:#5d8fc5 !important;
+  box-shadow:0 0 0 3px rgba(93,143,197,.13) !important;
+}
+.standard-location .location-identity{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#637a98;
+  font-size:11px;
+  font-weight:750;
+}
+.standard-location .location-pin{font-size:14px}
+.dk-location.head-unsaved{
+  background:#fff8e8 !important;
+  box-shadow:inset 3px 0 0 #e7b64c !important;
+}
+
+@media(max-width:1450px) and (min-width:681px){
+  .dk-badge{font-size:11.5px;padding:5px 8px;min-height:27px}
+  .dk-caption{font-size:8.5px}
+  .car-location{padding:7px !important;gap:6px !important}
+}
+
+@media(max-width:900px){
+  .dk-location{
+    border-left:0 !important;
+    border-top:2px solid #bfd4ea !important;
+    background:linear-gradient(135deg,#e9f3ff,#f8fbff) !important;
+  }
+}
+
+@media(max-width:680px){
+  .car-location.dk-location{
+    display:grid !important;
+    grid-template-columns:96px minmax(0,1fr) !important;
+    align-items:start !important;
+    gap:10px !important;
+    padding:12px !important;
+    border-radius:0 0 16px 16px !important;
+  }
+  .dk-identity{
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:5px;
+    padding-top:2px;
+  }
+  .dk-badge{
+    min-height:36px;
+    padding:8px 12px;
+    font-size:15px;
+    border-radius:10px;
+  }
+  .dk-caption{font-size:9px;padding-left:2px}
+  .location-controls{width:100%;gap:7px}
+  .dk-location .location-select,
+  .dk-location .location-detail{
+    width:100% !important;
+    height:44px !important;
+    font-size:13px !important;
+    border-radius:10px !important;
+  }
+  .standard-location .location-controls{width:100%}
+}
+
+@media(max-width:420px){
+  .car-location.dk-location{
+    grid-template-columns:82px minmax(0,1fr) !important;
+    gap:8px !important;
+  }
+  .dk-badge{font-size:13.5px;padding:7px 9px}
+}
+</style>
 </html>
 
 <style>
