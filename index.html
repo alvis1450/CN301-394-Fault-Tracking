@@ -1253,10 +1253,22 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
   </div>
 </div>
 <section class="dashboard-summary" aria-label="系統統計摘要">
-  <div class="dashboard-total-card" title="目前系統車廂總數">
-    <div class="dashboard-total-number" id="statVehicleTotal">0</div>
-    <div class="dashboard-total-title">總車廂數</div>
-    <div class="dashboard-total-subtitle">Total Carriages</div>
+  <div class="dashboard-total-wrap">
+    <button type="button" class="dashboard-total-card dashboard-total-toggle" id="vehicleBreakdownToggle" aria-expanded="false" aria-controls="vehicleBreakdownPanel" onclick="toggleVehicleBreakdown()" title="點擊查看 CN / DK / NMS / SSS 數量">
+      <div class="dashboard-total-number" id="statVehicleTotal">0</div>
+      <div class="dashboard-total-title">總車廂數 <span class="total-expand-icon" aria-hidden="true">⌄</span></div>
+      <div class="dashboard-total-subtitle" id="totalScopeLabel">Total Carriages · 全部單位</div>
+    </button>
+    <div class="vehicle-breakdown-panel" id="vehicleBreakdownPanel" hidden>
+      <div class="vehicle-breakdown-head"><span>車廂 / 設備分類</span><small id="breakdownScopeLabel">全部單位</small></div>
+      <div class="vehicle-breakdown-grid">
+        <div class="vehicle-breakdown-item type-cn"><span>CN</span><b id="statTypeCN">0</b><small>Carriages</small></div>
+        <div class="vehicle-breakdown-item type-dk"><span>DK</span><b id="statTypeDK">0</b><small>CN Equipment</small></div>
+        <div class="vehicle-breakdown-item type-nms"><span>NMS</span><b id="statTypeNMS">0</b><small>Carriages</small></div>
+        <div class="vehicle-breakdown-item type-sss"><span>SSS</span><b id="statTypeSSS">0</b><small>Carriages</small></div>
+      </div>
+      <div class="vehicle-breakdown-note">總車廂數不重複計入 DK；DK 為 CN 對應的獨立設備列。</div>
+    </div>
   </div>
   <div class="dashboard-status-cards">
     <div class="dashboard-status-card stat-all" data-filter="all" role="button" tabindex="0" onclick="setQuickFilter('all')"><span class="stat-name">全部紀錄</span><b id="statAll">0</b></div>
@@ -1871,13 +1883,47 @@ function formatRecordTime(v,compact=false){
     : {year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false};
   return d.toLocaleString("zh-TW",opt).replace(/\//g,"-");
 }
+function getDashboardScopeCars(){
+  const activeUnit=(typeof quickUnitFilter!=="undefined" ? quickUnitFilter : "");
+  return cars.filter(c=>!activeUnit || (units[c]||"")===activeUnit);
+}
+function getDashboardScopeRecords(scopeCars){
+  const set=new Set(scopeCars);
+  return data.filter(r=>set.has(r.car));
+}
+function updateVehicleBreakdown(){
+  const scopedCars=getDashboardScopeCars();
+  const cn=scopedCars.filter(isCnCar).length;
+  const nms=scopedCars.filter(c=>String(c).toUpperCase().startsWith("NMS")).length;
+  const sss=scopedCars.filter(c=>String(c).toUpperCase().startsWith("SSS")).length;
+  const dk=cn; // Every CN carriage has one matching DK equipment row.
+  const activeUnit=(typeof quickUnitFilter!=="undefined" ? quickUnitFilter : "");
+  const scopeLabel=activeUnit?`${activeUnit} 單位`:`全部單位`;
+  const values={statVehicleTotal:scopedCars.length,statTypeCN:cn,statTypeDK:dk,statTypeNMS:nms,statTypeSSS:sss};
+  Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=value;});
+  const scope=document.getElementById("breakdownScopeLabel");if(scope)scope.textContent=scopeLabel;
+  const subtitle=document.getElementById("totalScopeLabel");if(subtitle)subtitle.textContent=`Total Carriages · ${scopeLabel}`;
+  return scopedCars;
+}
+function toggleVehicleBreakdown(force){
+  const panel=document.getElementById("vehicleBreakdownPanel");
+  const btn=document.getElementById("vehicleBreakdownToggle");
+  if(!panel||!btn)return;
+  const open=typeof force==="boolean"?force:panel.hidden;
+  panel.hidden=!open;
+  btn.setAttribute("aria-expanded",String(open));
+  btn.classList.toggle("open",open);
+}
 function updateDashboard(){
-  const all=data.length;
+  const scopedCars=updateVehicleBreakdown();
+  const scopedRecords=getDashboardScopeRecords(scopedCars);
+  const all=scopedRecords.length;
   const counts={fault:0,repair:0,pending:0,fixed:0,clear:0};
-  data.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
-  document.getElementById("vehicleTotal").textContent=cars.length;
-  document.getElementById("statVehicleTotal").textContent=cars.length;
-  document.getElementById("recordTotal").textContent=all;
+  scopedRecords.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
+  const vehicleTotal=document.getElementById("vehicleTotal");
+  if(vehicleTotal)vehicleTotal.textContent=scopedCars.length;
+  const recordTotal=document.getElementById("recordTotal");
+  if(recordTotal)recordTotal.textContent=all;
   document.getElementById("statAll").textContent=all;
   document.getElementById("statFault").textContent=counts.fault;
   document.getElementById("statRepair").textContent=counts.repair;
@@ -2777,6 +2823,22 @@ initCloud();
 }
 @media(max-width:390px){.toolbar-controls{grid-template-columns:1fr!important}.search-wrap{grid-column:1!important}.quick-filter,.unfinished-toggle,.clear-filter-btn{grid-column:1!important}.header-actions{grid-template-columns:1fr!important}.car-location{grid-template-columns:1fr!important}}
 </style>
+
+<style id="vehicle-breakdown-2026">
+.dashboard-total-wrap{position:relative;min-width:0}
+.dashboard-total-toggle{width:100%;border:1px solid #d8e3ef;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.dashboard-total-toggle:hover{border-color:#a9bfd9;box-shadow:0 7px 20px rgba(18,55,105,.10)!important;transform:translateY(-1px)}
+.dashboard-total-toggle:focus-visible{outline:3px solid rgba(70,126,190,.2);outline-offset:2px}
+.total-expand-icon{display:inline-block;margin-left:4px;font-size:13px;transition:transform .18s ease;color:#6680a0}.dashboard-total-toggle.open .total-expand-icon{transform:rotate(180deg)}
+.vehicle-breakdown-panel{position:absolute;left:0;top:calc(100% + 8px);z-index:80;width:390px;max-width:min(92vw,390px);padding:12px;background:#fff;border:1px solid #cfdeed;border-radius:14px;box-shadow:0 18px 44px rgba(16,48,89,.18)}
+.vehicle-breakdown-panel[hidden]{display:none!important}
+.vehicle-breakdown-head{display:flex;justify-content:space-between;align-items:center;padding:1px 2px 9px;font-size:12.5px;font-weight:850;color:#173b70}.vehicle-breakdown-head small{font-size:10.5px;color:#7a8da7;font-weight:650;background:#f1f5fa;padding:4px 7px;border-radius:999px}
+.vehicle-breakdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.vehicle-breakdown-item{min-width:0;padding:9px 7px 8px;text-align:center;border:1px solid #dce6f1;border-radius:11px;background:#f8fbff}.vehicle-breakdown-item span{display:block;font-size:11px;font-weight:850;color:#5f7693}.vehicle-breakdown-item b{display:block;margin:3px 0 1px;font-size:22px;line-height:1;font-weight:900;color:#173b70;font-variant-numeric:tabular-nums}.vehicle-breakdown-item small{display:block;font-size:8.5px;line-height:1.15;color:#8a9ab0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vehicle-breakdown-item.type-dk{background:#f2f7ff;border-color:#c9dbef}.vehicle-breakdown-item.type-dk b{color:#245d99}.vehicle-breakdown-item.type-nms{background:#f6f8fb}.vehicle-breakdown-item.type-sss{background:#f8f6fc}
+.vehicle-breakdown-note{margin-top:9px;padding-top:8px;border-top:1px solid #edf2f7;color:#71849d;font-size:9.5px;line-height:1.35}
+@media(max-width:680px){.dashboard-total-wrap{width:100%}.vehicle-breakdown-panel{position:static;width:100%;max-width:none;margin-top:7px;box-shadow:0 5px 15px rgba(16,48,89,.08)}.vehicle-breakdown-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.vehicle-breakdown-item{padding:8px 4px}.vehicle-breakdown-item b{font-size:20px}.vehicle-breakdown-item small{font-size:7.5px}}
+</style>
 <script id="ux-optimization-2026-js">
 let quickStatusFilter="all";
 let quickUnitFilter="";
@@ -2787,6 +2849,7 @@ function rowStatusKey(rowEl){
   return sel ? color(sel.value) : "";
 }
 function applyQuickFilters(){
+  updateDashboard();
   const allCars=[...document.querySelectorAll("#app .car")];
   let visibleCars=0, visibleRows=0;
   allCars.forEach(carEl=>{
@@ -2823,7 +2886,7 @@ function setQuickFilter(v){
   const sel=document.getElementById("quickStatusFilter");if(sel)sel.value=quickStatusFilter;
   applyQuickFilters();
 }
-function setUnitFilter(v){quickUnitFilter=v||"";applyQuickFilters();}
+function setUnitFilter(v){quickUnitFilter=v||"";updateDashboard();applyQuickFilters();}
 function setUnfinishedOnly(v){quickUnfinishedOnly=!!v;applyQuickFilters();}
 function clearQuickFilters(){
   quickStatusFilter="all";quickUnitFilter="";quickUnfinishedOnly=false;
@@ -2837,6 +2900,11 @@ render=function(){__coreRender();requestAnimationFrame(applyQuickFilters);};
 // Keyboard access for dashboard filters.
 document.querySelectorAll(".dashboard-status-card[data-filter]").forEach(card=>card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setQuickFilter(card.dataset.filter);}}));
 requestAnimationFrame(applyQuickFilters);
+document.addEventListener("click",e=>{
+  const wrap=e.target.closest?.(".dashboard-total-wrap");
+  if(!wrap)toggleVehicleBreakdown(false);
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleVehicleBreakdown(false);});
 </script>
 
 <style id="ux-optimization-v2-2026">
