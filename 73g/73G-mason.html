@@ -327,6 +327,143 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 @media(max-width:680px){.cloud-sync-badge{font-size:9.8px;margin-top:3px}}
 
 </style>
+
+<style>
+/* ===== 裝備領用簽收證明：緊湊版 ===== */
+#issueReceiptModal .dialog{
+  width:min(680px,calc(100vw - 32px))!important;
+  max-height:calc(100vh - 32px);
+}
+#issueReceiptModal .dialog>h3{
+  padding:12px 16px!important;
+  font-size:16px!important;
+}
+#issueReceiptModal .form{
+  padding:12px 16px 14px!important;
+  gap:7px!important;
+  overflow-y:auto;
+}
+#issueReceiptModal .form>div:first-child{
+  padding:7px 9px!important;
+  font-size:10.8px!important;
+  line-height:1.4!important;
+}
+#issueReceiptModal .form label{
+  font-size:11.5px!important;
+  line-height:1.3;
+}
+#issueReceiptModal .form input,
+#issueReceiptModal .form select{
+  min-height:36px!important;
+  height:36px!important;
+  margin-top:3px!important;
+  padding:5px 9px!important;
+  font-size:12.5px!important;
+  border-radius:8px!important;
+}
+#issueReceiptModal .form div[style*="grid-template-columns"]{
+  gap:8px!important;
+}
+#issueReceiptModal .dialog-actions{
+  padding:9px 14px 11px!important;
+}
+#issueReceiptModal .dialog-actions .btn{
+  height:38px!important;
+  min-width:96px!important;
+  font-size:12px!important;
+}
+
+@media(max-width:680px){
+  #issueReceiptModal .dialog{
+    width:100%!important;
+    max-height:92dvh!important;
+  }
+  #issueReceiptModal .form{
+    padding:11px 12px 13px!important;
+    gap:7px!important;
+  }
+  #issueReceiptModal .form input,
+  #issueReceiptModal .form select{
+    min-height:42px!important;
+    height:42px!important;
+    font-size:16px!important;
+  }
+  #issueReceiptModal .form div[style*="grid-template-columns"]{
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+  }
+}
+@media(max-width:430px){
+  #issueReceiptModal .form div[style*="grid-template-columns"]{
+    grid-template-columns:1fr!important;
+  }
+}
+</style>
+
+
+<style>
+/* ===== 裝備領用簽收證明：固定底部操作列 ===== */
+#issueReceiptModal{
+  overflow:hidden!important;
+}
+#issueReceiptModal .dialog{
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:calc(100vh - 32px)!important;
+  overflow:hidden!important;
+}
+#issueReceiptModal .dialog>h3{
+  flex:0 0 auto;
+}
+#issueReceiptModal .form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+#issueReceiptModal .dialog-actions{
+  flex:0 0 auto!important;
+  position:sticky!important;
+  bottom:0!important;
+  z-index:10!important;
+  background:#fff!important;
+  border-top:1px solid #dfe7f0!important;
+  box-shadow:0 -8px 20px rgba(20,55,103,.08)!important;
+}
+#issueReceiptModal .dialog-actions .btn{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+}
+
+@media(max-width:680px){
+  #issueReceiptModal{
+    align-items:flex-end!important;
+    padding:0!important;
+  }
+  #issueReceiptModal .dialog{
+    max-height:92dvh!important;
+    border-radius:18px 18px 0 0!important;
+  }
+  #issueReceiptModal .dialog-actions{
+    position:sticky!important;
+    bottom:0!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+    padding:9px 10px max(10px,env(safe-area-inset-bottom))!important;
+  }
+  #issueReceiptModal .dialog-actions .btn{
+    width:100%!important;
+    min-width:0!important;
+  }
+  #issueReceiptModal .dialog-actions .report-btn{
+    grid-column:1/-1!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
@@ -357,6 +494,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <button id="saveMainBtn" class="btn save-main" onclick="saveAll()" disabled>💾 已儲存</button>
 <button class="btn primary" onclick="openReplace()">🔄 設備更換</button>
 <button class="btn report-btn" onclick="exportReportWord()">📄 匯出 Word 報告</button>
+<button class="btn green" type="button" onclick="openIssueReceipt()">✍ 裝備領用簽收證明</button>
 </div>
 <div class="action-group secondary-actions">
 <button class="btn light" onclick="exportBackup()">⬇ 匯出備份</button>
@@ -397,6 +535,139 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <label>備註<textarea id="rNote" placeholder="例如：無法開機、無網路"></textarea></label>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button id="saveReplaceBtn" class="btn primary" onclick="saveReplace()">💾 儲存更換紀錄</button></div></div></div>
 
+
+
+
+<div class="modal" id="issueReceiptModal"><div class="dialog" style="width:min(760px,100%)"><h3>裝備領用簽收證明</h3><div class="form">
+<div style="font-size:11.5px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px"><b>用途：</b>此功能只管理與匯出簽收證明，不會修改庫存數量、庫存序號、設備狀態、設備更換紀錄或其他欄位。</div>
+
+<label>送修單位 <span class="required">必填</span>
+<select id="receiptUnit" onchange="updateReceiptUnitSummary()">
+<option value="">請選擇送修單位</option>
+<option value="73G-1B1C (73群1營1連)">73G-1B1C (73群1營1連)</option>
+<option value="73G-1B2C (73群1營2連)">73G-1B2C (73群1營2連)</option>
+<option value="73G-1B3C (73群1營3連)">73G-1B3C (73群1營3連)</option>
+<option value="73G-1B4C (73群1營4連)">73G-1B4C (73群1營4連)</option>
+<option value="73G-1BHC-Plt (73群1營營部排)">73G-1BHC-Plt (73群1營營部排)</option>
+<option value="STC (通訓中心)">STC (通訓中心)</option>
+<option value="STC-CP (通訓中心通資連)">STC-CP (通訓中心通資連)</option>
+</select></label>
+
+<div id="receiptUnitSummary" class="stock-in-help" style="padding:7px 9px">請選擇送修單位，可查看該單位已儲存筆數。</div>
+
+<label>工作命令號碼 <span class="required">必填</span><input id="receiptWorkOrder" placeholder="請輸入工作命令號碼"></label>
+<label>車廂號碼 <span class="required">必填</span>
+<select id="receiptCarNo">
+<option value="">請選擇車廂號碼</option>
+<option value="CN-D-301">CN-D-301</option>
+<option value="CN-B-302">CN-B-302</option>
+<option value="CN-B-303">CN-B-303</option>
+<option value="CN-B-304">CN-B-304</option>
+<option value="CN-B-305">CN-B-305</option>
+<option value="CN-B-306">CN-B-306</option>
+<option value="CN-B-307">CN-B-307</option>
+<option value="CN-B-308">CN-B-308</option>
+<option value="CN-B-309">CN-B-309</option>
+<option value="CN-B-310">CN-B-310</option>
+<option value="CN-B-311">CN-B-311</option>
+<option value="CN-B-312">CN-B-312</option>
+<option value="CN-B-313">CN-B-313</option>
+<option value="CN-B-314">CN-B-314</option>
+<option value="CN-B-315">CN-B-315</option>
+<option value="CN-B-316">CN-B-316</option>
+<option value="CN-B-317">CN-B-317</option>
+<option value="CN-B-318">CN-B-318</option>
+<option value="CN-B-319">CN-B-319</option>
+<option value="CN-B-320">CN-B-320</option>
+<option value="CN-B-321">CN-B-321</option>
+<option value="CN-B-322">CN-B-322</option>
+<option value="CN-B-323">CN-B-323</option>
+<option value="CN-B-324">CN-B-324</option>
+<option value="CN-B-325">CN-B-325</option>
+<option value="CN-B-326">CN-B-326</option>
+<option value="CN-B-327">CN-B-327</option>
+<option value="CN-B-328">CN-B-328</option>
+<option value="CN-B-329">CN-B-329</option>
+<option value="CN-B-330">CN-B-330</option>
+<option value="CN-B-331">CN-B-331</option>
+<option value="CN-B-332">CN-B-332</option>
+<option value="CN-B-333">CN-B-333</option>
+<option value="CN-B-334">CN-B-334</option>
+<option value="CN-B-335">CN-B-335</option>
+<option value="CN-B-336">CN-B-336</option>
+<option value="CN-B-337">CN-B-337</option>
+<option value="CN-B-338">CN-B-338</option>
+<option value="CN-B-339">CN-B-339</option>
+<option value="CN-B-340">CN-B-340</option>
+<option value="CN-B-341">CN-B-341</option>
+<option value="CN-B-342">CN-B-342</option>
+<option value="CN-B-343">CN-B-343</option>
+<option value="CN-B-344">CN-B-344</option>
+<option value="CN-B-345">CN-B-345</option>
+<option value="CN-B-346">CN-B-346</option>
+<option value="CN-B-347">CN-B-347</option>
+<option value="CN-B-348">CN-B-348</option>
+<option value="CN-B-349">CN-B-349</option>
+<option value="CN-B-350">CN-B-350</option>
+<option value="CN-B-351">CN-B-351</option>
+<option value="CN-B-352">CN-B-352</option>
+<option value="CN-B-353">CN-B-353</option>
+<option value="CN-B-354">CN-B-354</option>
+<option value="CN-B-355">CN-B-355</option>
+<option value="CN-B-356">CN-B-356</option>
+<option value="CN-B-357">CN-B-357</option>
+<option value="CN-B-358">CN-B-358</option>
+<option value="CN-B-359">CN-B-359</option>
+<option value="CN-B-360">CN-B-360</option>
+<option value="CN-B-361">CN-B-361</option>
+<option value="CN-B-362">CN-B-362</option>
+<option value="CN-B-363">CN-B-363</option>
+<option value="CN-B-364">CN-B-364</option>
+<option value="CN-B-365">CN-B-365</option>
+<option value="CN-B-366">CN-B-366</option>
+<option value="CN-B-367">CN-B-367</option>
+<option value="CN-B-368">CN-B-368</option>
+<option value="CN-B-369">CN-B-369</option>
+<option value="CN-B-370">CN-B-370</option>
+<option value="CN-B-371">CN-B-371</option>
+<option value="CN-B-372">CN-B-372</option>
+<option value="CN-B-373">CN-B-373</option>
+<option value="CN-B-374">CN-B-374</option>
+<option value="CN-B-375">CN-B-375</option>
+<option value="CN-B-376">CN-B-376</option>
+<option value="CN-B-377">CN-B-377</option>
+<option value="CN-B-378">CN-B-378</option>
+<option value="NMS-381">NMS-381</option>
+<option value="NMS-382">NMS-382</option>
+<option value="NMS-383">NMS-383</option>
+<option value="NMS-384">NMS-384</option>
+<option value="SSS-391">SSS-391</option>
+<option value="SSS-392">SSS-392</option>
+<option value="SSS-393">SSS-393</option>
+<option value="SSS-394">SSS-394</option>
+</select></label>
+<label>裝備號碼 <span class="required">必填</span><input id="receiptEquipmentNo" placeholder="請輸入裝備號碼"></label>
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.65fr);gap:10px">
+<label>接修者<input id="receiptRepairReceiver" placeholder="可先輸入姓名，亦可匯出後手寫簽名"></label>
+<label>接修日期<input id="receiptRepairDate" type="date"></label>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.65fr);gap:10px">
+<label>接收者<input id="receiptFinalReceiver" placeholder="可先輸入姓名，亦可匯出後手寫簽名"></label>
+<label>接收日期<input id="receiptFinalDate" type="date"></label>
+</div>
+
+<div id="receiptSavedListWrap" style="display:none">
+  <div style="font-size:11.5px;font-weight:800;color:#536d8a;margin-bottom:4px">本單位已儲存資料</div>
+  <div id="receiptSavedList" style="max-height:150px;overflow:auto;border:1px solid #dfe7f0;border-radius:8px;background:#fbfdff"></div>
+</div>
+</div>
+
+<div class="dialog-actions" style="flex-wrap:wrap">
+  <button class="btn light" type="button" onclick="closeIssueReceipt()">取消</button>
+  <button class="btn green" type="button" onclick="saveIssueReceipt()">💾 儲存</button>
+  <button class="btn report-btn" type="button" onclick="exportIssueReceiptExcel()">📊 匯出本單位累加 Excel</button>
+</div></div></div>
 
 <div class="modal" id="addDeviceModal"><div class="dialog"><h3>新增設備</h3><div class="form">
 <label>所屬組件<input id="aGroupName" readonly></label>
@@ -1206,6 +1477,191 @@ th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color
 </style></head><body><h2>Equipment Inventory Report</h2>${reportContent.innerHTML}</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),200);
 }
 
+
+
+// ===== Equipment issue receipt proof (independent; per-unit accumulated records) =====
+const ISSUE_RECEIPT_STORAGE_KEY='73G_issue_receipt_records_v1';
+
+function receiptEsc(v){
+  return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function receiptDateText(v){
+  const s=String(v||'').trim();
+  if(!s)return '　　 年　　 月　　 日';
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?`${m[1]} 年 ${Number(m[2])} 月 ${Number(m[3])} 日`:receiptEsc(s);
+}
+function loadIssueReceiptRecords(){
+  try{
+    const raw=localStorage.getItem(ISSUE_RECEIPT_STORAGE_KEY);
+    const data=raw?JSON.parse(raw):[];
+    return Array.isArray(data)?data:[];
+  }catch(e){return []}
+}
+function saveIssueReceiptRecords(records){
+  localStorage.setItem(ISSUE_RECEIPT_STORAGE_KEY,JSON.stringify(records||[]));
+}
+function getReceiptFormData(){
+  return {
+    unit:document.getElementById('receiptUnit')?.value.trim()||'',
+    workOrder:document.getElementById('receiptWorkOrder')?.value.trim()||'',
+    carNo:document.getElementById('receiptCarNo')?.value.trim()||'',
+    equipmentNo:document.getElementById('receiptEquipmentNo')?.value.trim()||'',
+    repairReceiver:document.getElementById('receiptRepairReceiver')?.value.trim()||'',
+    repairDate:document.getElementById('receiptRepairDate')?.value||'',
+    finalReceiver:document.getElementById('receiptFinalReceiver')?.value.trim()||'',
+    finalDate:document.getElementById('receiptFinalDate')?.value||''
+  };
+}
+function validateReceiptData(d){
+  if(!d.unit||!d.workOrder||!d.carNo||!d.equipmentNo){
+    showToast('請先填寫送修單位、工作命令號碼、車廂號碼及裝備號碼','error');
+    return false;
+  }
+  return true;
+}
+function clearIssueReceiptForm(keepUnit=true){
+  const unit=document.getElementById('receiptUnit');
+  const keep=keepUnit?unit?.value:'';
+  ['receiptWorkOrder','receiptCarNo','receiptEquipmentNo','receiptRepairReceiver','receiptFinalReceiver'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  const today=new Date();
+  const localDate=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const rd=document.getElementById('receiptRepairDate'),fd=document.getElementById('receiptFinalDate');
+  if(rd)rd.value=localDate;if(fd)fd.value=localDate;
+  if(unit)unit.value=keep||'';
+  updateReceiptUnitSummary();
+}
+function openIssueReceipt(){
+  const modal=document.getElementById('issueReceiptModal');
+  if(!modal)return;
+  const today=new Date();
+  const localDate=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const repairDate=document.getElementById('receiptRepairDate');
+  const finalDate=document.getElementById('receiptFinalDate');
+  if(repairDate && !repairDate.value)repairDate.value=localDate;
+  if(finalDate && !finalDate.value)finalDate.value=localDate;
+  updateReceiptUnitSummary();
+  modal.classList.add('show');
+}
+function closeIssueReceipt(){
+  document.getElementById('issueReceiptModal')?.classList.remove('show');
+}
+function saveIssueReceipt(){
+  const d=getReceiptFormData();
+  if(!validateReceiptData(d))return;
+  const records=loadIssueReceiptRecords();
+  const now=new Date();
+  records.push({
+    id:'R'+now.getTime()+'_'+Math.random().toString(36).slice(2,7),
+    createdAt:now.toISOString(),
+    createdText:now.toLocaleString('zh-TW'),
+    ...d
+  });
+  saveIssueReceiptRecords(records);
+  showToast(`已儲存：${d.unit}（累計 ${records.filter(r=>r.unit===d.unit).length} 筆）`,'success');
+  clearIssueReceiptForm(true);
+}
+function updateReceiptUnitSummary(){
+  const unit=document.getElementById('receiptUnit')?.value||'';
+  const summary=document.getElementById('receiptUnitSummary');
+  const wrap=document.getElementById('receiptSavedListWrap');
+  const list=document.getElementById('receiptSavedList');
+  const records=loadIssueReceiptRecords();
+  const unitRows=unit?records.filter(r=>r.unit===unit):[];
+  if(summary){
+    summary.innerHTML=unit
+      ? `<b>${receiptEsc(unit)}</b>｜目前已儲存 <b>${unitRows.length}</b> 筆，可按「匯出本單位累加 Excel」一次匯出。`
+      : '請選擇送修單位，可查看該單位已儲存筆數。';
+  }
+  if(wrap)wrap.style.display=unitRows.length?'block':'none';
+  if(list){
+    list.innerHTML=unitRows.length?unitRows.slice().reverse().map(r=>`
+      <div style="padding:7px 9px;border-bottom:1px solid #edf2f6;font-size:11px;line-height:1.45;position:relative;padding-right:62px">
+        <b>${receiptEsc(r.workOrder)}</b>｜車廂 ${receiptEsc(r.carNo)}｜裝備 ${receiptEsc(r.equipmentNo)}
+        <div style="color:#7a8da4;margin-top:2px">${receiptEsc(r.createdText||'')}</div>
+        <button type="button" onclick="deleteIssueReceiptRecord('${receiptEsc(r.id)}')" style="position:absolute;right:7px;top:7px;border:1px solid #e2b6bc;background:#fff5f6;color:#a12b39;border-radius:6px;padding:3px 6px;font-size:9.5px;font-weight:800;cursor:pointer">刪除</button>
+      </div>`).join(''):'';
+  }
+}
+function deleteIssueReceiptRecord(id){
+  const records=loadIssueReceiptRecords();
+  const row=records.find(r=>r.id===id);
+  if(!row)return;
+  if(!confirm(`確定刪除此筆簽收資料？\n${row.unit}\n工作命令：${row.workOrder}`))return;
+  saveIssueReceiptRecords(records.filter(r=>r.id!==id));
+  updateReceiptUnitSummary();
+  showToast('已刪除簽收資料','success');
+}
+function exportIssueReceiptExcel(){
+  const unit=document.getElementById('receiptUnit')?.value.trim()||'';
+  if(!unit)return showToast('請先選擇要匯出的送修單位','error');
+  const all=loadIssueReceiptRecords();
+  const rows=all.filter(r=>r.unit===unit);
+  if(!rows.length)return showToast('此送修單位目前沒有已儲存的簽收資料','error');
+
+  const generated=new Date().toLocaleString('zh-TW');
+  const bodyRows=rows.map((r,i)=>`
+    <tr>
+      <td class="center">${i+1}</td>
+      <td>${receiptEsc(r.workOrder)}</td>
+      <td>${receiptEsc(r.carNo)}</td>
+      <td>${receiptEsc(r.equipmentNo)}</td>
+      <td>${receiptEsc(r.repairReceiver||'')}</td>
+      <td>${receiptDateText(r.repairDate)}</td>
+      <td class="sign"></td>
+      <td>${receiptEsc(r.finalReceiver||'')}</td>
+      <td>${receiptDateText(r.finalDate)}</td>
+      <td class="sign"></td>
+    </tr>`).join('');
+
+  const sheet=`<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>裝備領用簽收證明</x:Name><x:WorksheetOptions><x:Selected/><x:FitToPage/><x:PageSetup><x:Layout x:Orientation="Landscape"/></x:PageSetup></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+<style>
+body{font-family:"Microsoft JhengHei","Arial";font-size:10pt}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+td,th{border:1px solid #000;padding:6px 7px;vertical-align:middle}
+th{background:#eaf1f8;font-weight:bold;text-align:center}
+.title{font-size:18pt;font-weight:bold;text-align:center;border:0;height:38px}
+.meta{border:0;font-size:10pt}
+.center{text-align:center}
+.sign{height:42px;min-width:90px}
+</style></head><body>
+<table>
+<tr><td colspan="10" class="title">裝備領用簽收證明</td></tr>
+<tr><td colspan="10" class="meta"><b>送修單位：</b>${receiptEsc(unit)}　　<b>累計筆數：</b>${rows.length}　　<b>匯出時間：</b>${receiptEsc(generated)}</td></tr>
+<tr>
+<th style="width:36px">序號</th>
+<th>工作命令號碼</th>
+<th>車廂號碼</th>
+<th>裝備號碼</th>
+<th>接修者</th>
+<th>接修日期</th>
+<th>接修者簽名</th>
+<th>接收者</th>
+<th>接收日期</th>
+<th>接收者簽名</th>
+</tr>
+${bodyRows}
+</table>
+</body></html>`;
+
+  const blob=new Blob(['\ufeff',sheet],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const safeUnit=unit.replace(/[\\/:*?"<>|]+/g,'_').slice(0,50);
+  a.href=url;
+  a.download=`73G_裝備領用簽收證明_${safeUnit}_${new Date().toISOString().slice(0,10)}.xls`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast(`已匯出 ${unit} 共 ${rows.length} 筆簽收資料`,'success');
+}
+
 // ===== Safe modal backdrop close =====
 // A drag that starts inside a dialog (for example selecting/copying text) must
 // never be treated as a click on the backdrop when the pointer is released
@@ -1217,7 +1673,8 @@ function installSafeModalBackdropClose(){
     summaryDetailModal:()=>closeSummaryDetail(),
     reportModal:()=>closeReport(),
     stockInModal:()=>closeStockIn(),
-    serialBatchModal:()=>closeSerialBatch()
+    serialBatchModal:()=>closeSerialBatch(),
+    issueReceiptModal:()=>closeIssueReceipt()
   };
   Object.entries(closers).forEach(([id,closeFn])=>{
     const overlay=document.getElementById(id);if(!overlay)return;
@@ -1240,7 +1697,7 @@ function installSafeModalBackdropClose(){
 }
 installSafeModalBackdropClose();
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn();closeIssueReceipt()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
 normalizeStockMovements();render();updateSaveUI();updateLastSaved();initializeCloudSync();
 </script>
