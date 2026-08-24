@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>73G裝備庫存管理</title>
+<style>
+:root{--navy:#173b70;--navy2:#28558f;--bg:#f4f7fb;--panel:#fff;--line:#dce5ef;--text:#17365f;--muted:#71849c;--green:#178a52;--orange:#b57414;--red:#b42b39;--blue:#2f6fb2;--soft:#f8fafc}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:linear-gradient(120deg,#123263,#1b4279 55%,#315c96);color:#fff;padding:15px 22px;box-shadow:0 5px 18px rgba(14,39,76,.14)}
+.wrap{max-width:1320px;margin:auto}.topbar .wrap{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+.brand h1{margin:0;font-size:23px}.brand small{display:block;margin-top:5px;color:#d7e2f2}.today{font-size:12px;color:#e1e9f5}
+main{max-width:1320px;margin:auto;padding:16px 14px 42px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 3px 11px rgba(21,50,89,.04)}.card b{display:block;font-size:27px}.card span{font-size:12px;color:var(--muted)}
+.summary-card{cursor:pointer;position:relative;transition:.16s ease;user-select:none}.summary-card:hover{transform:translateY(-2px);border-color:#b8cbe0;box-shadow:0 8px 22px rgba(21,50,89,.09)}.summary-card:focus-visible{outline:3px solid #b9d5f4;outline-offset:2px}.summary-card::after{content:"查看明細 ›";position:absolute;right:15px;bottom:14px;font-size:10.5px;font-weight:800;color:#54769d}.summary-card:hover::after{color:#173b70}.summary-card .card-sub{display:block;margin-top:4px;padding-right:68px;font-size:10.5px;color:#91a0b2}
+.detail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}.detail-title{font-size:13px;font-weight:800;color:#173b70}.detail-count{font-size:11px;font-weight:800;color:#315c8c;background:#edf4fb;border-radius:999px;padding:6px 10px}.detail-table-wrap{overflow:auto;max-height:62vh;border:1px solid #e2e9f1;border-radius:10px}.detail-table-wrap table{min-width:760px}.detail-table-wrap th{top:0;z-index:1}.detail-empty{padding:34px 14px;text-align:center;color:#8193a9}.detail-serial{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;color:#153f73}.detail-qty{font-weight:850;text-align:center;color:#123d74}
+.toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.search{flex:1;min-width:230px;height:39px;border:1px solid #d2deec;border-radius:10px;padding:0 12px;outline:none;color:var(--text)}
+.btn{height:39px;border:0;border-radius:9px;padding:0 13px;font-weight:750;cursor:pointer}.btn.save-main{background:#16a05d;color:#fff;box-shadow:0 2px 8px rgba(22,160,93,.18)}.btn.save-main:disabled{background:#b9c7d6;color:#fff;cursor:default;box-shadow:none}.btn.primary{background:var(--navy);color:#fff}.btn.light{background:#eef3f8;color:#385a82}.btn.green{background:#e9f7ef;color:#116a3e}
+.note{font-size:12px;color:var(--muted);margin:3px 2px 13px}
+.filterbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(21,50,89,.025)}
+.filter-label{font-size:11px;font-weight:800;color:#6d8199;white-space:nowrap}.filter-select{height:36px;min-width:220px;border:1px solid #d2deec;border-radius:9px;background:#fff;color:var(--text);padding:0 9px;outline:none}.filter-check{height:36px;display:inline-flex;align-items:center;gap:6px;padding:0 10px;border:1px solid #dce5ef;border-radius:9px;background:#f9fbfd;color:#506b8b;font-size:11.5px;font-weight:650;cursor:pointer;white-space:nowrap}.filter-check input{accent-color:#28558f}.filter-count{margin-left:auto;font-size:11.5px;font-weight:800;color:#315c8c;background:#edf4fb;border-radius:999px;padding:7px 11px;white-space:nowrap}
+@media(max-width:700px){.filter-select{min-width:0;flex:1}.filter-count{margin-left:0;width:100%;text-align:center}}
+.component{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 3px 11px rgba(21,50,89,.035)}
+.system-section{margin:0 0 14px;border:1px solid #d7e2ee;border-radius:16px;overflow:hidden;background:#eef3f8;box-shadow:0 4px 14px rgba(21,50,89,.035)}
+.system-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;font-weight:850}
+.system-head:hover{filter:brightness(.99)}.system-title{display:flex;align-items:center;gap:10px;font-size:18px}.system-arrow{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.72);transition:.16s}.system-section.open>.system-head .system-arrow{transform:rotate(90deg)}
+.system-meta{font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.72);white-space:nowrap}.system-body{display:none;padding:10px}.system-section.open>.system-body{display:block}
+.system-section.type-cn>.system-head{background:linear-gradient(100deg,#e7f0fb,#dceafb);color:#153f73}.system-section.type-nms>.system-head{background:linear-gradient(100deg,#eaf7f0,#dff1e7);color:#176542}.system-section.type-sss>.system-head{background:linear-gradient(100deg,#f4edff,#ebe3fb);color:#67469a}
+.system-body .component:last-child{margin-bottom:0}
+/* Device row background follows inventory status */
+.device-row{transition:background .15s,border-color .15s}.device-row.state-stock{background:#f1f8fd}.device-row.state-issued{background:#fff8e9}.device-row.state-installed{background:#eef9f3}.device-row.state-broken{background:#fff1f2}
+.device-row.state-stock:hover{background:#e8f4fb}.device-row.state-issued:hover{background:#fff3d9}.device-row.state-installed:hover{background:#e5f6ed}.device-row.state-broken:hover{background:#ffe7e9}
+.device-row.state-stock .status{background:#e7f4fb;border-color:#a9cee5;color:#286287}.device-row.state-issued .status{background:#fff2d7;border-color:#e3c174;color:#845400}.device-row.state-installed .status{background:#e3f5eb;border-color:#9ed2b4;color:#126a40}.device-row.state-broken .status{background:#ffe5e7;border-color:#e6a5ac;color:#a91c2a}
+.comp-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:13px 14px;cursor:pointer;background:#fff}
+.comp-head:hover{background:#fbfdff}.comp-title{display:flex;align-items:center;gap:9px;min-width:0}.arrow{width:25px;height:25px;border-radius:7px;background:#edf3f9;display:grid;place-items:center;font-size:11px;transition:.15s}.component.open .arrow{transform:rotate(90deg)}.comp-name{font-weight:850;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.part{font-size:10.5px;color:#8899ae;margin-top:3px}
+.comp-count{font-size:11px;color:#607892;background:#f2f6fa;border-radius:999px;padding:5px 9px;white-space:nowrap}.mini-action{border:1px solid #cfdceb;background:#fff;color:#315c8c;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:11px}
+.comp-body{display:none;border-top:1px solid #e8eef5}.component.open .comp-body{display:block}
+table{width:100%;border-collapse:collapse}th,td{padding:10px 11px;border-bottom:1px solid #edf2f6;text-align:left;font-size:12px;vertical-align:middle}th{background:#f8fafc;color:#657b96;font-size:11px;position:sticky;top:0}tr:last-child td{border-bottom:0}.device-name{font-weight:700;color:#173b70}.qty{font-weight:850;text-align:center}.serial-input{width:100%;min-width:150px;border:1px solid #d4dfeb;border-radius:8px;padding:7px 8px;font:inherit}.status{border:1px solid #d4dfeb;border-radius:8px;padding:7px 8px;background:#fff;color:#244766}.loc{width:100%;min-width:115px;border:1px solid #d4dfeb;border-radius:8px;padding:7px 8px;font:inherit}
+.qty-control{display:inline-flex;align-items:center;gap:5px;justify-content:center}.qty-btn{width:28px;height:28px;border:1px solid #cbd9e8;background:#fff;color:#214e80;border-radius:7px;font-weight:900;cursor:pointer;font-size:17px;line-height:1}.qty-btn:hover{background:#eef5fb}.qty-input{width:58px;height:30px;border:1px solid #cbd9e8;border-radius:7px;text-align:center;font-weight:850;color:#17365f;background:#fff}.qty-input:focus{outline:none;border-color:#6e9dcc;box-shadow:0 0 0 2px #e7f0fa}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10.5px;font-weight:800}.badge.stock{background:#edf6fc;color:#286287}.badge.issued{background:#fff7e6;color:#845400}.badge.installed{background:#eaf8f0;color:#126a40}.badge.broken{background:#fff0f1;color:#a91c2a}
+.empty{padding:22px;text-align:center;color:#899aaf}.savebar{position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(20,55,103,.97);color:#fff;padding:10px 14px;display:none;box-shadow:0 -4px 18px rgba(10,35,70,.18);backdrop-filter:blur(8px)}.savebar.show{display:block}.savebar-inner{max-width:1320px;margin:auto;display:flex;align-items:center;gap:12px}.savebar-msg{flex:1;font-size:12px;font-weight:700}.savebar .btn{height:36px}.unsaved-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffca55;margin-right:7px;vertical-align:1px}
+.history{margin-top:16px}.history h3{font-size:15px;margin:0 0 8px}.history-item{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:12px}.history-item b{color:#103e78}
+.modal{position:fixed;inset:0;background:#0c1e3677;display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.show{display:flex}.dialog{width:min(560px,100%);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px #0003}.dialog h3{margin:0;padding:15px 17px;background:#173b70;color:#fff;font-size:16px}.form{padding:15px 17px;display:grid;gap:10px}.form label{font-size:12px;color:#61758f}.form input,.form select,.form textarea{width:100%;margin-top:5px;border:1px solid #d2deec;border-radius:9px;padding:9px 10px;font:inherit}.form textarea{min-height:66px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 17px 17px}
+@media(max-width:820px){.summary{grid-template-columns:repeat(2,1fr)}.comp-body{overflow-x:auto}table{min-width:900px}.comp-head{grid-template-columns:minmax(0,1fr) auto}.mini-action{display:none}}
+@media(max-width:520px){.brand h1{font-size:19px}.summary{grid-template-columns:1fr 1fr}.card b{font-size:22px}main{padding:12px 9px 34px}}
+
+
+/* ===== Production usability refinement ===== */
+:root{
+  --brand:#143a70;--brand-2:#28558f;--canvas:#f2f5f9;--panel:#fff;
+  --text:#17324f;--text-strong:#102f55;--muted:#667c96;--line:#d8e2ed;
+  --focus:#4b86c4;--success:#138553;--danger:#b42336;--warning:#9a6710;
+  --stock-bg:#edf6fc;--stock-line:#b7d7e9;--issued-bg:#fff7e7;--issued-line:#ead39d;
+  --installed-bg:#edf8f2;--installed-line:#b7dec8;--broken-bg:#fff0f2;--broken-line:#edbec4;
+}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC",Arial,sans-serif;background:var(--canvas);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:74px}
+.wrap,main,.savebar-inner{max-width:1480px}
+.topbar{padding:16px 22px;background:linear-gradient(115deg,#103566 0%,#1b477e 58%,#35679f 100%)}
+.brand h1{font-size:23px;line-height:1.2;font-weight:850;letter-spacing:.1px}.brand h1 span{font-size:13px;font-weight:600;color:#cbd9eb;margin-left:7px}.brand small{font-size:12.5px;font-weight:500}.header-meta{text-align:right}.today{font-size:12px;font-weight:650}.saved-meta{margin-top:3px;color:#c8d8ea;font-size:10.5px}
+main{padding:16px 14px 34px}
+.summary{gap:12px;margin-bottom:12px}.card{min-height:98px;padding:16px 18px;border-radius:15px}.card b{font-size:30px;line-height:1;font-weight:850;color:#153e74;font-variant-numeric:tabular-nums}.card span{display:block;margin-top:8px;font-size:13px;font-weight:800;color:#365778}.summary-card::after{bottom:15px;font-size:10.5px}.summary-card .card-sub{margin-top:3px;font-size:10.5px;color:#7f90a5}
+.main-actions{position:sticky;top:0;z-index:25;padding:10px 11px;box-shadow:0 5px 18px rgba(18,51,89,.07)}
+.search-wrap{position:relative;flex:1 1 390px;min-width:260px}.search-icon{position:absolute;left:11px;top:8px;font-size:18px;color:#6e849d;pointer-events:none}.search{width:100%;min-width:0;height:41px;padding:0 12px 0 34px;font-size:13px;font-weight:550;background:#fbfdff}.search:focus,.filter-select:focus,.serial-input:focus,.status:focus,.loc:focus,.qty-input:focus,.form input:focus,.form select:focus,.form textarea:focus{outline:none;border-color:var(--focus)!important;box-shadow:0 0 0 3px rgba(75,134,196,.13)!important}
+.action-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.btn{height:40px;border-radius:9px;padding:0 13px;font-size:12px;font-weight:800;white-space:nowrap;transition:.15s}.btn:hover:not(:disabled){transform:translateY(-1px)}.btn.report-btn{background:#eaf1fb;color:#194f88;border:1px solid #c6d9ee}.btn.ghost{background:#fff;color:#607993;border:1px solid #d8e2ed}.btn.light{border:1px solid #d9e3ee}.btn.primary{box-shadow:0 2px 8px rgba(23,59,112,.16)}
+.filterbar{padding:10px 12px;margin-bottom:8px}.filter-label{font-size:12px}.filter-select{height:38px;font-size:12.5px}.filter-check{height:38px;font-size:12px}.filter-count{font-size:11px}
+.status-guide{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 8px;padding:9px 11px;background:#fff;border:1px solid var(--line);border-radius:12px}.guide-title{font-size:11.5px;font-weight:850;color:#4f6783;margin-right:2px}.guide-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}.guide-pill i{width:8px;height:8px;border-radius:50%;display:block}.guide-pill.stock{background:var(--stock-bg);border-color:var(--stock-line);color:#286287}.guide-pill.stock i{background:#5a9dc5}.guide-pill.issued{background:var(--issued-bg);border-color:var(--issued-line);color:#835c12}.guide-pill.issued i{background:#d0a144}.guide-pill.installed{background:var(--installed-bg);border-color:var(--installed-line);color:#246c49}.guide-pill.installed i{background:#55a87a}.guide-pill.broken{background:var(--broken-bg);border-color:var(--broken-line);color:#9c2c38}.guide-pill.broken i{background:#d05b67}.guide-help{font-size:10.8px;color:#778ba2;margin-left:auto}.note{padding:0 2px;font-size:11.5px;color:#647a94}
+.system-section{border-radius:16px;margin-bottom:12px;background:#f7f9fc}.system-head{min-height:60px;padding:13px 16px}.system-title{font-size:17px}.system-meta{font-size:10.8px}.system-body{padding:10px}.component{border-radius:12px;margin-bottom:8px;box-shadow:none}.comp-head{min-height:58px;padding:11px 13px}.comp-name{font-size:14px}.part{font-size:10.5px}.mini-action{font-weight:750}.comp-count{font-size:10.8px}
+th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color:#526c88;letter-spacing:.02em}.device-name{font-size:12.3px;font-weight:750;color:#143e70}.qty-input,.serial-input,.status,.loc{height:34px;font-size:12px}.serial-input,.loc{padding:6px 8px}.qty-input{width:62px}.qty-btn{width:30px;height:30px}.status{font-weight:750;min-width:102px}
+.device-row{border-left:4px solid transparent}.device-row.state-stock{background:var(--stock-bg);border-left-color:#76afd0}.device-row.state-issued{background:var(--issued-bg);border-left-color:#d5aa54}.device-row.state-installed{background:var(--installed-bg);border-left-color:#6ab08a}.device-row.state-broken{background:var(--broken-bg);border-left-color:#d86b75}
+.history{margin:0 0 12px;padding:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 3px 11px rgba(21,50,89,.035)}
+.history-toggle{width:100%;border:0;background:#fff;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;color:inherit}
+.history-toggle:hover{background:#f8fbfe}.history-toggle:focus-visible{outline:3px solid #b9d5f4;outline-offset:-3px}
+.history-head-left{display:flex;align-items:center;gap:10px;min-width:0}.history-arrow{width:28px;height:28px;border-radius:8px;background:#edf3f9;display:grid;place-items:center;font-size:11px;flex:0 0 auto;transition:.16s}
+.history.open .history-arrow{transform:rotate(90deg)}.history-title-wrap h3{margin:0;font-size:15px;color:#163c6e}.history-title-wrap p{margin:3px 0 0;font-size:10.8px;color:#7a8da4}
+.history-count{font-size:11px;font-weight:850;color:#315c8c;background:#edf4fb;border-radius:999px;padding:6px 10px;white-space:nowrap}.history-body{display:none;border-top:1px solid #e7edf4;padding:10px 12px 12px;background:#f8fafc}.history.open .history-body{display:block}.history-item{padding:11px 13px;border-radius:11px;line-height:1.55;background:#fff}
+@media(max-width:680px){.history-toggle{padding:11px 12px}.history-title-wrap p{display:none}.history-count{font-size:10px;padding:5px 8px}}
+.dialog{border-radius:16px}.dialog h3{font-size:16px;font-weight:850;background:#f8fafc;border-bottom:1px solid #e4ebf3}.form label{font-size:11.5px;font-weight:800;color:#536d8a}.form input,.form select,.form textarea{font-size:13px}.required{margin-left:5px;color:#b42336;font-size:10px}.dialog-actions{background:#f8fafc;border-top:1px solid #e5ecf3}
+.savebar{padding:9px 14px}.savebar-msg{font-size:12.5px}.toast{position:fixed;right:18px;bottom:82px;z-index:120;background:#173b70;color:#fff;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:750;box-shadow:0 8px 28px rgba(10,40,78,.2);opacity:0;transform:translateY(7px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:none}.toast.error{background:#9f2937}.toast.success{background:#13764a}
+@media(max-width:980px){.main-actions{position:static}.search-wrap{flex-basis:100%}.primary-actions,.secondary-actions{flex:1 1 auto}.header-meta{text-align:left}.summary{grid-template-columns:repeat(2,1fr)}.guide-help{width:100%;margin-left:0}.system-meta{display:none}}
+@media(max-width:680px){body{font-size:13px}.topbar{padding:13px 12px}.brand h1{font-size:19px}.brand h1 span{display:block;margin:3px 0 0}.topbar .wrap{align-items:flex-start}.header-meta{width:100%;display:flex;justify-content:space-between;gap:8px}.summary{gap:8px}.card{min-height:86px;padding:13px}.card b{font-size:25px}.card span{font-size:12px}.summary-card::after{display:none}.summary-card .card-sub{padding-right:0}.toolbar{border-radius:12px}.action-group{width:100%}.action-group .btn{flex:1 1 calc(50% - 5px)}.filterbar{align-items:stretch}.filter-label{width:100%}.filter-select{width:100%;flex:auto}.filter-check{flex:1}.filter-count{width:100%}.status-guide{gap:5px}.guide-title{width:100%}.system-head{padding:12px}.system-title{font-size:15px}.system-body{padding:7px}.comp-head{padding:10px}.comp-name{font-size:13px}.comp-body{overflow-x:auto}.comp-body table{min-width:860px}.savebar-inner{gap:7px}.savebar-msg{font-size:11px}.savebar .btn{padding:0 9px}.toast{left:10px;right:10px;bottom:76px;text-align:center}}
+
+
+
+/* ===== Summary detail system grouping ===== */
+.summary-system-block{margin:0 0 14px;border:1px solid #dbe5ef;border-radius:12px;overflow:hidden;background:#fff}
+.summary-system-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:#f6f9fc;color:#173b70}
+.summary-system-head b{font-size:15px}.summary-system-head span{font-size:11px;font-weight:800;color:#617a96}
+.summary-system-block.type-cn .summary-system-head{background:#e8f1fb;color:#153f73}
+.summary-system-block.type-nms .summary-system-head{background:#e8f6ee;color:#176542}
+.summary-system-block.type-sss .summary-system-head{background:#f1ebfb;color:#67469a}
+.summary-system-block .detail-table-wrap{border:0;border-top:1px solid #e2e9f1;border-radius:0;max-height:none}
+@media(max-width:680px){.summary-system-head{align-items:flex-start;flex-direction:column;gap:2px}}
+
+/* ===== Zero-stock visual distinction ===== */
+:root{--zero-bg:#f3f5f7;--zero-line:#aeb9c6;--zero-text:#66788d}
+.device-row.qty-zero{background:var(--zero-bg)!important;border-left-color:var(--zero-line)!important}
+.device-row.qty-zero:hover{background:#eceff3!important}
+.device-row.qty-zero .qty-input{background:#eef1f4!important;border-color:#c5ced8!important;color:#5c6d80!important}
+.zero-stock-label{display:inline-flex;align-items:center;margin-left:4px;padding:3px 6px;border-radius:999px;background:#e3e7eb;color:#5d6d7e;border:1px solid #c7d0d9;font-size:9.5px;font-weight:850;white-space:nowrap}
+.guide-pill.zero{background:var(--zero-bg);border-color:#c7d0d9;color:#5d6d7e}.guide-pill.zero i{background:#8b98a6}
+
+/* ===== 2026 Professional responsive UI pass ===== */
+:root{
+  --app-bg:#eef3f8;
+  --surface:#ffffff;
+  --surface-soft:#f7f9fc;
+  --ink:#12304f;
+  --ink-strong:#0d2b4d;
+  --muted-2:#6d8299;
+  --border:#d8e2ed;
+  --border-strong:#c8d6e5;
+  --primary:#173f74;
+  --primary-2:#2d5f96;
+  --shadow-sm:0 2px 8px rgba(24,55,91,.05);
+  --shadow-md:0 8px 24px rgba(24,55,91,.08);
+  --radius:14px;
+}
+html{font-size:16px}
+body{background:var(--app-bg);color:var(--ink);font-size:14px;line-height:1.55;letter-spacing:.01em}
+button,input,select,textarea{font-family:inherit}
+button,select,label{touch-action:manipulation}
+.topbar{padding:15px 20px;border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 3px 14px rgba(12,39,72,.13)}
+.topbar .wrap{min-height:50px}
+.brand h1{font-size:22px;font-weight:850;letter-spacing:.01em}.brand h1 span{font-size:12.5px;font-weight:650;opacity:.92}.brand small{font-size:12px;line-height:1.4;color:#d7e4f3}
+.today{font-size:12px}.saved-meta{font-size:11px}
+main{max-width:1480px;padding:18px 14px 42px}
+.summary{gap:12px;margin-bottom:14px}
+.card{border-color:var(--border);box-shadow:var(--shadow-sm)}
+.summary-card{min-height:112px;padding:18px 20px;border-radius:16px;overflow:hidden}
+.summary-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#3f78ad;opacity:.8}
+.summary-card b{font-size:34px;line-height:1;font-weight:900;color:#113f73;letter-spacing:-.02em}
+.summary-card span{font-size:14px;font-weight:850;color:#294e73;margin-top:10px}
+.summary-card .card-sub{font-size:12px;line-height:1.35;color:#7a8da3;margin-top:5px;padding-right:86px}
+.summary-card::after{content:"查看明細 →";right:17px;bottom:17px;font-size:11.5px;font-weight:800;color:#356493}
+.summary-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.history{margin-bottom:14px;border-radius:16px;box-shadow:var(--shadow-sm)}
+.history-toggle{min-height:72px;padding:14px 17px}.history-arrow{width:34px;height:34px;border-radius:10px;font-size:13px}.history-title-wrap h3{font-size:16px}.history-title-wrap p{font-size:12px;margin-top:4px}.history-count{font-size:12px;padding:7px 11px}
+.history-body{padding:12px 14px 14px}.history-item{font-size:13px;padding:12px 14px;border:1px solid #e1e8f0;box-shadow:0 1px 4px rgba(24,55,91,.03)}
+.history-item{position:relative;padding-right:112px}.history-delete-btn{position:absolute;right:12px;top:12px;height:34px;border:1px solid #efc7cc;background:#fff5f6;color:#a82433;border-radius:9px;padding:0 11px;font-size:11.5px;font-weight:850;cursor:pointer;transition:.15s}.history-delete-btn:hover{background:#ffe9ec;border-color:#e8aab2}.history-delete-btn:focus-visible{outline:3px solid rgba(180,35,54,.15);outline-offset:2px}
+.toolbar,.filterbar,.status-guide{border-color:var(--border);box-shadow:var(--shadow-sm)}
+.main-actions{top:8px;padding:11px;border-radius:16px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px)}
+.search-wrap{flex:1 1 430px}.search{height:44px;border-radius:11px;font-size:14px;padding-left:38px;border-color:#cdd9e6}.search-icon{left:12px;top:9px;font-size:19px}
+.btn{height:42px;border-radius:10px;padding:0 14px;font-size:13px;font-weight:800;border:1px solid transparent;transition:transform .12s,box-shadow .12s,background .12s}
+.btn.primary{background:#173f74}.btn.primary:hover{background:#123761}.btn.report-btn{background:#edf4fc;border-color:#c9dbee;color:#194d80}.btn.light{background:#f2f6fa;border-color:#d8e2ec;color:#365b80}.btn.ghost{border-color:#d7e2ed;color:#536f8b}.btn.green{border-color:#c9e6d7}.btn:focus-visible,.qty-btn:focus-visible,.mini-action:focus-visible{outline:3px solid rgba(62,124,184,.25);outline-offset:2px}
+.filterbar{padding:11px 13px;border-radius:14px;gap:10px}.filter-label{font-size:12.5px;color:#526b85}.filter-select{height:40px;border-radius:10px;font-size:13px;border-color:#d0dce8}.filter-check{height:40px;border-radius:10px;font-size:12.5px;background:#fbfcfe}.filter-count{font-size:12px;padding:7px 11px}
+.status-guide{padding:10px 12px;border-radius:13px;margin-bottom:10px}.guide-title{font-size:12px}.guide-pill{font-size:11.5px;padding:5px 9px}.guide-help{font-size:11.5px}
+.note{margin:2px 2px 14px;padding:10px 12px;border-radius:10px;background:#f8fbfe;border:1px solid #e0e8f1;font-size:12px;line-height:1.5;color:#5f768e}
+.system-section{border-color:#d7e2ed;border-radius:17px;background:#f6f8fb;box-shadow:var(--shadow-sm);margin-bottom:14px}
+.system-head{min-height:64px;padding:14px 17px}.system-title{font-size:18px;font-weight:900}.system-arrow{width:34px;height:34px}.system-meta{font-size:11.5px;padding:7px 10px}.system-body{padding:10px}
+.component{border-color:#dce5ee;border-radius:13px;margin-bottom:9px;background:#fff}.comp-head{min-height:62px;padding:12px 14px}.arrow{width:30px;height:30px;border-radius:9px}.comp-name{font-size:15px;font-weight:850}.part{font-size:11.5px;margin-top:4px}.comp-count{font-size:11.5px;padding:6px 9px}.mini-action{min-height:36px;border-radius:9px;font-size:12px;padding:0 10px}
+.comp-body{border-top-color:#e5ecf3;overflow-x:auto}
+table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;line-height:1.4}th{font-size:11.5px;color:#526b85;background:#f7f9fc;letter-spacing:.02em}.device-name{font-size:13px;font-weight:780}.serial-input,.status,.loc,.qty-input{height:38px;font-size:13px;border-radius:9px;border-color:#ccd9e6}.serial-input,.loc{padding:7px 9px}.status{min-width:108px}.qty-btn{width:34px;height:34px;border-radius:9px;font-size:18px}.qty-input{width:66px}.zero-stock-label{font-size:10.5px;padding:4px 7px}
+.detail-toolbar{margin-bottom:12px}.detail-title{font-size:14px}.detail-count{font-size:12px}.detail-table-wrap{border-radius:12px}.detail-empty,.empty{font-size:13px}
+.modal{background:rgba(12,31,54,.52);backdrop-filter:blur(3px);padding:18px}.dialog{width:min(620px,100%);border-radius:18px;box-shadow:0 24px 70px rgba(7,28,51,.25)}.dialog h3{padding:16px 18px;font-size:17px;color:#153c69}.form{padding:17px 18px;gap:12px}.form label{font-size:12.5px;color:#4f6882}.form input,.form select,.form textarea{min-height:44px;border-radius:10px;font-size:14px;border-color:#ccd9e6;padding:9px 11px}.form textarea{min-height:88px}.dialog-actions{padding:12px 18px 16px;gap:9px}.dialog-actions .btn{min-width:92px}
+.toast{font-size:13px;border-radius:11px;padding:11px 15px;max-width:min(420px,calc(100vw - 24px))}
+.savebar{padding:10px 14px}.savebar-inner{min-height:42px}.savebar-msg{font-size:13px}
+.summary-system-block{border-radius:14px}.summary-system-head{padding:12px 14px}.summary-system-head b{font-size:16px}.summary-system-head span{font-size:12px}
+@media(max-width:1100px){.summary-card{min-height:105px}.summary-card b{font-size:31px}.main-actions{position:static}.action-group{flex:1 1 auto}}
+@media(max-width:760px){
+  body{font-size:14px;padding-bottom:78px}
+  .topbar{padding:12px 13px}.topbar .wrap{gap:8px}.brand h1{font-size:19px}.brand h1 span{display:block;margin:3px 0 0;font-size:11.5px}.brand small{font-size:11.5px}.header-meta{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left}.today,.saved-meta{font-size:10.5px}
+  main{padding:12px 9px 30px}.summary{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.summary-card{min-height:100px;padding:14px 13px}.summary-card b{font-size:28px}.summary-card span{font-size:13px;margin-top:8px}.summary-card .card-sub{font-size:10.5px;padding-right:0}.summary-card::after{display:none}
+  .history{margin-bottom:10px}.history-toggle{min-height:62px;padding:11px 12px}.history-arrow{width:32px;height:32px}.history-title-wrap h3{font-size:14px}.history-title-wrap p{display:none}.history-count{font-size:10.5px;padding:6px 8px}.history-item{padding-right:12px;padding-bottom:54px}.history-delete-btn{top:auto;right:12px;bottom:10px;height:36px}
+  .toolbar{padding:9px}.search-wrap{flex-basis:100%;min-width:0}.search{height:44px;font-size:16px}.action-group{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px}.action-group .btn{width:100%;height:44px;font-size:12.5px;padding:0 8px}.secondary-actions{grid-template-columns:1fr 1fr}
+  .filterbar{align-items:stretch;padding:10px}.filter-label{width:100%}.filter-select{width:100%;min-width:0;height:44px;font-size:16px}.filter-check{flex:1;height:44px;font-size:12px}.filter-count{width:100%;margin-left:0;text-align:center}
+  .status-guide{gap:6px;padding:9px}.guide-title{width:100%}.guide-pill{font-size:10.5px;padding:5px 8px}.guide-help{width:100%;margin-left:0;font-size:10.5px}
+  .note{font-size:11px;padding:9px 10px}
+  .system-head{min-height:58px;padding:11px 12px}.system-title{font-size:16px}.system-meta{display:none}.system-body{padding:7px}.comp-head{grid-template-columns:minmax(0,1fr) auto;min-height:58px;padding:10px}.comp-name{font-size:14px;white-space:normal;line-height:1.35}.part{font-size:10.5px}.comp-count{font-size:10.5px}.mini-action{display:none}.comp-body table{min-width:1040px}
+  th,td{padding:10px 9px;font-size:12.5px}.serial-input,.status,.loc,.qty-input{font-size:16px;height:42px}.qty-btn{width:38px;height:38px}.qty-input{width:64px}
+  .modal{align-items:flex-end;padding:0}.dialog{width:100%!important;max-height:92dvh!important;border-radius:18px 18px 0 0;overflow:auto!important}.dialog h3{position:sticky;top:0;z-index:2;padding:15px 16px}.form{padding:15px 14px}.form label{font-size:12px}.form input,.form select,.form textarea{font-size:16px;min-height:46px}.dialog-actions{position:sticky;bottom:0;z-index:2;padding:10px 12px max(12px,env(safe-area-inset-bottom));background:#fff}.dialog-actions .btn{flex:1;height:46px}
+  .detail-table-wrap{max-height:60dvh}.summary-system-head{padding:10px 11px}.summary-system-head b{font-size:15px}.summary-system-head span{font-size:10.5px}
+  .savebar{padding:8px 9px max(8px,env(safe-area-inset-bottom))}.savebar-inner{gap:7px}.savebar-msg{font-size:11px}.savebar .btn{height:40px;padding:0 9px;font-size:11px}
+  .toast{left:10px;right:10px;bottom:88px;text-align:center}
+}
+@media(max-width:390px){.summary-card{min-height:94px}.summary-card b{font-size:25px}.summary-card span{font-size:12px}.summary-card .card-sub{font-size:9.8px}.action-group .btn{font-size:11.5px}.history-count{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+</style>
+
+<style>
+/* ===== Serial tag editor ===== */
+.serial-editor{min-width:260px;border:1px solid #ccd9e6;border-radius:11px;background:#fff;padding:8px;transition:border-color .15s,box-shadow .15s}
+.serial-editor:focus-within{border-color:var(--focus);box-shadow:0 0 0 3px rgba(75,134,196,.13)}
+.serial-editor-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.serial-editor-count{font-size:10.5px;font-weight:850;color:#5e7590;background:#f1f5f9;border-radius:999px;padding:4px 7px;white-space:nowrap}.serial-editor-count.full{background:#eaf7f0;color:#176542}.serial-editor-count.over{background:#fff0f2;color:#a52c39}
+.serial-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:27px}.serial-tag{display:inline-flex;align-items:center;max-width:100%;gap:5px;padding:4px 6px 4px 8px;border-radius:8px;background:#edf4fb;border:1px solid #c9dced;color:#164b7c;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:800;line-height:1.25}.serial-tag-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.serial-tag-remove{width:20px;height:20px;border:0;border-radius:6px;background:transparent;color:#6b8299;cursor:pointer;font-size:15px;line-height:18px;padding:0}.serial-tag-remove:hover{background:#dce9f5;color:#9d2734}
+.serial-empty{font-size:11px;color:#91a0b0;padding:4px 2px}.serial-entry-row{display:flex;gap:5px;margin-top:7px}.serial-entry{min-width:0;flex:1;height:34px;border:1px solid #d4dfeb;border-radius:8px;padding:0 8px;font-size:12px;color:#17365f}.serial-entry:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 2px rgba(75,134,196,.12)}.serial-add-btn,.serial-batch-btn{height:34px;border:1px solid #c8d8e7;border-radius:8px;background:#f7fafc;color:#315b83;padding:0 8px;font-size:10.5px;font-weight:800;cursor:pointer;white-space:nowrap}.serial-add-btn:hover,.serial-batch-btn:hover{background:#edf4fb}.serial-help{display:block;margin-top:5px;font-size:9.8px;line-height:1.35;color:#8193a6}
+#serialBatchInput{min-height:170px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5}
+@media(max-width:760px){.serial-editor{min-width:300px;padding:8px}.serial-tag{font-size:12px;padding:5px 7px 5px 9px}.serial-entry{height:40px;font-size:16px}.serial-add-btn,.serial-batch-btn{height:40px;font-size:11px}.serial-help{font-size:10.5px}}
+</style>
+<style>
+/* ===== Device replacement modal viewport fix ===== */
+#modal{padding:18px;overflow:hidden}
+#modal .dialog{
+  width:min(760px,calc(100vw - 36px));
+  max-height:calc(100vh - 36px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#modal .dialog>h3{flex:0 0 auto}
+#modal .form{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:16px 22px 18px;
+  scrollbar-gutter:stable;
+}
+#modal .dialog-actions{
+  flex:0 0 auto;
+  position:sticky;
+  bottom:0;
+  z-index:3;
+  margin:0;
+  padding:12px 18px max(12px,env(safe-area-inset-bottom));
+  background:#fff;
+  border-top:1px solid #dfe7f0;
+  box-shadow:0 -8px 20px rgba(20,55,103,.06);
+}
+#modal .dialog-actions .btn{min-width:110px}
+@media(max-height:760px) and (min-width:681px){
+  #modal{padding:10px}
+  #modal .dialog{max-height:calc(100vh - 20px)}
+  #modal .dialog>h3{padding:12px 18px;font-size:15px}
+  #modal .form{padding:12px 18px;gap:8px}
+  #modal .form label{font-size:11.5px}
+  #modal .form input,#modal .form select,#modal .form textarea{margin-top:4px;padding:8px 10px}
+  #modal .form textarea{min-height:72px;max-height:96px}
+  #modal .dialog-actions{padding:9px 16px}
+}
+@media(max-width:680px){
+  #modal{align-items:flex-end;padding:0}
+  #modal .dialog{
+    width:100%;max-width:none;max-height:92dvh;
+    border-radius:18px 18px 0 0;
+  }
+  #modal .form{padding:14px 14px 18px}
+  #modal .dialog-actions{padding:10px 12px max(12px,env(safe-area-inset-bottom))}
+  #modal .dialog-actions .btn{flex:1;min-width:0}
+}
+
+/* ===== Stock-in modal viewport / usability fix ===== */
+#stockInModal{padding:18px;overflow:hidden}
+#stockInModal .dialog{
+  width:min(760px,calc(100vw - 36px))!important;
+  max-height:calc(100vh - 36px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#stockInModal .dialog>h3{flex:0 0 auto}
+#stockInModal .form{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:14px 20px 16px;
+  gap:10px;
+  scrollbar-gutter:stable;
+}
+#stockInModal .dialog-actions{
+  flex:0 0 auto;
+  position:sticky;
+  bottom:0;
+  z-index:4;
+  margin:0;
+  padding:11px 18px max(11px,env(safe-area-inset-bottom));
+  background:#fff;
+  border-top:1px solid #dfe7f0;
+  box-shadow:0 -8px 20px rgba(20,55,103,.08);
+}
+#stockInModal .dialog-actions .btn{min-width:112px}
+#stockInModal .form textarea{min-height:78px;max-height:120px;resize:vertical}
+#stockInModal #stockInSerials{min-height:96px;max-height:150px}
+#stockInModal .stock-in-summary{margin-bottom:2px}
+#stockInModal .stock-in-help{font-size:11px;line-height:1.5}
+@media(max-height:800px) and (min-width:681px){
+  #stockInModal{padding:10px}
+  #stockInModal .dialog{max-height:calc(100vh - 20px)}
+  #stockInModal .dialog>h3{padding:11px 18px;font-size:15px}
+  #stockInModal .form{padding:10px 18px 12px;gap:7px}
+  #stockInModal .form label{font-size:11.5px}
+  #stockInModal .form input,#stockInModal .form select{min-height:38px;height:38px;margin-top:3px;padding:6px 9px}
+  #stockInModal .form textarea{margin-top:3px;min-height:62px;max-height:82px;padding:7px 9px}
+  #stockInModal #stockInSerials{min-height:76px;max-height:96px}
+  #stockInModal .stock-in-summary>div{padding:7px 9px}
+  #stockInModal .stock-in-summary b{font-size:16px}
+  #stockInModal .stock-in-help{padding:7px 9px;font-size:10.5px}
+  #stockInModal .dialog-actions{padding:8px 16px}
+}
+@media(max-width:680px){
+  #stockInModal{align-items:flex-end;padding:0}
+  #stockInModal .dialog{
+    width:100%!important;max-width:none;max-height:92dvh;
+    border-radius:18px 18px 0 0;
+  }
+  #stockInModal .form{padding:13px 14px 16px;gap:10px}
+  #stockInModal .form input,#stockInModal .form select,#stockInModal .form textarea{font-size:16px}
+  #stockInModal .dialog-actions{padding:10px 12px max(12px,env(safe-area-inset-bottom))}
+  #stockInModal .dialog-actions .btn{flex:1;min-width:0;height:46px}
+}
+
+/* ===== Professional stock transaction management ===== */
+.stock-history{margin:0 0 12px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 3px 12px rgba(21,50,89,.045)}
+.stock-history-toggle{width:100%;border:0;background:linear-gradient(100deg,#f4f8fc,#edf4fb);color:#173b70;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer}
+.stock-history-toggle:hover{background:#eaf2fa}.stock-history-head{display:flex;align-items:center;gap:10px;min-width:0}.stock-history-arrow{width:27px;height:27px;border-radius:8px;background:#fff;border:1px solid #d8e4ef;display:grid;place-items:center;font-size:11px;transition:.15s}
+.stock-history.open .stock-history-arrow{transform:rotate(90deg)}.stock-history-title h3{font-size:14px;margin:0;color:#173b70}.stock-history-title p{margin:3px 0 0;color:#7589a0;font-size:10.8px;font-weight:600}
+.stock-history-count{font-size:10.8px;font-weight:850;color:#315c8c;background:#fff;border:1px solid #d8e4ef;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.stock-history-body{display:none;border-top:1px solid #e5edf4;padding:10px}.stock-history.open .stock-history-body{display:block}
+.stock-move-item{position:relative;border:1px solid #e0e8f0;border-radius:10px;padding:10px 12px;margin-bottom:7px;background:#fbfdff;font-size:11.5px;line-height:1.6}.stock-move-item:last-child{margin-bottom:0}
+.stock-move-item.inbound{border-left:4px solid #2d9b67;background:#f5fbf7}.stock-move-item.outbound{border-left:4px solid #d38b32;background:#fffaf2}.stock-move-item.adjust{border-left:4px solid #5c83b5}.stock-move-type{display:inline-flex;border-radius:999px;padding:3px 7px;font-size:9.8px;font-weight:850;margin-right:5px;background:#eaf1f8;color:#315c8c}.stock-move-item.inbound .stock-move-type{background:#e4f5eb;color:#176542}.stock-move-item.outbound .stock-move-type{background:#fff0da;color:#8b5a10}
+.stock-in-btn{height:30px;border:1px solid #9fcdb4;background:#edf8f2;color:#176542;border-radius:8px;padding:0 9px;font-size:10.5px;font-weight:850;cursor:pointer;white-space:nowrap}.stock-in-btn:hover{background:#e1f3e9}.stock-qty-readonly{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:34px;padding:0 10px;border:1px solid #cbd9e8;border-radius:8px;background:#f6f9fc;color:#17365f;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}.stock-move-delete{position:absolute;right:10px;top:9px;height:28px;border:1px solid #e2b6bc;background:#fff5f6;color:#a12b39;border-radius:7px;padding:0 9px;font-size:10px;font-weight:850;cursor:pointer}.stock-move-delete:hover{background:#ffecee}.stock-move-item{padding-right:92px}
+.stock-in-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stock-in-summary>div{border:1px solid #dfe8f0;border-radius:10px;background:#f8fbfd;padding:9px 10px}.stock-in-summary b{display:block;font-size:18px;color:#173b70}.stock-in-summary span{font-size:10px;color:#7589a0}
+.stock-in-help{font-size:10.8px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px}
+@media(max-width:680px){.stock-history-toggle{padding:12px}.stock-history-title p{display:none}.stock-history-count{font-size:10px}.stock-in-summary{grid-template-columns:1fr 1fr}.stock-in-summary>div:last-child{grid-column:1/-1}.stock-in-btn{height:34px}}
+
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div></div></div></header>
+<main>
+<section class="summary">
+<div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('groups')" onkeydown="summaryKey(event,'groups')"><b id="sGroups">0</b><span>組件分類</span><small class="card-sub">依 CN / NMS / SSS 分類查看</small></div>
+<div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('types')" onkeydown="summaryKey(event,'types')"><b id="sTypes">0</b><span>設備種類</span><small class="card-sub">依 CN / NMS / SSS 分類查看</small></div>
+<div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('qty')" onkeydown="summaryKey(event,'qty')"><b id="sQty">0</b><span>庫存總量</span><small class="card-sub">目前實際在庫數量</small></div>
+<div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('tracked')" onkeydown="summaryKey(event,'tracked')"><b id="sTracked">0</b><span>已登記序號</span><small class="card-sub">序號、狀態與位置</small></div>
+</section>
+<section class="history" id="historyPanel">
+  <button class="history-toggle" type="button" onclick="toggleHistoryPanel()" aria-expanded="false" aria-controls="historyBody">
+    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>設備更換／損壞裝備紀錄</h3><p>查看更換時間、位置、損壞舊序號、換上新序號與備註。</p></span></span>
+    <span id="historyCount" class="history-count">0 筆紀錄</span>
+  </button>
+  <div id="historyBody" class="history-body"><div id="history"></div></div>
+</section>
+<section class="stock-history" id="stockHistoryPanel">
+  <button class="stock-history-toggle" type="button" onclick="toggleStockHistoryPanel()" aria-expanded="false" aria-controls="stockHistoryBody">
+    <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>庫存異動紀錄</h3><p>追蹤新設備入庫與設備更換領出；保留時間、數量、序號與位置。</p></span></span>
+    <span id="stockHistoryCount" class="stock-history-count">0 筆異動</span>
+  </button>
+  <div id="stockHistoryBody" class="stock-history-body"><div id="stockHistory"></div></div>
+</section>
+<section class="toolbar main-actions">
+<div class="search-wrap"><span class="search-icon">⌕</span><input id="search" class="search" placeholder="搜尋組件、料號、設備名稱、序號或位置" oninput="render()"></div>
+<div class="action-group primary-actions">
+<button id="saveMainBtn" class="btn save-main" onclick="saveAll()" disabled>💾 已儲存</button>
+<button class="btn primary" onclick="openReplace()">🔄 登記設備更換</button>
+<button class="btn report-btn" onclick="exportReportWord()">📄 匯出 Word 報告</button>
+</div>
+<div class="action-group secondary-actions">
+<button class="btn light" onclick="exportBackup()">⬇ 匯出備份</button>
+<button class="btn light" onclick="document.getElementById('importFile').click()">⬆ 匯入備份</button>
+<button class="btn ghost" onclick="expandAll()">全部展開</button>
+<button class="btn ghost" onclick="collapseAll()">全部收合</button>
+</div>
+<input id="importFile" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)">
+</section>
+<section class="filterbar">
+  <span class="filter-label">組件篩選</span>
+  <select id="groupFilter" class="filter-select" onchange="render()"><option value="">全部組件</option></select>
+  <label class="filter-check"><input id="stockOnly" type="checkbox" onchange="render()"> 只顯示有庫存</label>
+  <label class="filter-check"><input id="recordOnly" type="checkbox" onchange="render()"> 只顯示有紀錄</label>
+  <button class="btn light" type="button" onclick="clearFilters()">清除篩選</button>
+  <span id="filterCount" class="filter-count">顯示 0 / 0 個組件</span>
+</section>
+<section class="status-guide" aria-label="狀態顏色說明">
+  <div class="guide-title">狀態顏色</div>
+  <span class="guide-pill zero"><i></i>無庫存（0）</span>
+  <span class="guide-pill stock"><i></i>有庫存</span>
+  <span class="guide-help">主清單狀態由系統依目前庫存自動判定；已安裝與損壞設備請至「設備更換／損壞裝備紀錄」查看。</span>
+</section>
+<div class="note"><b>操作提醒：</b>收到新設備請使用每列的 <b>＋ 新增庫存</b>，系統會建立可追溯的入庫紀錄；設備更換時系統會自動扣除 1 件庫存並留下領出紀錄。庫存數量為系統計算結果，不提供直接手動調整。</div>
+<div id="components"></div>
+
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div id="savebar" class="savebar"><div class="savebar-inner"><div class="savebar-msg"><span class="unsaved-dot"></span>有尚未儲存的變更</div><button class="btn light" onclick="discardChanges()">取消變更</button><button class="btn save-main" onclick="saveAll()">💾 儲存變更</button></div></div>
+<datalist id="unitList"></datalist>
+<div class="modal" id="modal"><div class="dialog"><h3>登記設備更換</h3><div class="form">
+<label>位置 <span class="required">必填</span><select id="rCN"><option value="">請選擇位置</option></select></label>
+<label>組件<select id="rGroup"></select></label>
+<label>設備<select id="rDevice"></select></label>
+<label>壞掉的舊序號 <span class="required">必填</span><input id="rOld" placeholder="請輸入現場故障設備的舊序號"><span id="rOldHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">舊序號屬於現場設備，不會從庫存序號扣除。</span></label>
+<label>換上的新序號 <span class="required">必填</span><select id="rNew"><option value="">請先選擇設備</option></select><span id="rNewHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">新序號必須從目前庫存序號中選擇；儲存後庫存會自動減 1。</span></label>
+<label>備註<textarea id="rNote" placeholder="例如：無法開機、無網路"></textarea></label>
+</div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveReplace()">💾 儲存更換紀錄</button></div></div></div>
+
+
+<div class="modal" id="addDeviceModal" onclick="if(event.target===this)closeAddDevice()"><div class="dialog"><h3>新增設備</h3><div class="form">
+<label>所屬組件<input id="aGroupName" readonly></label>
+<label>設備名稱 <span class="required">必填</span><input id="aName" placeholder="請輸入設備名稱"></label>
+<label>料號<input id="aPart" placeholder="若無料號可填 N/A"></label>
+</div><div class="dialog-actions"><button class="btn light" onclick="closeAddDevice()">取消</button><button class="btn primary" onclick="confirmAddDevice()">加入清單</button></div></div></div>
+
+<div class="modal" id="summaryDetailModal" onclick="if(event.target===this)closeSummaryDetail()"><div class="dialog" style="width:min(1050px,100%);max-height:92vh;overflow:hidden"><h3 id="summaryDetailHeading">統計明細</h3><div id="summaryDetailContent" style="padding:16px;overflow:auto;max-height:76vh"></div><div class="dialog-actions"><button class="btn light" onclick="closeSummaryDetail()">關閉</button></div></div></div>
+
+<div class="modal" id="reportModal"><div class="dialog" style="width:min(980px,100%);max-height:90vh;overflow:auto"><h3>裝備庫存 Report 報告</h3><div id="reportContent" style="padding:16px"></div><div class="dialog-actions"><button class="btn light" onclick="closeReport()">關閉</button><button class="btn green" onclick="exportReportCSV()">匯出 CSV</button><button class="btn primary" onclick="printReport()">列印 / PDF</button></div></div></div>
+
+<div class="modal" id="stockInModal" onclick="if(event.target===this)closeStockIn()"><div class="dialog" style="width:min(700px,100%)"><h3>新增庫存｜新設備入庫</h3><div class="form">
+<div class="stock-in-summary"><div><b id="stockInCurrentQty">0</b><span>目前庫存</span></div><div><b id="stockInCurrentSerials">0</b><span>目前庫存序號</span></div><div><b id="stockInSystem">—</b><span>系統分類</span></div></div>
+<label>設備<input id="stockInDevice" readonly></label>
+<label>本次新增數量 <span class="required">必填</span><input id="stockInQty" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+<label>本次新增序號<textarea id="stockInSerials" placeholder="有序號的設備請輸入本次收到的序號。可直接貼 Excel 一整欄，也支援逗號、全形逗號、Tab 或換行。"></textarea></label>
+<label>位置 <span class="required">必填</span><select id="stockInLocation"></select></label>
+<label>來源 / 單號<input id="stockInReference" placeholder="選填，例如：採購單、撥補單、工單編號"></label>
+<label>備註<textarea id="stockInNote" placeholder="選填，例如：新設備到貨、備品補充"></textarea></label>
+<div class="stock-in-help"><b>入庫規則：</b>本次序號數不可大於新增數量；序號不可與目前任何庫存設備重複。儲存後會立即增加庫存並建立一筆不可因修改庫存而消失的異動紀錄。</div>
+</div><div class="dialog-actions"><button class="btn light" onclick="closeStockIn()">取消</button><button class="btn primary" onclick="confirmStockIn()">💾 確認入庫</button></div></div></div>
+
+<div class="modal" id="serialBatchModal" onclick="if(event.target===this)closeSerialBatch()"><div class="dialog" style="width:min(620px,100%)"><h3>批次加入庫存序號</h3><div class="form">
+<label>設備<input id="serialBatchDevice" readonly></label>
+<label>批次序號<textarea id="serialBatchInput" placeholder="可直接貼上 Excel 一整欄，或使用逗號、全形逗號、換行、Tab 分隔。\n例如：\nSN-A001\nSN-A002\nSN-A003"></textarea></label>
+<div style="font-size:11px;line-height:1.55;color:#70849a;background:#f7fafc;border:1px solid #e1e9f1;border-radius:9px;padding:9px 10px">系統會自動去除空白與重複序號；若序號已存在於其他設備，會略過並提示。序號筆數超過目前庫存時，庫存量會自動補足。</div>
+</div><div class="dialog-actions"><button class="btn light" onclick="closeSerialBatch()">取消</button><button class="btn primary" onclick="confirmSerialBatch()">加入序號</button></div></div></div>
+<script>
+const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 保密器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 無線電","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"n/a","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"n/a","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-Drawer","items":[{"part":"A30-2030-010","name":"筆電","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"N/A","name":"電源線","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"11457-2309-01","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01 ","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 紅區交換器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線x1","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250手持話機x1","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051電源線x1","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"N/A","name":"市電轉換接頭（澳洲）x1","qty":0,"serials":[]},{"part":"10515-0607-4100*","name":"RF-7800W卡x1","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟x1","qty":0,"serials":[]},{"part":"N/A","name":"螺絲包x1 (4ea)","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線 / 無線電配備","sourcePart":"11457-2042-01","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"天線桅桿與工具配備","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-0504","name":"電纜導引環","qty":0,"serials":[]},{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"N/A","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"N/A","name":"内六角板手組","qty":0,"serials":[]},{"part":"E75-0373-001","name":"10M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"鐵槌","qty":0,"serials":[]},{"part":"N/A","name":"量距繩(黃)","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"N/A","name":"地樁","qty":0,"serials":[]},{"part":"E75-0372-001","name":"25M 天線桅桿T型桿套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"E75-0376-001","name":"25M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"E75-0377-001","name":"25M 天線桅杆手動天線定位器(MAP)套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（內部）","sourcePart":"11457-2000-01","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"OMNI ANT HORZ(N)","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（外部）","sourcePart":"11457-2000-01","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"N/A","name":"TOCNET P-case","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 RUGGED laptop GETAC S510 COMPUTER","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"CABLE ASSY, TOCNET AUDIO TO RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"Dual Radio 6-pin Generic Cable Assemblies","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB POWER SUPPLY KIT, AC TO 24VDC","qty":0,"serials":[]}]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2592-001","name":"4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"11457-2307-01","name":"COMMAND POST INTERFACE PANEL ASSEMBLY","qty":0,"serials":[]},{"part":"N/A","name":"POWER CORD","qty":0,"serials":[]},{"part":"N/A","name":"USB","qty":0,"serials":[]},{"part":"N/A","name":"RS-232","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]},{"part":"11457-2309-01","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線x1","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線x1","qty":0,"serials":[]},{"part":"N/A","name":"電源線x1","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-Cabnet","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-Drawer","items":[{"part":"A30-2030-010","name":"筆電(1)","qty":0,"serials":[]},{"part":"A30-2030-010","name":"筆電(2)","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]},{"part":"A30-2305-004","name":"HDT 帳篷套件，橄欖褐色","qty":0,"serials":[]},{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具包，橄欖褐色，標準款","qty":0,"serials":[]},{"part":"n/a","name":"螺絲起子x1","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"11457-3000-01","items":[{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"11457-3000-01","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]}]}];
+let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:JSON.parse(JSON.stringify(baseGroups)),replacements:[],stockMovements:[]};
+/* Built-in catalog migration: add new catalog groups/items without overwriting user-entered data. */
+(function mergeBuiltInCatalog(){
+  if(!store || !Array.isArray(store.groups)) store={groups:[],replacements:[],stockMovements:[]};
+  if(!Array.isArray(store.replacements)) store.replacements=[];
+  if(!Array.isArray(store.stockMovements)) store.stockMovements=[];
+  const groupKey=g=>`${String(g.name||'').trim()}||${String(g.sourcePart||'').trim()}`;
+  const itemKey=x=>`${String(x.part||'').trim().toLowerCase()}||${String(x.name||'').trim().toLowerCase()}`;
+  const current=new Map(store.groups.map(g=>[groupKey(g),g]));
+  let changed=false;
+  baseGroups.forEach(bg=>{
+    const k=groupKey(bg);
+    let target=current.get(k);
+    if(!target){
+      target=JSON.parse(JSON.stringify(bg));
+      store.groups.push(target);
+      current.set(k,target);
+      changed=true;
+      return;
+    }
+    if(!Array.isArray(target.items)) target.items=[];
+    const have=new Set(target.items.map(itemKey));
+    (bg.items||[]).forEach(bi=>{
+      const ik=itemKey(bi);
+      if(!have.has(ik)){
+        target.items.push(JSON.parse(JSON.stringify(bi)));
+        have.add(ik);
+        changed=true;
+      }
+    });
+  });
+  if(changed) localStorage.setItem('nmsInventoryV2',JSON.stringify(store));
+})();
+// v3 linkage fix: never wipe existing quantities on first open.
+// Normalize legacy/imported rows so quantity, serials, state and location always have a valid shape.
+function normalizeInventoryItem(x){
+  if(!x)return x;
+  x.serials=[...new Set((Array.isArray(x.serials)?x.serials:[]).map(v=>String(v??'').trim()).filter(Boolean))];
+  const rawQty=Math.max(0,Math.floor(Number(x.qty)||0));
+  x.qty=Math.max(rawQty,x.serials.length);
+  if(!['stock','issued','installed','broken'].includes(x.state))x.state='stock';
+  x.location=String(x.location??'').trim();
+  return x;
+}
+function normalizeInventoryStore(target=store){
+  if(!target||!Array.isArray(target.groups))return target;
+  target.groups.forEach(g=>{if(!Array.isArray(g.items))g.items=[];(g.items||[]).forEach(normalizeInventoryItem)});
+  if(!Array.isArray(target.replacements))target.replacements=[];
+  if(!Array.isArray(target.stockMovements))target.stockMovements=[];
+  return target;
+}
+normalizeInventoryStore();
+let openSet=new Set([0]);
+let systemOpenSet=new Set(['CN','NMS']);
+function systemType(g){const n=String(g?.name||'').trim().toUpperCase();return n.startsWith('NMS')?'NMS':n.startsWith('SSS')?'SSS':'CN'}
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+let dirty=false;
+let savedSnapshot=JSON.stringify(store);
+function updateSaveUI(){
+ const b=document.getElementById('saveMainBtn'),bar=document.getElementById('savebar');
+ if(b){b.disabled=!dirty;b.textContent=dirty?'💾 儲存變更':'💾 已儲存'}
+ if(bar)bar.classList.toggle('show',dirty);
+}
+function markDirty(){dirty=true;updateSaveUI()}
+function save(){localStorage.setItem('nmsInventoryV2',JSON.stringify(store));localStorage.setItem('nmsInventoryLastSaved',new Date().toISOString());savedSnapshot=JSON.stringify(store);dirty=false;updateSaveUI();updateLastSaved()}
+function saveAll(){
+ normalizeInventoryStore();
+ const dups=findDuplicateSerials();
+ if(dups.length){alert('無法儲存：發現重複設備序號。\n\n'+dups.slice(0,8).join('\n')+(dups.length>8?'\n…':''));return}
+ save();render();showSavedNotice();showToast('資料已儲存','success')
+}
+function showSavedNotice(){const b=document.getElementById('saveMainBtn');if(!b)return;const t=b.textContent;b.textContent='✓ 儲存完成';setTimeout(()=>{b.textContent=dirty?'💾 儲存變更':'💾 已儲存'},900)}
+function discardChanges(){if(!dirty)return;if(!confirm('確定取消尚未儲存的變更？'))return;store=JSON.parse(savedSnapshot);dirty=false;updateSaveUI();render();showToast('已取消未儲存變更')}
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+function findDuplicateSerials(){
+ const seen=new Map(),dups=[];
+ store.groups.forEach(g=>(g.items||[]).forEach(x=>(x.serials||[]).filter(Boolean).forEach(sn=>{
+   const key=String(sn).trim().toLowerCase();if(!key)return;
+   const label=`${sn}｜${g.name}｜${x.name}`;
+   if(seen.has(key))dups.push(`${sn}：${seen.get(key)} / ${g.name}｜${x.name}`);else seen.set(key,`${g.name}｜${x.name}`)
+ })));
+ return dups;
+}
+function showToast(msg,type=''){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+type;clearTimeout(showToast.t);showToast.t=setTimeout(()=>el.className='toast',1800)}
+function updateLastSaved(){const el=document.getElementById('lastSaved');if(!el)return;const raw=localStorage.getItem('nmsInventoryLastSaved');el.textContent=raw?'最後儲存：'+new Date(raw).toLocaleString('zh-TW',{dateStyle:'short',timeStyle:'short'}):'尚無儲存紀錄'}
+function updateSummary(){
+ const all=store.groups.flatMap(g=>g.items);
+ sGroups.textContent=store.groups.length;sTypes.textContent=all.length;sQty.textContent=all.reduce((a,x)=>a+(Number(x.qty)||0),0);sTracked.textContent=all.reduce((a,x)=>a+(x.serials?.filter(Boolean).length||0),0);
+}
+function itemStatus(x){if(!x.state)x.state='stock';return x.state}
+const stateText={stock:'庫存',empty:'無庫存',issued:'已領用',installed:'已安裝',broken:'故障'};
+const unitIds=['CN-D-301',...Array.from({length:77},(_,i)=>`CN-B-${i+302}`),'NMS-381','NMS-382','NMS-383','NMS-384','SSS-391','SSS-392','SSS-393','SSS-394'];
+const commonLocations=['基修中心','FSR Site','1C庫房','2C庫房','3C庫房','4C庫房','HC庫房','STC庫房','HQ庫房'];
+function locationOptions(current=''){
+ const groups=[['一般位置',commonLocations],['CN 車廂',unitIds.filter(x=>x.startsWith('CN-'))],['NMS',unitIds.filter(x=>x.startsWith('NMS-'))],['SSS',unitIds.filter(x=>x.startsWith('SSS-'))]];
+ let found=!current;
+ let html='<option value="">請選擇</option>';
+ groups.forEach(([label,arr])=>{html+=`<optgroup label="${label}">`+arr.map(v=>{if(v===current)found=true;return `<option value="${esc(v)}" ${v===current?'selected':''}>${esc(v)}</option>`}).join('')+'</optgroup>'});
+ if(current&&!found)html+=`<option value="${esc(current)}" selected>${esc(current)}</option>`;
+ return html;
+}
+unitList.innerHTML=unitIds.map(v=>`<option value="${v}"></option>`).join('');
+const rCNSelect=document.getElementById('rCN');if(rCNSelect)rCNSelect.innerHTML='<option value="">請選擇位置</option>'+unitIds.map(v=>`<option value="${v}">${v}</option>`).join('');
+function refreshGroupFilter(){
+ const el=document.getElementById('groupFilter');if(!el)return;
+ const current=el.value;
+ const buckets={CN:[],NMS:[],SSS:[]};
+ store.groups.forEach((g,i)=>buckets[systemType(g)].push({g,i}));
+ let opts='<option value="">全部組件</option>';
+ ['CN','NMS','SSS'].forEach(type=>{if(!buckets[type].length)return;opts+=`<optgroup label="${type}">`+buckets[type].map(({g,i})=>`<option value="${i}">${esc(g.name)}｜${esc(g.sourcePart||'')}</option>`).join('')+'</optgroup>'});
+ el.innerHTML=opts;
+ if([...el.options].some(o=>o.value===current))el.value=current;
+}
+function hasRecord(x){return (x.serials||[]).filter(Boolean).length>0 || !!String(x.location||'').trim() || (x.state&&x.state!=='stock')}
+function clearFilters(){
+ search.value='';
+ const gf=document.getElementById('groupFilter'),so=document.getElementById('stockOnly'),ro=document.getElementById('recordOnly');
+ if(gf)gf.value='';if(so)so.checked=false;if(ro)ro.checked=false;render();
+}
+function render(){
+ refreshGroupFilter();
+ const q=search.value.trim().toLowerCase();
+ const selectedGroup=document.getElementById('groupFilter')?.value ?? '';
+ const stockOnly=!!document.getElementById('stockOnly')?.checked;
+ const recordOnly=!!document.getElementById('recordOnly')?.checked;
+ const filtering=!!q||selectedGroup!==''||stockOnly||recordOnly;
+ const buckets={CN:[],NMS:[],SSS:[]};
+ let shownGroups=0;
+ store.groups.forEach((g,gi)=>{
+   if(selectedGroup!=='' && Number(selectedGroup)!==gi)return;
+   const matchedGroup=g.name.toLowerCase().includes(q)||String(g.sourcePart||'').toLowerCase().includes(q);
+   const rows=g.items.filter(x=>{
+     const textMatch=!q || matchedGroup || [x.part,x.name,(x.serials||[]).join(' '),x.location||''].join(' ').toLowerCase().includes(q);
+     const stockMatch=!stockOnly || (Number(x.qty)||0)>0;
+     const recordMatch=!recordOnly || hasRecord(x);
+     return textMatch&&stockMatch&&recordMatch;
+   });
+   if(!rows.length)return;
+   shownGroups++;
+   buckets[systemType(g)].push({g,gi,rows});
+ });
+ let html='';
+ ['CN','NMS','SSS'].forEach(type=>{
+   const entries=buckets[type]; if(!entries.length)return;
+   const parentOpen=filtering?true:systemOpenSet.has(type);
+   const totalItems=entries.reduce((a,e)=>a+e.rows.length,0);
+   const totalQty=entries.reduce((a,e)=>a+e.rows.reduce((b,x)=>b+(Number(x.qty)||0),0),0);
+   html+=`<section class="system-section type-${type.toLowerCase()} ${parentOpen?'open':''}">
+     <div class="system-head" onclick="toggleSystem('${type}')">
+       <div class="system-title"><span class="system-arrow">▶</span><span>${type} 裝備組件</span></div>
+       <span class="system-meta">${entries.length} 個組件・${totalItems} 種設備・${totalQty} 件庫存</span>
+     </div><div class="system-body">`;
+   entries.forEach(({g,gi,rows})=>{
+     const isOpen=filtering?true:openSet.has(gi);
+     html+=`<section class="component ${isOpen?'open':''}" data-gi="${gi}">
+       <div class="comp-head" onclick="toggleGroup(${gi})">
+         <div class="comp-title"><span class="arrow">▶</span><div><div class="comp-name">${esc(g.name)}</div><div class="part">${esc(g.sourcePart||'')}</div></div></div>
+         <span class="comp-count">${rows.length} 種 / ${rows.reduce((a,x)=>a+(Number(x.qty)||0),0)} 件</span>
+         <button class="mini-action" onclick="event.stopPropagation();addDevice(${gi})">＋ 新增設備</button>
+       </div>
+       <div class="comp-body">${rows.length?`<table><thead><tr><th style="width:125px">料號</th><th>設備名稱</th><th style="width:135px">庫存量</th><th style="width:330px">庫存序號</th><th style="width:110px">狀態</th><th style="width:170px">位置</th></tr></thead><tbody>`+rows.map(x=>{
+         const ii=g.items.indexOf(x), serial=(x.serials||[]).join(', '), st=itemStatus(x), qty=Number(x.qty)||0;
+         return `<tr class="device-row state-${st} ${qty===0?'qty-zero':''}"><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="qty"><div class="qty-control"><span class="stock-qty-readonly" aria-label="目前庫存量">${qty}</span>${qty===0?'<span class="zero-stock-label">無庫存</span>':''}</div><div style="margin-top:6px"><button type="button" class="stock-in-btn" onclick="openStockIn(${gi},${ii})">＋ 新增庫存</button></div></td>
+         <td>${serialTagEditor(x,gi,ii)}</td>
+         <td><span class="inventory-status ${qty<=0?'empty':''}" title="庫存狀態由系統自動判定">${qty>0?'庫存':'無庫存'}</span></td>
+         <td><select class="loc" onchange="setLocation(${gi},${ii},this.value)">${locationOptions(x.location||'')}</select></td></tr>`}).join('')+`</tbody></table>`:`<div class="empty">沒有設備</div>`}</div>
+     </section>`;
+   });
+   html+='</div></section>';
+ });
+ components.innerHTML=html||'<div class="empty">找不到符合資料</div>';
+ const fc=document.getElementById('filterCount');if(fc)fc.textContent=`顯示 ${shownGroups} / ${store.groups.length} 個組件`;
+ const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—';return `<div class="history-item"><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆更換紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(r.cn)}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br><b>損壞裝備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'損壞／已換下')}</span>　→　<b>換上新設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>${r.note?'<br><b>備註：</b>'+esc(r.note):''}</div>`}).join('')||'<div class="empty">尚無更換紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
+ renderStockHistory();
+ updateSummary();
+}
+
+function stockMovementTypeText(type){
+ return ({inbound:'新增庫存',replacement_out:'設備更換領出',adjust:'歷史盤點調整',serial_adjust:'歷史序號修正'}[type]||'庫存異動');
+}
+function normalizeStockMovementRecord(m={}){
+ const raw=String(m.timestamp||'').trim();let dt=null;if(raw){const d=new Date(raw);if(!Number.isNaN(d.getTime()))dt=d}
+ return {
+  id:String(m.id||('M'+Date.now()+Math.random().toString(36).slice(2,7))),
+  type:String(m.type||'adjust'),
+  timestamp:dt?dt.toISOString():raw,
+  dateTime:String(m.dateTime||'').trim()||(dt?dt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):''),
+  system:String(m.system||'').trim(),group:String(m.group||'').trim(),device:String(m.device||'').trim(),part:String(m.part||'').trim(),
+  qtyChange:Number(m.qtyChange)||0,beforeQty:Math.max(0,Number(m.beforeQty)||0),afterQty:Math.max(0,Number(m.afterQty)||0),
+  serials:Array.isArray(m.serials)?m.serials.map(v=>String(v).trim()).filter(Boolean):parseSerialValues(m.serials||''),
+  location:String(m.location||'').trim(),reference:String(m.reference||'').trim(),note:String(m.note||'').trim()
+ };
+}
+function normalizeStockMovements(target=store){
+ if(!Array.isArray(target.stockMovements))target.stockMovements=[];
+ target.stockMovements=target.stockMovements.map(normalizeStockMovementRecord);
+ return target.stockMovements;
+}
+function addStockMovement(g,i,{type='adjust',qtyChange=0,beforeQty=0,afterQty=0,serials=[],location='',reference='',note=''}={}){
+ if(!Array.isArray(store.stockMovements))store.stockMovements=[];
+ const group=store.groups[g],x=group?.items?.[i],now=new Date();if(!group||!x)return;
+ store.stockMovements.push(normalizeStockMovementRecord({
+  id:'M'+now.getTime()+Math.random().toString(36).slice(2,6),type,timestamp:now.toISOString(),
+  dateTime:now.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
+  system:systemType(group),group:group.name,device:x.name,part:x.part||'',qtyChange,beforeQty,afterQty,serials,location:location||x.location||'',reference,note
+ }));
+}
+function renderStockHistory(){
+ normalizeStockMovements();
+ const box=document.getElementById('stockHistory'),count=document.getElementById('stockHistoryCount');
+ if(!box)return;
+ const rows=(store.stockMovements||[]).map((m,sourceIndex)=>({m,sourceIndex})).reverse();
+ if(count)count.textContent=`${rows.length} 筆異動`;
+ box.innerHTML=rows.length?rows.map(({m,sourceIndex})=>{
+   const cls=m.type==='inbound'?'inbound':m.type==='replacement_out'?'outbound':'adjust';
+   const delta=m.qtyChange>0?`+${m.qtyChange}`:String(m.qtyChange);
+   return `<div class="stock-move-item ${cls}"><button type="button" class="stock-move-delete" onclick="deleteStockMovement(${sourceIndex})" title="刪除此筆庫存異動紀錄">刪除紀錄</button><span class="stock-move-type">${esc(stockMovementTypeText(m.type))}</span><b>${esc(m.dateTime||'—')}｜${esc(m.system||'—')}｜${esc(m.group||'—')}</b><br><b>設備：</b>${esc(m.device||'—')}｜${esc(m.part||'—')}　<b>數量：</b>${esc(delta)}（${m.beforeQty} → ${m.afterQty}）${m.serials.length?`<br><b>本次序號：</b><span class="detail-serial">${esc(m.serials.join('、'))}</span>`:''}<br><b>位置：</b>${esc(m.location||'—')}${m.reference?`　<b>來源/單號：</b>${esc(m.reference)}`:''}${m.note?`<br><b>備註：</b>${esc(m.note)}`:''}</div>`;
+ }).join(''):'<div class="empty">尚無庫存異動紀錄。收到新設備時請使用「＋ 新增庫存」。</div>';
+}
+function deleteStockMovement(index){
+ const arr=store.stockMovements||[],m=arr[index];if(!m)return;
+ const delta=m.qtyChange>0?`+${m.qtyChange}`:String(m.qtyChange),when=m.dateTime||'未記錄時間';
+ if(!confirm(`確定刪除這筆庫存異動紀錄？\n\n${when}\n${m.device||'設備'}｜${stockMovementTypeText(m.type)} ${delta}\n\n注意：只會刪除歷史紀錄，不會回滾目前庫存數量，也不會恢復或移除任何序號。`))return;
+ arr.splice(index,1);
+ save();render();toggleStockHistoryPanel(true);
+ showToast('庫存異動紀錄已刪除；目前庫存資料未變更','success');
+}
+function toggleStockHistoryPanel(forceOpen){
+ const panel=document.getElementById('stockHistoryPanel');if(!panel)return;
+ const open=typeof forceOpen==='boolean'?forceOpen:!panel.classList.contains('open');
+ panel.classList.toggle('open',open);
+ const btn=panel.querySelector('.stock-history-toggle');if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
+}
+let stockInGI=null,stockInII=null;
+function openStockIn(g,i){
+ stockInGI=g;stockInII=i;const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
+ stockInCurrentQty.textContent=Number(x.qty)||0;stockInCurrentSerials.textContent=(x.serials||[]).filter(Boolean).length;stockInSystem.textContent=systemType(group);
+ stockInDevice.value=`${x.name}｜${x.part}`;stockInQty.value=1;stockInSerials.value='';stockInLocation.innerHTML=locationOptions(x.location||'');stockInReference.value='';stockInNote.value='';
+ stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus(),80);
+}
+function closeStockIn(){stockInModal.classList.remove('show');stockInGI=stockInII=null}
+function confirmStockIn(){
+ const g=stockInGI,i=stockInII,group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
+ const addQty=Math.max(0,Math.floor(Number(stockInQty.value)||0)),serials=parseSerialValues(stockInSerials.value),location=stockInLocation.value.trim();
+ if(addQty<=0)return showToast('新增數量至少要 1','error');
+ if(!location)return showToast('請選擇入庫位置','error');
+ if(serials.length>addQty)return showToast(`本次輸入 ${serials.length} 個序號，不能高於新增數量 ${addQty}`,'error');
+ const own=new Set((x.serials||[]).map(v=>String(v).trim().toLowerCase())),conflicts=[];
+ serials.forEach(sn=>{if(own.has(sn.toLowerCase()))conflicts.push(`${sn}（已在此設備庫存）`);else{const owner=findSerialOwner(sn,g,i);if(owner)conflicts.push(`${sn}（${owner.group}｜${owner.item.name}）`)}})
+ if(conflicts.length){alert('無法入庫：發現重複序號。\n\n'+conflicts.slice(0,12).join('\n')+(conflicts.length>12?'\n…':''));return}
+ const before=Number(x.qty)||0;x.qty=before+addQty;x.serials=x.serials||[];serials.forEach(sn=>x.serials.push(sn));x.location=location;
+ addStockMovement(g,i,{type:'inbound',qtyChange:addQty,beforeQty:before,afterQty:x.qty,serials,location,reference:stockInReference.value.trim(),note:stockInNote.value.trim()||'新設備入庫'});
+ save();closeStockIn();render();toggleStockHistoryPanel(true);document.getElementById('stockHistoryPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
+ showToast(`入庫完成：新增 ${addQty} 件，庫存共 ${x.qty} 件`,'success');
+}
+
+function toggleHistoryPanel(forceOpen){
+ const panel=document.getElementById('historyPanel');if(!panel)return;
+ const open=typeof forceOpen==='boolean'?forceOpen:!panel.classList.contains('open');
+ panel.classList.toggle('open',open);
+ const btn=panel.querySelector('.history-toggle');if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
+}
+function deleteReplacementRecord(index){
+ const arr=store.replacements||[],r=arr[index];if(!r)return;
+ const when=r.dateTime||r.date||'未記錄時間',label=`${r.device||'設備'}｜損壞序號 ${r.old||'—'} → 新序號 ${r.next||'—'}`;
+ if(!confirm(`確定刪除這筆設備更換 / 損壞紀錄？\n\n${when}\n${label}\n\n注意：只會刪除歷史紀錄，不會增加庫存，也不會把已領出的新序號放回庫存。`))return;
+ arr.splice(index,1);
+ save();render();toggleHistoryPanel(true);
+ showToast('更換 / 損壞紀錄已刪除；庫存資料未變更','success');
+}
+function toggleSystem(type){systemOpenSet.has(type)?systemOpenSet.delete(type):systemOpenSet.add(type);render()}
+function summaryKey(e,type){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSummaryDetail(type)}}
+function closeSummaryDetail(){document.getElementById('summaryDetailModal').classList.remove('show')}
+function summaryRows(){
+ const rows=[];
+ store.groups.forEach((g,gi)=>(g.items||[]).forEach((x,ii)=>rows.push({gi,ii,group:g.name,groupPart:g.sourcePart||'',part:x.part||'',name:x.name||'',qty:Number(x.qty)||0,serials:(x.serials||[]).filter(Boolean),state:(Number(x.qty)||0)>0?'stock':'empty',location:x.location||''})));
+ return rows;
+}
+function openSummaryDetail(type){
+ const modal=document.getElementById('summaryDetailModal'),heading=document.getElementById('summaryDetailHeading'),box=document.getElementById('summaryDetailContent');
+ const rows=summaryRows(); let html='';
+ if(type==='groups'){
+   heading.textContent='組件分類明細｜依系統分類';
+   const data=store.groups.map(g=>{const items=g.items||[];return {system:systemType(g),name:g.name,part:g.sourcePart||'',types:items.length,qty:items.reduce((a,x)=>a+(Number(x.qty)||0),0),tracked:items.reduce((a,x)=>a+((x.serials||[]).filter(Boolean).length),0)}});
+   html=`<div class="detail-toolbar"><div class="detail-title">CN / NMS / SSS 組件分類</div><div class="detail-count">${data.length} 個組件</div></div>`;
+   ['CN','NMS','SSS'].forEach(sys=>{
+     const part=data.filter(x=>x.system===sys);if(!part.length)return;
+     const qty=part.reduce((a,x)=>a+x.qty,0),types=part.reduce((a,x)=>a+x.types,0);
+     html+=`<section class="summary-system-block type-${sys.toLowerCase()}"><div class="summary-system-head"><b>${sys}</b><span>${part.length} 個組件｜${types} 種設備｜${qty} 件庫存</span></div><div class="detail-table-wrap"><table><thead><tr><th>組件名稱</th><th>組件料號</th><th>設備種類</th><th>庫存數量</th><th>已登記序號</th></tr></thead><tbody>${part.map(x=>`<tr><td class="device-name">${esc(x.name)}</td><td>${esc(x.part)}</td><td class="detail-qty">${x.types}</td><td class="detail-qty">${x.qty}</td><td class="detail-qty">${x.tracked}</td></tr>`).join('')}</tbody></table></div></section>`;
+   });
+ }else if(type==='types'){
+   heading.textContent='設備種類明細｜依系統分類';
+   html=`<div class="detail-toolbar"><div class="detail-title">CN / NMS / SSS 設備種類與料號</div><div class="detail-count">${rows.length} 種設備</div></div>`;
+   ['CN','NMS','SSS'].forEach(sys=>{
+     const part=rows.filter(x=>systemType(store.groups[x.gi])===sys);if(!part.length)return;
+     const qty=part.reduce((a,x)=>a+x.qty,0),tracked=part.reduce((a,x)=>a+x.serials.length,0);
+     html+=`<section class="summary-system-block type-${sys.toLowerCase()}"><div class="summary-system-head"><b>${sys}</b><span>${part.length} 種設備｜${qty} 件庫存｜${tracked} 個序號</span></div><div class="detail-table-wrap"><table><thead><tr><th>所屬組件</th><th>料號</th><th>設備名稱</th><th>庫存</th><th>序號數</th><th>狀態</th><th>位置</th></tr></thead><tbody>${part.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="detail-qty">${x.qty}</td><td class="detail-qty">${x.serials.length}</td><td>${esc(stateText[x.state]||x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table></div></section>`;
+   });
+ }else if(type==='qty'){
+   heading.textContent='庫存數量明細';
+   const data=rows.filter(x=>x.qty>0), total=data.reduce((a,x)=>a+x.qty,0);
+   html=`<div class="detail-toolbar"><div class="detail-title">目前有庫存的設備</div><div class="detail-count">${data.length} 種 / 共 ${total} 件</div></div>`+(data.length?`<div class="detail-table-wrap"><table><thead><tr><th>所屬組件</th><th>料號</th><th>設備名稱</th><th>庫存數量</th><th>已登記序號</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="detail-qty">${x.qty}</td><td>${x.serials.length?esc(x.serials.join(', ')):'—'}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="detail-empty">目前所有設備庫存都是 0。</div>`);
+ }else{
+   heading.textContent='已登記序號明細';
+   const data=[];rows.forEach(x=>x.serials.forEach(sn=>data.push({...x,serial:sn})));
+   html=`<div class="detail-toolbar"><div class="detail-title">所有已登記設備序號</div><div class="detail-count">${data.length} 個序號</div></div>`+(data.length?`<div class="detail-table-wrap"><table><thead><tr><th>序號</th><th>設備名稱</th><th>料號</th><th>所屬組件</th><th>狀態</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td class="detail-serial">${esc(x.serial)}</td><td class="device-name">${esc(x.name)}</td><td>${esc(x.part)}</td><td>${esc(x.group)}</td><td>${esc(stateText[x.state]||x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="detail-empty">目前尚未登記任何設備序號。</div>`);
+ }
+ box.innerHTML=html;modal.classList.add('show');
+}
+function toggleGroup(i){openSet.has(i)?openSet.delete(i):openSet.add(i);render()}
+function expandAll(){['CN','NMS','SSS'].forEach(t=>systemOpenSet.add(t));store.groups.forEach((_,i)=>openSet.add(i));render()}function collapseAll(){systemOpenSet.clear();openSet.clear();render()}
+function setQty(g,i,v){
+ showToast('庫存數量不可直接修改，請使用「＋ 新增庫存」或「設備更換」流程','error');
+ render();
+}
+function changeQty(g,i,d){
+ showToast('已停用盤點調整；庫存只能透過正式入庫或設備更換異動','error');
+ render();
+}
+function serialTagEditor(x,g,i){
+ const serials=(x.serials||[]).filter(Boolean),qty=Number(x.qty)||0,countClass=serials.length>qty?'over':serials.length===qty&&qty>0?'full':'';
+ const tags=serials.length?serials.map((sn,si)=>`<span class="serial-tag" title="${esc(sn)}"><span class="serial-tag-text">${esc(sn)}</span><button type="button" class="serial-tag-remove" title="移除序號 ${esc(sn)}" aria-label="移除序號 ${esc(sn)}" onclick="removeSerial(${g},${i},${si})">×</button></span>`).join(''):'<span class="serial-empty">尚未登記庫存序號</span>';
+ return `<div class="serial-editor"><div class="serial-editor-head"><span style="font-size:10.5px;font-weight:800;color:#59718a">庫存序號</span><span class="serial-editor-count ${countClass}">${serials.length} / ${qty}</span></div><div class="serial-tags">${tags}</div><div class="serial-entry-row"><input class="serial-entry" id="serialEntry-${g}-${i}" placeholder="輸入序號後 Enter" autocomplete="off" onkeydown="serialEntryKey(event,${g},${i})"><button type="button" class="serial-add-btn" onclick="addSerialFromInput(${g},${i})">＋新增</button><button type="button" class="serial-batch-btn" onclick="openSerialBatch(${g},${i})">批次貼上</button></div><small class="serial-help">支援 Enter 新增；批次可貼 Excel、逗號或換行資料。</small></div>`;
+}
+function parseSerialValues(v){return [...new Set(String(v??'').split(/[,，\n\r\t;；]+/).map(s=>s.trim()).filter(Boolean))]}
+function findSerialOwner(serial,skipG=-1,skipI=-1){
+ const key=String(serial||'').trim().toLowerCase();if(!key)return null;
+ for(let gi=0;gi<store.groups.length;gi++){const g=store.groups[gi];for(let ii=0;ii<(g.items||[]).length;ii++){if(gi===skipG&&ii===skipI)continue;const x=g.items[ii];const hit=(x.serials||[]).some(sn=>String(sn).trim().toLowerCase()===key);if(hit)return {gi,ii,group:g.name,item:x};}}
+ return null;
+}
+function addSerialValues(g,i,values,{silent=false}={}){
+ const x=store.groups[g]?.items?.[i];if(!x)return {added:0,duplicates:0,conflicts:[]};
+ x.serials=(x.serials||[]).map(v=>String(v).trim()).filter(Boolean);const existing=new Set(x.serials.map(v=>v.toLowerCase()));let added=0,duplicates=0;const conflicts=[];
+ parseSerialValues(values).forEach(sn=>{const key=sn.toLowerCase();if(existing.has(key)){duplicates++;return}const owner=findSerialOwner(sn,g,i);if(owner){conflicts.push(`${sn}（${owner.group}｜${owner.item.name}）`);return}x.serials.push(sn);existing.add(key);added++;});
+ if((Number(x.qty)||0)<x.serials.length)x.qty=x.serials.length;
+ if(added){markDirty();render()}
+ if(!silent){if(conflicts.length)showToast(`已加入 ${added} 筆；${conflicts.length} 筆序號已存在其他設備`,'error');else if(duplicates)showToast(`已加入 ${added} 筆，略過 ${duplicates} 筆重複序號`,'success');else if(added)showToast(`已加入 ${added} 個庫存序號`,'success');else showToast('沒有可加入的新序號','error')}
+ return {added,duplicates,conflicts};
+}
+function serialEntryKey(e,g,i){if(e.key==='Enter'){e.preventDefault();addSerialFromInput(g,i)}}
+function addSerialFromInput(g,i){const el=document.getElementById(`serialEntry-${g}-${i}`);if(!el)return;const v=el.value.trim();if(!v)return;addSerialValues(g,i,v);}
+function removeSerial(g,i,serialIndex){const x=store.groups[g]?.items?.[i];if(!x)return;x.serials=x.serials||[];const serial=x.serials[serialIndex];if(serial===undefined)return;x.serials.splice(serialIndex,1);markDirty();render();showToast(`已移除庫存序號 ${serial}`,'success')}
+let serialBatchGI=null,serialBatchII=null;
+function openSerialBatch(g,i){serialBatchGI=g;serialBatchII=i;const x=store.groups[g]?.items?.[i];if(!x)return;serialBatchDevice.value=`${x.name}｜${x.part}`;serialBatchInput.value='';serialBatchModal.classList.add('show');setTimeout(()=>serialBatchInput.focus(),80)}
+function closeSerialBatch(){serialBatchModal.classList.remove('show');serialBatchGI=serialBatchII=null}
+function confirmSerialBatch(){if(serialBatchGI===null)return;const raw=serialBatchInput.value;if(!parseSerialValues(raw).length)return showToast('請貼上至少一個序號','error');const result=addSerialValues(serialBatchGI,serialBatchII,raw,{silent:true});closeSerialBatch();if(result.conflicts.length){alert(`批次加入完成：\n成功 ${result.added} 筆\n同設備重複 ${result.duplicates} 筆\n其他設備已存在 ${result.conflicts.length} 筆\n\n已略過：\n${result.conflicts.slice(0,12).join('\n')}${result.conflicts.length>12?'\n…':''}`)}else showToast(`批次加入 ${result.added} 筆${result.duplicates?`，略過重複 ${result.duplicates} 筆`:''}`,'success')}
+// Backward-compatible parser for older inline calls / imported UI state.
+function setSerials(g,i,v){
+ const x=store.groups[g].items[i],vals=parseSerialValues(v),clean=[];
+ vals.forEach(sn=>{if(!findSerialOwner(sn,g,i))clean.push(sn)});x.serials=clean;
+ if((Number(x.qty)||0)<x.serials.length)x.qty=x.serials.length;markDirty();render();
+}
+function setState(g,i,v){showToast('庫存狀態由系統自動判定，無需手動修改');render()}
+function setLocation(g,i,v){store.groups[g].items[i].location=v.trim();markDirty();render()}
+let addDeviceGroupIndex=null;
+function addDevice(g){addDeviceGroupIndex=g;aGroupName.value=store.groups[g]?.name||'';aName.value='';aPart.value='';document.getElementById('addDeviceModal').classList.add('show');setTimeout(()=>aName.focus(),80)}
+function closeAddDevice(){document.getElementById('addDeviceModal').classList.remove('show');addDeviceGroupIndex=null}
+function confirmAddDevice(){
+ const name=aName.value.trim(),part=aPart.value.trim()||'N/A';
+ if(!name){showToast('請輸入設備名稱','error');aName.focus();return}
+ const g=store.groups[addDeviceGroupIndex];if(!g)return;
+ const dup=(g.items||[]).some(x=>String(x.part||'').trim().toLowerCase()===part.toLowerCase()&&String(x.name||'').trim().toLowerCase()===name.toLowerCase());
+ if(dup){showToast('此組件已有相同設備與料號','error');return}
+ g.items.push({part,name,qty:0,serials:[],state:'stock',location:''});openSet.add(addDeviceGroupIndex);markDirty();closeAddDevice();render();showToast('設備已加入清單，請記得儲存','success')
+}
+function openReplace(){
+ // 組件依 CN / NMS / SSS 分區顯示，避免混在同一串清單。
+ const current=rGroup.value;
+ let opts='';
+ ['CN','NMS','SSS'].forEach(type=>{
+   const entries=store.groups.map((g,i)=>({g,i})).filter(({g})=>systemType(g)===type);
+   if(!entries.length)return;
+   opts+=`<optgroup label="${type} 組件">`+entries.map(({g,i})=>`<option value="${i}">${esc(g.name)}｜${esc(g.sourcePart||'')}</option>`).join('')+'</optgroup>';
+ });
+ rGroup.innerHTML=opts;
+ if(current && [...rGroup.options].some(o=>o.value===current))rGroup.value=current;
+ rGroup.onchange=refreshDevices;
+ rDevice.onchange=refreshReplacementStockSerials;
+ rOld.value='';rNote.value='';
+ refreshDevices();modal.classList.add('show');
+}
+function refreshDevices(){
+ const gi=Number(rGroup.value),g=store.groups[gi];
+ if(!g){
+   rDevice.innerHTML='<option value="">請先選擇組件</option>';
+   refreshReplacementStockSerials();
+   return;
+ }
+ // 只列出目前所選組件內的設備；選 CN 組件不會出現 NMS / SSS 設備。
+ const items=g.items||[];
+ rDevice.innerHTML=items.length
+   ? items.map((x,i)=>`<option value="${i}">${esc(x.name)}｜${esc(x.part)}</option>`).join('')
+   : '<option value="">此組件目前沒有設備</option>';
+ refreshReplacementStockSerials();
+}
+function refreshReplacementStockSerials(){
+ const gi=Number(rGroup.value)||0,ii=Number(rDevice.value)||0,x=store.groups[gi]?.items?.[ii];
+ const serials=(x?.serials||[]).map(s=>String(s).trim()).filter(Boolean);
+ const qty=Number(x?.qty)||0,help=document.getElementById('rNewHelp');
+ if(qty<=0){
+  rNew.innerHTML='<option value="">目前庫存為 0，無法更換</option>';rNew.disabled=true;
+  if(help){help.textContent='此設備目前沒有庫存，無法執行設備更換。';help.style.color='#b42336'}
+ }else if(!serials.length){
+  rNew.innerHTML='<option value="">庫存尚未登記序號</option>';rNew.disabled=true;
+  if(help){help.textContent=`目前庫存 ${qty} 件，但沒有庫存序號。請先回主畫面登記新設備序號。`;help.style.color='#b42336'}
+ }else{
+  rNew.disabled=false;rNew.innerHTML='<option value="">請選擇要從庫存領出的新序號</option>'+serials.map(sn=>`<option value="${esc(sn)}">${esc(sn)}</option>`).join('');
+  if(help){help.textContent=`目前庫存 ${qty} 件 / ${serials.length} 個已登記庫存序號。選定後儲存會扣除 1 件庫存。`;help.style.color='#7a8da4'}
+ }
+}
+function closeModal(){modal.classList.remove('show')}
+function saveReplace(){
+ const cn=rCN.value.trim(),old=String(rOld.value||'').trim(),next=String(rNew.value||'').trim(),gi=Number(rGroup.value),ii=Number(rDevice.value);
+ if(!cn||!old||!next)return showToast('請完整填寫位置、舊序號，並選擇庫存的新序號','error');
+ if(old.toLowerCase()===next.toLowerCase())return showToast('舊序號與換上的新序號不可相同','error');
+ const g=store.groups[gi],x=g?.items?.[ii];if(!x)return showToast('找不到指定設備','error');
+ const qty=Number(x.qty)||0,serials=(x.serials||[]).map(s=>String(s).trim()).filter(Boolean);
+ if(qty<=0)return showToast('目前庫存為 0，無法執行設備更換','error');
+ const newIndex=serials.findIndex(sn=>sn.toLowerCase()===next.toLowerCase());
+ if(newIndex<0)return showToast('選擇的新序號已不在庫存中，請重新確認','error');
+ // 庫存只代表尚未使用的新設備：更換完成後領出 1 件，並移除該庫存序號。
+ x.qty=Math.max(0,qty-1);
+ x.serials=serials.filter((_,idx)=>idx!==newIndex);
+ addStockMovement(gi,ii,{type:'replacement_out',qtyChange:-1,beforeQty:qty,afterQty:x.qty,serials:[next],location:cn,note:`設備更換領出；損壞舊序號：${old}`});
+ const changedAt=new Date();
+ store.replacements.push({
+  timestamp:changedAt.toISOString(),
+  date:changedAt.toLocaleDateString('zh-TW'),
+  dateTime:changedAt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
+  cn,group:g.name,device:x.name,part:x.part||'',old,next,note:rNote.value.trim(),damagedStatus:'損壞／已換下',newStatus:'已安裝／使用'
+ });
+ save();closeModal();render();
+ rCN.value='';rOld.value='';rNew.innerHTML='<option value="">請先選擇設備</option>';rNote.value='';
+ toggleHistoryPanel(true);document.getElementById('historyPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
+ showToast(`設備更換完成：已領出 ${next}，庫存剩 ${x.qty} 件`,'success');
+}
+
+function normalizeReplacementRecord(r={}){
+ const rawTs=String(r.timestamp||'').trim();
+ let dt=null;
+ if(rawTs){const d=new Date(rawTs);if(!Number.isNaN(d.getTime()))dt=d}
+ const dateTime=String(r.dateTime||'').trim();
+ const date=String(r.date||'').trim();
+ return {
+  timestamp:dt?dt.toISOString():rawTs,
+  date:date||(dt?dt.toLocaleDateString('zh-TW'):''),
+  dateTime:dateTime||(dt?dt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):date),
+  cn:String(r.cn||'').trim(),group:String(r.group||'').trim(),device:String(r.device||'').trim(),part:String(r.part||'').trim(),
+  old:String(r.old||'').trim(),next:String(r.next||'').trim(),note:String(r.note||'').trim(),damagedStatus:String(r.damagedStatus||'損壞／已換下').trim()||'損壞／已換下',newStatus:String(r.newStatus||'已安裝／使用').trim()||'已安裝／使用'
+ };
+}
+function normalizeReplacementHistory(target=store){
+ if(!Array.isArray(target.replacements))target.replacements=[];
+ target.replacements=target.replacements.map(normalizeReplacementRecord);
+ return target.replacements;
+}
+function inventoryStats(target=store){
+ const all=(target.groups||[]).flatMap(g=>g.items||[]);
+ const bySystem={CN:{groups:0,types:0,qty:0,serials:0},NMS:{groups:0,types:0,qty:0,serials:0},SSS:{groups:0,types:0,qty:0,serials:0}};
+ (target.groups||[]).forEach(g=>{const t=systemType(g),items=g.items||[];bySystem[t].groups++;bySystem[t].types+=items.length;bySystem[t].qty+=items.reduce((a,x)=>a+(Number(x.qty)||0),0);bySystem[t].serials+=items.reduce((a,x)=>a+(x.serials||[]).filter(Boolean).length,0)});
+ return {groups:(target.groups||[]).length,types:all.length,qty:all.reduce((a,x)=>a+(Number(x.qty)||0),0),serials:all.reduce((a,x)=>a+(x.serials||[]).filter(Boolean).length,0),replacements:(target.replacements||[]).length,stockMovements:(target.stockMovements||[]).length,bySystem};
+}
+function exportBackup(){
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ const stats=inventoryStats();
+ const payload={
+  schema:'equipment-inventory-v3',version:3,exportedAt:new Date().toISOString(),
+  description:'V3 新設備庫存、庫存序號、庫存異動歷程與目前保留的設備更換/損壞紀錄完整備份',stats,data:store
+ };
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+ showToast(`完整備份已匯出：庫存 ${stats.qty} 件 / 庫存異動 ${stats.stockMovements} 筆 / 更換紀錄 ${stats.replacements} 筆`,'success');
+}
+function importBackup(ev){
+ const f=ev.target.files&&ev.target.files[0];if(!f)return;
+ if(!confirm('匯入備份會取代目前畫面中的全部庫存與設備更換/損壞紀錄。備份中沒有的已刪除紀錄不會恢復。\n\n建議先匯出目前備份。確定繼續？')){ev.target.value='';return}
+ const r=new FileReader();
+ r.onload=()=>{try{
+  const obj=JSON.parse(r.result),incoming=obj.data||obj;
+  if(!incoming||!Array.isArray(incoming.groups))throw new Error('備份格式不正確：找不到 groups 庫存資料');
+  if(!Array.isArray(incoming.replacements))incoming.replacements=[];
+  if(!Array.isArray(incoming.stockMovements))incoming.stockMovements=[];
+  normalizeInventoryStore(incoming);normalizeReplacementHistory(incoming);normalizeStockMovements(incoming);
+  // 匯入前檢查「目前庫存序號」不可重複；歷史更換序號不視為目前庫存，不參與重複判斷。
+  const oldStore=store;store=incoming;const dups=findDuplicateSerials();
+  if(dups.length){store=oldStore;throw new Error('備份內有重複的目前庫存序號：\n'+dups.slice(0,5).join('\n'))}
+  save();render();toggleHistoryPanel(false);toggleStockHistoryPanel(false);
+  const st=inventoryStats();showToast(`備份匯入完成：庫存 ${st.qty} 件 / 庫存異動 ${st.stockMovements} 筆 / 更換紀錄 ${st.replacements} 筆`,'success');
+ }catch(e){alert('匯入失敗：'+e.message)}finally{ev.target.value=''}};
+ r.readAsText(f,'utf-8');
+}
+function reportRows(){
+ const rows=[];
+ (store.groups||[]).forEach(g=>(g.items||[]).forEach(x=>rows.push({system:systemType(g),group:g.name,part:x.part||'',name:x.name||'',qty:Number(x.qty)||0,serial:(x.serials||[]).join(', '),serialCount:(x.serials||[]).filter(Boolean).length,state:(Number(x.qty)||0)>0?'庫存':'無庫存',location:x.location||''})));
+ return rows;
+}
+function reportSystemSection(type,rows){
+ const data=rows.filter(x=>x.system===type),qty=data.reduce((a,x)=>a+x.qty,0),sns=data.reduce((a,x)=>a+x.serialCount,0);
+ if(!data.length)return '';
+ return `<section style="margin:16px 0 20px"><h4 style="margin:0 0 8px;color:#173b70">${type} 庫存明細 <span style="font-size:11px;color:#71849c;font-weight:600">${data.length} 種設備 / ${qty} 件庫存 / ${sns} 個庫存序號</span></h4><div style="overflow:auto"><table><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>庫存位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td>${esc(x.name)}</td><td>${x.qty}</td><td>${esc(x.serial||'—')}</td><td>${esc(x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table></div></section>`;
+}
+function openReport(){
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
+ let html=`<div style="display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px;margin-bottom:14px">
+ <div class="card"><b>${st.groups}</b><span>組件分類</span></div><div class="card"><b>${st.types}</b><span>設備種類</span></div><div class="card"><b>${st.qty}</b><span>新設備庫存</span></div><div class="card"><b>${st.serials}</b><span>庫存序號</span></div><div class="card"><b>${st.replacements}</b><span>損壞 / 更換紀錄</span></div></div>`;
+ html+=`<div style="font-size:12px;color:#61758f;margin-bottom:10px">產生時間：${new Date().toLocaleString('zh-TW')}　｜　<strong>庫存量與庫存序號只代表尚未領出的新設備</strong>；已更換領出的新序號會保留於下方更換紀錄，不再計入庫存。</div>`;
+ html+=`<div style="overflow:auto;margin-bottom:12px"><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return `<tr><td><b>${t}</b></td><td>${x.groups}</td><td>${x.types}</td><td>${x.qty}</td><td>${x.serials}</td></tr>`}).join('')}</tbody></table></div>`;
+ ['CN','NMS','SSS'].forEach(t=>html+=reportSystemSection(t,rows));
+ html+=`<h4 style="margin:20px 0 8px;color:#9c2c38">設備更換 / 損壞裝備紀錄 <span style="font-size:11px;color:#71849c;font-weight:600">${reps.length} 筆</span></h4>`;
+ html+=reps.length?`<div style="overflow:auto"><table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>損壞裝備序號</th><th>換上新設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.old||'—')}</td><td class="detail-serial">${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無設備更換 / 損壞裝備紀錄</div>`;
+ reportContent.innerHTML=html;reportModal.classList.add('show');
+}
+function exportReportWord(){
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
+ const now=new Date(),generated=now.toLocaleString('zh-TW');
+ const summaryRows=['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return `<tr><td><b>${t}</b></td><td>${x.groups}</td><td>${x.types}</td><td>${x.qty}</td><td>${x.serials}</td></tr>`}).join('');
+ const inventorySections=['CN','NMS','SSS'].map(type=>{
+   const data=rows.filter(x=>x.system===type),qty=data.reduce((a,x)=>a+x.qty,0),sns=data.reduce((a,x)=>a+x.serialCount,0);
+   if(!data.length)return '';
+   return `<h2>${type} 庫存明細</h2><p class="meta">${data.length} 種設備｜${qty} 件庫存｜${sns} 個庫存序號</p><table><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td>${esc(x.name)}</td><td class="num">${x.qty}</td><td>${esc(x.serial||'—')}</td><td>${esc(x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table>`;
+ }).join('');
+ const replacementTable=reps.length?`<table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>損壞裝備序號</th><th>換上新設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無設備更換／損壞裝備紀錄。</p>';
+ const movementRows=(store.stockMovements||[]).slice().reverse();
+ const movementTable=movementRows.length?`<table><thead><tr><th>異動時間</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量異動</th><th>異動前</th><th>異動後</th><th>本次序號</th><th>位置</th><th>來源/單號</th><th>備註</th></tr></thead><tbody>${movementRows.map(m=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.system||'—')}</td><td>${esc(m.group||'—')}</td><td>${esc(m.device||'—')}</td><td>${esc(m.part||'—')}</td><td class="num">${m.qtyChange>0?'+'+m.qtyChange:m.qtyChange}</td><td class="num">${m.beforeQty}</td><td class="num">${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.reference||'')}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無庫存異動紀錄。</p>';
+ const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><title>73G裝備庫存管理 Report</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:"Microsoft JhengHei",Arial,sans-serif;color:#17365f;font-size:10pt;line-height:1.45}h1{font-size:20pt;color:#173b70;margin:0 0 5px}h2{font-size:13pt;color:#173b70;margin:18px 0 4px;border-bottom:1px solid #cbd8e6;padding-bottom:4px}.meta{color:#607892;margin:0 0 7px}.notice{background:#eef5fb;border:1px solid #cbddea;padding:8px;margin:9px 0 12px}.summary{width:100%;margin:8px 0 12px}.summary td{border:1px solid #c9d6e5;text-align:center;padding:8px}.summary b{display:block;font-size:17pt;color:#123f76}.summary span{font-size:9pt;color:#607892}table{width:100%;border-collapse:collapse;margin:6px 0 14px;table-layout:auto}th,td{border:1px solid #aebfd1;padding:5px 6px;vertical-align:top;word-break:break-word}th{background:#eaf1f8;color:#173b70;font-weight:bold}.num{text-align:center}.footer{margin-top:16px;color:#71849c;font-size:8.5pt}</style></head><body><h1>73G裝備庫存管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備更換後領出的新設備序號會自庫存移除，並保留於設備更換／損壞裝備紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>損壞／更換紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p><h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備更換領出</p>${movementTable}<h2>設備更換／損壞裝備紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}<div class="footer">73G裝備庫存管理｜本文件由系統自動產生</div></body></html>`;
+ const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=`73G裝備庫存管理_Report_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Word Report 已匯出','success');
+}
+function closeReport(){reportModal.classList.remove('show')}
+function csvCell(v){v=String(v??'');return '"'+v.replace(/"/g,'""')+'"'}
+function exportReportCSV(){
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ const rows=reportRows(),st=inventoryStats();let csv='\ufeff';
+ csv+=['裝備庫存 Report','產生時間',new Date().toLocaleString('zh-TW')].map(csvCell).join(',')+'\n';
+ csv+=['統計','組件分類',st.groups,'設備種類',st.types,'新設備庫存',st.qty,'庫存序號',st.serials,'損壞/更換紀錄',st.replacements].map(csvCell).join(',')+'\n\n';
+ csv+=['系統','組件數','設備種類','新設備庫存','庫存序號'].map(csvCell).join(',')+'\n';
+ csv+=['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return [t,x.groups,x.types,x.qty,x.serials].map(csvCell).join(',')}).join('\n')+'\n\n';
+ csv+=['目前新設備庫存明細'].map(csvCell).join(',')+'\n';
+ csv+=['系統','組件','料號','設備名稱','庫存量','庫存序號','狀態','庫存位置'].map(csvCell).join(',')+'\n';
+ csv+=rows.map(x=>[x.system,x.group,x.part,x.name,x.qty,x.serial,x.state,x.location].map(csvCell).join(',')).join('\n');
+ csv+='\n\n'+['庫存異動紀錄'].map(csvCell).join(',')+'\n';
+ csv+=['異動時間','類型','系統','組件','設備','料號','數量異動','異動前','異動後','本次序號','位置','來源/單號','備註'].map(csvCell).join(',')+'\n';
+ csv+=(store.stockMovements||[]).slice().reverse().map(m=>[m.dateTime||'',stockMovementTypeText(m.type),m.system,m.group,m.device,m.part,m.qtyChange,m.beforeQty,m.afterQty,(m.serials||[]).join('、'),m.location,m.reference,m.note].map(csvCell).join(',')).join('\n');
+ csv+='\n\n'+['設備更換 / 損壞裝備紀錄'].map(csvCell).join(',')+'\n';
+ csv+=['更換時間','位置','組件','設備','料號','損壞裝備序號','換上新設備序號','損壞狀態','備註'].map(csvCell).join(',')+'\n';
+ csv+=(store.replacements||[]).slice().reverse().map(r=>[r.dateTime||r.date||'',r.cn,r.group,r.device,r.part||'',r.old,r.next,r.damagedStatus||'損壞／已換下',r.note||''].map(csvCell).join(',')).join('\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_report_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('Report CSV 已匯出','success');
+}
+function printReport(){
+ const w=window.open('','_blank');if(!w)return alert('瀏覽器阻擋了列印視窗');
+ w.document.write(`<html><head><meta charset="UTF-8"><title>Equipment Inventory Report</title><style>body{font-family:Arial,"Microsoft JhengHei",sans-serif;color:#17365f;padding:20px}h2{margin:0 0 6px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #cfd9e6;padding:5px;text-align:left;vertical-align:top}th{background:#eef3f8}.card{display:inline-block;border:1px solid #ccd8e5;border-radius:8px;padding:8px 12px;margin:0 6px 10px 0}.card b{font-size:18px;display:block}@media print{body{padding:0}}
+
+/* ===== Production usability refinement ===== */
+:root{
+  --brand:#143a70;--brand-2:#28558f;--canvas:#f2f5f9;--panel:#fff;
+  --text:#17324f;--text-strong:#102f55;--muted:#667c96;--line:#d8e2ed;
+  --focus:#4b86c4;--success:#138553;--danger:#b42336;--warning:#9a6710;
+  --stock-bg:#edf6fc;--stock-line:#b7d7e9;--issued-bg:#fff7e7;--issued-line:#ead39d;
+  --installed-bg:#edf8f2;--installed-line:#b7dec8;--broken-bg:#fff0f2;--broken-line:#edbec4;
+}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC",Arial,sans-serif;background:var(--canvas);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:74px}
+.wrap,main,.savebar-inner{max-width:1480px}
+.topbar{padding:16px 22px;background:linear-gradient(115deg,#103566 0%,#1b477e 58%,#35679f 100%)}
+.brand h1{font-size:23px;line-height:1.2;font-weight:850;letter-spacing:.1px}.brand h1 span{font-size:13px;font-weight:600;color:#cbd9eb;margin-left:7px}.brand small{font-size:12.5px;font-weight:500}.header-meta{text-align:right}.today{font-size:12px;font-weight:650}.saved-meta{margin-top:3px;color:#c8d8ea;font-size:10.5px}
+main{padding:16px 14px 34px}
+.summary{gap:12px;margin-bottom:12px}.card{min-height:98px;padding:16px 18px;border-radius:15px}.card b{font-size:30px;line-height:1;font-weight:850;color:#153e74;font-variant-numeric:tabular-nums}.card span{display:block;margin-top:8px;font-size:13px;font-weight:800;color:#365778}.summary-card::after{bottom:15px;font-size:10.5px}.summary-card .card-sub{margin-top:3px;font-size:10.5px;color:#7f90a5}
+.main-actions{position:sticky;top:0;z-index:25;padding:10px 11px;box-shadow:0 5px 18px rgba(18,51,89,.07)}
+.search-wrap{position:relative;flex:1 1 390px;min-width:260px}.search-icon{position:absolute;left:11px;top:8px;font-size:18px;color:#6e849d;pointer-events:none}.search{width:100%;min-width:0;height:41px;padding:0 12px 0 34px;font-size:13px;font-weight:550;background:#fbfdff}.search:focus,.filter-select:focus,.serial-input:focus,.status:focus,.loc:focus,.qty-input:focus,.form input:focus,.form select:focus,.form textarea:focus{outline:none;border-color:var(--focus)!important;box-shadow:0 0 0 3px rgba(75,134,196,.13)!important}
+.action-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.btn{height:40px;border-radius:9px;padding:0 13px;font-size:12px;font-weight:800;white-space:nowrap;transition:.15s}.btn:hover:not(:disabled){transform:translateY(-1px)}.btn.report-btn{background:#eaf1fb;color:#194f88;border:1px solid #c6d9ee}.btn.ghost{background:#fff;color:#607993;border:1px solid #d8e2ed}.btn.light{border:1px solid #d9e3ee}.btn.primary{box-shadow:0 2px 8px rgba(23,59,112,.16)}
+.filterbar{padding:10px 12px;margin-bottom:8px}.filter-label{font-size:12px}.filter-select{height:38px;font-size:12.5px}.filter-check{height:38px;font-size:12px}.filter-count{font-size:11px}
+.status-guide{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 8px;padding:9px 11px;background:#fff;border:1px solid var(--line);border-radius:12px}.guide-title{font-size:11.5px;font-weight:850;color:#4f6783;margin-right:2px}.guide-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}.guide-pill i{width:8px;height:8px;border-radius:50%;display:block}.guide-pill.stock{background:var(--stock-bg);border-color:var(--stock-line);color:#286287}.guide-pill.stock i{background:#5a9dc5}.guide-pill.issued{background:var(--issued-bg);border-color:var(--issued-line);color:#835c12}.guide-pill.issued i{background:#d0a144}.guide-pill.installed{background:var(--installed-bg);border-color:var(--installed-line);color:#246c49}.guide-pill.installed i{background:#55a87a}.guide-pill.broken{background:var(--broken-bg);border-color:var(--broken-line);color:#9c2c38}.guide-pill.broken i{background:#d05b67}.guide-help{font-size:10.8px;color:#778ba2;margin-left:auto}.note{padding:0 2px;font-size:11.5px;color:#647a94}
+.system-section{border-radius:16px;margin-bottom:12px;background:#f7f9fc}.system-head{min-height:60px;padding:13px 16px}.system-title{font-size:17px}.system-meta{font-size:10.8px}.system-body{padding:10px}.component{border-radius:12px;margin-bottom:8px;box-shadow:none}.comp-head{min-height:58px;padding:11px 13px}.comp-name{font-size:14px}.part{font-size:10.5px}.mini-action{font-weight:750}.comp-count{font-size:10.8px}
+th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color:#526c88;letter-spacing:.02em}.device-name{font-size:12.3px;font-weight:750;color:#143e70}.qty-input,.serial-input,.status,.loc{height:34px;font-size:12px}.serial-input,.loc{padding:6px 8px}.qty-input{width:62px}.qty-btn{width:30px;height:30px}.status{font-weight:750;min-width:102px}
+.device-row{border-left:4px solid transparent}.device-row.state-stock{background:var(--stock-bg);border-left-color:#76afd0}.device-row.state-issued{background:var(--issued-bg);border-left-color:#d5aa54}.device-row.state-installed{background:var(--installed-bg);border-left-color:#6ab08a}.device-row.state-broken{background:var(--broken-bg);border-left-color:#d86b75}
+.history{margin-top:18px;padding-top:3px}.section-title-row{display:flex;justify-content:space-between;align-items:end;margin-bottom:8px}.history h3{margin:0;font-size:15px;color:#163c6e}.history p{margin:3px 0 0;font-size:10.8px;color:#7a8da4}.history-item{padding:11px 13px;border-radius:11px;line-height:1.55}
+.dialog{border-radius:16px}.dialog h3{font-size:16px;font-weight:850;background:#f8fafc;border-bottom:1px solid #e4ebf3}.form label{font-size:11.5px;font-weight:800;color:#536d8a}.form input,.form select,.form textarea{font-size:13px}.required{margin-left:5px;color:#b42336;font-size:10px}.dialog-actions{background:#f8fafc;border-top:1px solid #e5ecf3}
+.savebar{padding:9px 14px}.savebar-msg{font-size:12.5px}.toast{position:fixed;right:18px;bottom:82px;z-index:120;background:#173b70;color:#fff;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:750;box-shadow:0 8px 28px rgba(10,40,78,.2);opacity:0;transform:translateY(7px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:none}.toast.error{background:#9f2937}.toast.success{background:#13764a}
+@media(max-width:980px){.main-actions{position:static}.search-wrap{flex-basis:100%}.primary-actions,.secondary-actions{flex:1 1 auto}.header-meta{text-align:left}.summary{grid-template-columns:repeat(2,1fr)}.guide-help{width:100%;margin-left:0}.system-meta{display:none}}
+@media(max-width:680px){body{font-size:13px}.topbar{padding:13px 12px}.brand h1{font-size:19px}.brand h1 span{display:block;margin:3px 0 0}.topbar .wrap{align-items:flex-start}.header-meta{width:100%;display:flex;justify-content:space-between;gap:8px}.summary{gap:8px}.card{min-height:86px;padding:13px}.card b{font-size:25px}.card span{font-size:12px}.summary-card::after{display:none}.summary-card .card-sub{padding-right:0}.toolbar{border-radius:12px}.action-group{width:100%}.action-group .btn{flex:1 1 calc(50% - 5px)}.filterbar{align-items:stretch}.filter-label{width:100%}.filter-select{width:100%;flex:auto}.filter-check{flex:1}.filter-count{width:100%}.status-guide{gap:5px}.guide-title{width:100%}.system-head{padding:12px}.system-title{font-size:15px}.system-body{padding:7px}.comp-head{padding:10px}.comp-name{font-size:13px}.comp-body{overflow-x:auto}.comp-body table{min-width:860px}.savebar-inner{gap:7px}.savebar-msg{font-size:11px}.savebar .btn{padding:0 9px}.toast{left:10px;right:10px;bottom:76px;text-align:center}}
+
+
+/* ===== Automatic inventory status ===== */
+.inventory-status{display:inline-flex;align-items:center;justify-content:center;min-width:84px;height:36px;padding:0 12px;border-radius:10px;font-size:12px;font-weight:850;border:1px solid #b7d7e9;background:#edf6fc;color:#286287;white-space:nowrap}
+.inventory-status.empty{background:#f1f3f6;border-color:#c9d1da;color:#66788d}
+.inventory-status::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:#5a9dc5}.inventory-status.empty::before{background:#929eaa}
+</style></head><body><h2>Equipment Inventory Report</h2>${reportContent.innerHTML}</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),200);
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
+today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
+normalizeStockMovements();render();updateSaveUI();updateLastSaved();
+</script>
+</body></html>
