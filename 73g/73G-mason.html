@@ -316,6 +316,31 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 @media(max-width:680px){.stock-history-toggle{padding:12px}.stock-history-title p{display:none}.stock-history-count{font-size:10px}.stock-in-summary{grid-template-columns:1fr 1fr}.stock-in-summary>div:last-child{grid-column:1/-1}.stock-in-btn{height:34px}}
 
 </style>
+
+<style>
+/* ===== Stock-in modal scroll stability / text selection refinement ===== */
+body.stock-modal-open{overflow:hidden;overscroll-behavior:none}
+#stockInModal{overscroll-behavior:none}
+#stockInModal .dialog{overflow-anchor:none;contain:layout paint}
+#stockInModal .form{
+  overflow-anchor:none;
+  scroll-behavior:auto;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
+#stockInModal .form>*{overflow-anchor:none}
+#stockInModal .form textarea{
+  resize:none!important;
+  overflow:auto;
+  overflow-anchor:none;
+}
+#stockInModal #stockInSerials{min-height:92px;max-height:120px}
+#stockInModal #stockInNote{min-height:64px;max-height:82px}
+@media(max-height:800px) and (min-width:681px){
+  #stockInModal #stockInSerials{min-height:72px;max-height:84px}
+  #stockInModal #stockInNote{min-height:54px;max-height:64px}
+}
+</style>
 </head>
 <body>
 <header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div></div></div></header>
@@ -653,9 +678,9 @@ function openStockIn(g,i){
  stockInGI=g;stockInII=i;const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  stockInCurrentQty.textContent=Number(x.qty)||0;stockInCurrentSerials.textContent=(x.serials||[]).filter(Boolean).length;stockInSystem.textContent=systemType(group);
  stockInDevice.value=`${x.name}｜${x.part}`;stockInQty.value=1;stockInSerials.value='';stockInLocation.innerHTML=locationOptions(x.location||'');stockInReference.value='';stockInNote.value='';
- stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus(),80);
+ document.body.classList.add('stock-modal-open');stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus({preventScroll:true}),80);
 }
-function closeStockIn(){stockInModal.classList.remove('show');stockInGI=stockInII=null}
+function closeStockIn(){stockInModal.classList.remove('show');document.body.classList.remove('stock-modal-open');stockInGI=stockInII=null}
 function confirmStockIn(){
  const g=stockInGI,i=stockInII,group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  const addQty=Math.max(0,Math.floor(Number(stockInQty.value)||0)),serials=parseSerialValues(stockInSerials.value),location=stockInLocation.value.trim();
@@ -1009,5 +1034,30 @@ th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
 normalizeStockMovements();render();updateSaveUI();updateLastSaved();
+
+
+// Keep the stock-in form from auto-scrolling while the user drags to select text.
+(function bindStockInSelectionStability(){
+ const modal=document.getElementById('stockInModal');
+ const form=modal?.querySelector('.form');
+ if(!modal||!form)return;
+ let lock=null,raf=0;
+ const isTextField=el=>el && (el.tagName==='TEXTAREA' || (el.tagName==='INPUT' && !['button','checkbox','radio','range','file','color'].includes((el.type||'text').toLowerCase())));
+ const restore=()=>{
+   if(!lock)return;
+   cancelAnimationFrame(raf);
+   raf=requestAnimationFrame(()=>{if(lock && form.scrollTop!==lock.top)form.scrollTop=lock.top;});
+ };
+ form.addEventListener('pointerdown',e=>{
+   if(e.button!==0 || !isTextField(e.target))return;
+   lock={top:form.scrollTop};
+ },true);
+ form.addEventListener('scroll',restore,{passive:true});
+ const release=()=>{lock=null;cancelAnimationFrame(raf)};
+ window.addEventListener('pointerup',release,true);
+ window.addEventListener('pointercancel',release,true);
+ window.addEventListener('blur',release);
+})();
+
 </script>
 </body></html>
