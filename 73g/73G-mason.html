@@ -316,31 +316,6 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 @media(max-width:680px){.stock-history-toggle{padding:12px}.stock-history-title p{display:none}.stock-history-count{font-size:10px}.stock-in-summary{grid-template-columns:1fr 1fr}.stock-in-summary>div:last-child{grid-column:1/-1}.stock-in-btn{height:34px}}
 
 </style>
-
-<style>
-/* ===== Stock-in modal scroll stability / text selection refinement ===== */
-body.stock-modal-open{overflow:hidden;overscroll-behavior:none}
-#stockInModal{overscroll-behavior:none}
-#stockInModal .dialog{overflow-anchor:none;contain:layout paint}
-#stockInModal .form{
-  overflow-anchor:none;
-  scroll-behavior:auto;
-  overscroll-behavior-y:contain;
-  -webkit-overflow-scrolling:touch;
-}
-#stockInModal .form>*{overflow-anchor:none}
-#stockInModal .form textarea{
-  resize:none!important;
-  overflow:auto;
-  overflow-anchor:none;
-}
-#stockInModal #stockInSerials{min-height:92px;max-height:120px}
-#stockInModal #stockInNote{min-height:64px;max-height:82px}
-@media(max-height:800px) and (min-width:681px){
-  #stockInModal #stockInSerials{min-height:72px;max-height:84px}
-  #stockInModal #stockInNote{min-height:54px;max-height:64px}
-}
-</style>
 </head>
 <body>
 <header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div></div></div></header>
@@ -474,10 +449,16 @@ let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:
   if(changed) localStorage.setItem('nmsInventoryV2',JSON.stringify(store));
 })();
 // v3 linkage fix: never wipe existing quantities on first open.
+// Natural serial sorting: numeric parts are compared as numbers (2 < 10 < 100).
+const serialNaturalCollator=new Intl.Collator('zh-TW',{numeric:true,sensitivity:'base'});
+function sortSerialsNatural(values){
+  return (Array.isArray(values)?values:[]).slice().sort((a,b)=>serialNaturalCollator.compare(String(a??''),String(b??'')));
+}
+
 // Normalize legacy/imported rows so quantity, serials, state and location always have a valid shape.
 function normalizeInventoryItem(x){
   if(!x)return x;
-  x.serials=[...new Set((Array.isArray(x.serials)?x.serials:[]).map(v=>String(v??'').trim()).filter(Boolean))];
+  x.serials=sortSerialsNatural([...new Set((Array.isArray(x.serials)?x.serials:[]).map(v=>String(v??'').trim()).filter(Boolean))]);
   const rawQty=Math.max(0,Math.floor(Number(x.qty)||0));
   x.qty=Math.max(rawQty,x.serials.length);
   if(!['stock','issued','installed','broken'].includes(x.state))x.state='stock';
@@ -678,9 +659,9 @@ function openStockIn(g,i){
  stockInGI=g;stockInII=i;const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  stockInCurrentQty.textContent=Number(x.qty)||0;stockInCurrentSerials.textContent=(x.serials||[]).filter(Boolean).length;stockInSystem.textContent=systemType(group);
  stockInDevice.value=`${x.name}｜${x.part}`;stockInQty.value=1;stockInSerials.value='';stockInLocation.innerHTML=locationOptions(x.location||'');stockInReference.value='';stockInNote.value='';
- document.body.classList.add('stock-modal-open');stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus({preventScroll:true}),80);
+ stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus(),80);
 }
-function closeStockIn(){stockInModal.classList.remove('show');document.body.classList.remove('stock-modal-open');stockInGI=stockInII=null}
+function closeStockIn(){stockInModal.classList.remove('show');stockInGI=stockInII=null}
 function confirmStockIn(){
  const g=stockInGI,i=stockInII,group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  const addQty=Math.max(0,Math.floor(Number(stockInQty.value)||0)),serials=parseSerialValues(stockInSerials.value),location=stockInLocation.value.trim();
@@ -690,7 +671,7 @@ function confirmStockIn(){
  const own=new Set((x.serials||[]).map(v=>String(v).trim().toLowerCase())),conflicts=[];
  serials.forEach(sn=>{if(own.has(sn.toLowerCase()))conflicts.push(`${sn}（已在此設備庫存）`);else{const owner=findSerialOwner(sn,g,i);if(owner)conflicts.push(`${sn}（${owner.group}｜${owner.item.name}）`)}})
  if(conflicts.length){alert('無法入庫：發現重複序號。\n\n'+conflicts.slice(0,12).join('\n')+(conflicts.length>12?'\n…':''));return}
- const before=Number(x.qty)||0;x.qty=before+addQty;x.serials=x.serials||[];serials.forEach(sn=>x.serials.push(sn));x.location=location;
+ const before=Number(x.qty)||0;x.qty=before+addQty;x.serials=x.serials||[];serials.forEach(sn=>x.serials.push(sn));x.serials=sortSerialsNatural(x.serials);x.location=location;
  addStockMovement(g,i,{type:'inbound',qtyChange:addQty,beforeQty:before,afterQty:x.qty,serials,location,reference:stockInReference.value.trim(),note:stockInNote.value.trim()||'新設備入庫'});
  save();closeStockIn();render();toggleStockHistoryPanel(true);document.getElementById('stockHistoryPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
  showToast(`入庫完成：新增 ${addQty} 件，庫存共 ${x.qty} 件`,'success');
@@ -762,9 +743,9 @@ function changeQty(g,i,d){
 function serialTagEditor(x,g,i){
  const serials=(x.serials||[]).filter(Boolean),qty=Number(x.qty)||0,countClass=serials.length>qty?'over':serials.length===qty&&qty>0?'full':'';
  const tags=serials.length?serials.map((sn,si)=>`<span class="serial-tag" title="${esc(sn)}"><span class="serial-tag-text">${esc(sn)}</span><button type="button" class="serial-tag-remove" title="移除序號 ${esc(sn)}" aria-label="移除序號 ${esc(sn)}" onclick="removeSerial(${g},${i},${si})">×</button></span>`).join(''):'<span class="serial-empty">尚未登記庫存序號</span>';
- return `<div class="serial-editor"><div class="serial-editor-head"><span style="font-size:10.5px;font-weight:800;color:#59718a">庫存序號</span><span class="serial-editor-count ${countClass}">${serials.length} / ${qty}</span></div><div class="serial-tags">${tags}</div><div class="serial-entry-row"><input class="serial-entry" id="serialEntry-${g}-${i}" placeholder="輸入序號後 Enter" autocomplete="off" onkeydown="serialEntryKey(event,${g},${i})"><button type="button" class="serial-add-btn" onclick="addSerialFromInput(${g},${i})">＋新增</button><button type="button" class="serial-batch-btn" onclick="openSerialBatch(${g},${i})">批次貼上</button></div><small class="serial-help">支援 Enter 新增；批次可貼 Excel、逗號或換行資料。</small></div>`;
+ return `<div class="serial-editor"><div class="serial-editor-head"><span style="font-size:10.5px;font-weight:800;color:#59718a">庫存序號</span><span class="serial-editor-count ${countClass}">${serials.length} / ${qty}</span></div><div class="serial-tags">${tags}</div><div class="serial-entry-row"><input class="serial-entry" id="serialEntry-${g}-${i}" placeholder="輸入序號後 Enter" autocomplete="off" onkeydown="serialEntryKey(event,${g},${i})"><button type="button" class="serial-add-btn" onclick="addSerialFromInput(${g},${i})">＋新增</button><button type="button" class="serial-batch-btn" onclick="openSerialBatch(${g},${i})">批次貼上</button></div><small class="serial-help">支援 Enter 新增；批次可貼 Excel、逗號或換行資料；序號會自動依數字由小到大排序。</small></div>`;
 }
-function parseSerialValues(v){return [...new Set(String(v??'').split(/[,，\n\r\t;；]+/).map(s=>s.trim()).filter(Boolean))]}
+function parseSerialValues(v){return sortSerialsNatural([...new Set(String(v??'').split(/[,，\n\r\t;；]+/).map(s=>s.trim()).filter(Boolean))])}
 function findSerialOwner(serial,skipG=-1,skipI=-1){
  const key=String(serial||'').trim().toLowerCase();if(!key)return null;
  for(let gi=0;gi<store.groups.length;gi++){const g=store.groups[gi];for(let ii=0;ii<(g.items||[]).length;ii++){if(gi===skipG&&ii===skipI)continue;const x=g.items[ii];const hit=(x.serials||[]).some(sn=>String(sn).trim().toLowerCase()===key);if(hit)return {gi,ii,group:g.name,item:x};}}
@@ -774,6 +755,7 @@ function addSerialValues(g,i,values,{silent=false}={}){
  const x=store.groups[g]?.items?.[i];if(!x)return {added:0,duplicates:0,conflicts:[]};
  x.serials=(x.serials||[]).map(v=>String(v).trim()).filter(Boolean);const existing=new Set(x.serials.map(v=>v.toLowerCase()));let added=0,duplicates=0;const conflicts=[];
  parseSerialValues(values).forEach(sn=>{const key=sn.toLowerCase();if(existing.has(key)){duplicates++;return}const owner=findSerialOwner(sn,g,i);if(owner){conflicts.push(`${sn}（${owner.group}｜${owner.item.name}）`);return}x.serials.push(sn);existing.add(key);added++;});
+ x.serials=sortSerialsNatural(x.serials);
  if((Number(x.qty)||0)<x.serials.length)x.qty=x.serials.length;
  if(added){markDirty();render()}
  if(!silent){if(conflicts.length)showToast(`已加入 ${added} 筆；${conflicts.length} 筆序號已存在其他設備`,'error');else if(duplicates)showToast(`已加入 ${added} 筆，略過 ${duplicates} 筆重複序號`,'success');else if(added)showToast(`已加入 ${added} 個庫存序號`,'success');else showToast('沒有可加入的新序號','error')}
@@ -789,7 +771,7 @@ function confirmSerialBatch(){if(serialBatchGI===null)return;const raw=serialBat
 // Backward-compatible parser for older inline calls / imported UI state.
 function setSerials(g,i,v){
  const x=store.groups[g].items[i],vals=parseSerialValues(v),clean=[];
- vals.forEach(sn=>{if(!findSerialOwner(sn,g,i))clean.push(sn)});x.serials=clean;
+ vals.forEach(sn=>{if(!findSerialOwner(sn,g,i))clean.push(sn)});x.serials=sortSerialsNatural(clean);
  if((Number(x.qty)||0)<x.serials.length)x.qty=x.serials.length;markDirty();render();
 }
 function setState(g,i,v){showToast('庫存狀態由系統自動判定，無需手動修改');render()}
@@ -1034,30 +1016,5 @@ th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
 normalizeStockMovements();render();updateSaveUI();updateLastSaved();
-
-
-// Keep the stock-in form from auto-scrolling while the user drags to select text.
-(function bindStockInSelectionStability(){
- const modal=document.getElementById('stockInModal');
- const form=modal?.querySelector('.form');
- if(!modal||!form)return;
- let lock=null,raf=0;
- const isTextField=el=>el && (el.tagName==='TEXTAREA' || (el.tagName==='INPUT' && !['button','checkbox','radio','range','file','color'].includes((el.type||'text').toLowerCase())));
- const restore=()=>{
-   if(!lock)return;
-   cancelAnimationFrame(raf);
-   raf=requestAnimationFrame(()=>{if(lock && form.scrollTop!==lock.top)form.scrollTop=lock.top;});
- };
- form.addEventListener('pointerdown',e=>{
-   if(e.button!==0 || !isTextField(e.target))return;
-   lock={top:form.scrollTop};
- },true);
- form.addEventListener('scroll',restore,{passive:true});
- const release=()=>{lock=null;cancelAnimationFrame(raf)};
- window.addEventListener('pointerup',release,true);
- window.addEventListener('pointercancel',release,true);
- window.addEventListener('blur',release);
-})();
-
 </script>
 </body></html>
