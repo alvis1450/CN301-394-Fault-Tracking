@@ -320,10 +320,16 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 .stock-in-help{font-size:10.8px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px}
 @media(max-width:680px){.stock-history-toggle{padding:12px}.stock-history-title p{display:none}.stock-history-count{font-size:10px}.stock-in-summary{grid-template-columns:1fr 1fr}.stock-in-summary>div:last-child{grid-column:1/-1}.stock-in-btn{height:34px}}
 
+/* ===== Supabase multi-device cloud sync ===== */
+.cloud-sync-badge{display:inline-flex;align-items:center;gap:6px;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.12);color:#e5eef8;border:1px solid rgba(255,255,255,.18)}
+.cloud-sync-dot{width:7px;height:7px;border-radius:50%;background:#aabbd0;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.cloud-sync-badge.online .cloud-sync-dot{background:#62d394}.cloud-sync-badge.syncing .cloud-sync-dot{background:#ffd166}.cloud-sync-badge.offline .cloud-sync-dot{background:#ff9b9b}.cloud-sync-badge.conflict .cloud-sync-dot{background:#ffcc66}
+@media(max-width:680px){.cloud-sync-badge{font-size:9.8px;margin-top:3px}}
+
 </style>
 </head>
 <body>
-<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div></div></div></header>
+<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
 <main>
 <section class="summary">
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('groups')" onkeydown="summaryKey(event,'groups')"><b id="sGroups">0</b><span>組件分類</span><small class="card-sub">依 CN / NMS / SSS 分類查看</small></div>
@@ -420,6 +426,153 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 </div><div class="dialog-actions"><button class="btn light" onclick="closeSerialBatch()">取消</button><button class="btn primary" onclick="confirmSerialBatch()">加入序號</button></div></div></div>
 <script>
 const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 保密器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 無線電","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"n/a","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"n/a","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-Drawer","items":[{"part":"A30-2030-010","name":"筆電","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"N/A","name":"電源線","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"11457-2309-01","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01 ","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 紅區交換器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線x1","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250手持話機x1","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051電源線x1","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"N/A","name":"市電轉換接頭（澳洲）x1","qty":0,"serials":[]},{"part":"10515-0607-4100*","name":"RF-7800W卡x1","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟x1","qty":0,"serials":[]},{"part":"N/A","name":"螺絲包x1 (4ea)","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線 / 無線電配備","sourcePart":"11457-2042-01","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"天線桅桿與工具配備","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-0504","name":"電纜導引環","qty":0,"serials":[]},{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"N/A","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"N/A","name":"内六角板手組","qty":0,"serials":[]},{"part":"E75-0373-001","name":"10M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"鐵槌","qty":0,"serials":[]},{"part":"N/A","name":"量距繩(黃)","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"N/A","name":"地樁","qty":0,"serials":[]},{"part":"E75-0372-001","name":"25M 天線桅桿T型桿套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"E75-0376-001","name":"25M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"E75-0377-001","name":"25M 天線桅杆手動天線定位器(MAP)套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（內部）","sourcePart":"11457-2000-01","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"OMNI ANT HORZ(N)","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（外部）","sourcePart":"11457-2000-01","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"N/A","name":"TOCNET P-case","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 RUGGED laptop GETAC S510 COMPUTER","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"CABLE ASSY, TOCNET AUDIO TO RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"Dual Radio 6-pin Generic Cable Assemblies","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB POWER SUPPLY KIT, AC TO 24VDC","qty":0,"serials":[]}]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2592-001","name":"4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"11457-2307-01","name":"COMMAND POST INTERFACE PANEL ASSEMBLY","qty":0,"serials":[]},{"part":"N/A","name":"POWER CORD","qty":0,"serials":[]},{"part":"N/A","name":"USB","qty":0,"serials":[]},{"part":"N/A","name":"RS-232","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]},{"part":"11457-2309-01","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線x1","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線x1","qty":0,"serials":[]},{"part":"N/A","name":"電源線x1","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-Cabnet","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-Drawer","items":[{"part":"A30-2030-010","name":"筆電(1)","qty":0,"serials":[]},{"part":"A30-2030-010","name":"筆電(2)","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]},{"part":"A30-2305-004","name":"HDT 帳篷套件，橄欖褐色","qty":0,"serials":[]},{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具包，橄欖褐色，標準款","qty":0,"serials":[]},{"part":"n/a","name":"螺絲起子x1","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"11457-3000-01","items":[{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"11457-3000-01","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]}]}];
+// ===== Supabase multi-device cloud sync =====
+// Publishable keys are intended for browser-side use. Never put a service_role / secret key here.
+const SUPABASE_URL='https://jyjgbduvmfmzlhhciylc.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg';
+const CLOUD_TABLE='inventory_data';
+const CLOUD_ROW_ID='73g-main';
+const CLOUD_POLL_MS=5000;
+let cloudUpdatedAt=null;
+let cloudSyncBusy=false;
+let cloudReady=false;
+let cloudUnsynced=false;
+let cloudSyncQueue=Promise.resolve();
+let cloudPollTimer=null;
+
+function cloudApiUrl(extra=''){
+  return `${SUPABASE_URL}/rest/v1/${CLOUD_TABLE}${extra}`;
+}
+function cloudHeaders(json=true){
+  const h={apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`};
+  if(json)h['Content-Type']='application/json';
+  return h;
+}
+function setCloudStatus(state,text){
+  const badge=document.getElementById('cloudSyncBadge'),label=document.getElementById('cloudSyncText');
+  if(badge)badge.className=`cloud-sync-badge ${state||''}`;
+  if(label)label.textContent=text||'';
+}
+function cloudDataIsInitialized(data){
+  return !!(data && Array.isArray(data.groups) && data.groups.length);
+}
+function persistLocalSnapshot(){
+  const now=new Date().toISOString();
+  localStorage.setItem('nmsInventoryV2',JSON.stringify(store));
+  localStorage.setItem('nmsInventoryLastSaved',now);
+  savedSnapshot=JSON.stringify(store);
+  dirty=false;
+  updateSaveUI();
+  updateLastSaved();
+}
+async function fetchCloudRow(){
+  const url=cloudApiUrl(`?id=eq.${encodeURIComponent(CLOUD_ROW_ID)}&select=id,data,updated_at`);
+  const res=await fetch(url,{headers:cloudHeaders(false),cache:'no-store'});
+  if(!res.ok)throw new Error(`雲端讀取失敗 (${res.status})`);
+  const rows=await res.json();
+  return rows?.[0]||null;
+}
+async function ensureCloudRow(){
+  let row=await fetchCloudRow();
+  if(row)return row;
+  const now=new Date().toISOString();
+  const res=await fetch(cloudApiUrl(),{
+    method:'POST',headers:{...cloudHeaders(),Prefer:'return=representation'},
+    body:JSON.stringify({id:CLOUD_ROW_ID,data:{groups:[],replacements:[],stockMovements:[]},updated_at:now})
+  });
+  if(!res.ok)throw new Error(`建立雲端資料失敗 (${res.status})`);
+  const rows=await res.json();
+  return rows?.[0]||{id:CLOUD_ROW_ID,data:{groups:[],replacements:[],stockMovements:[]},updated_at:now};
+}
+async function pushCloudSnapshot(snapshot,{silent=false}={}){
+  if(!navigator.onLine){cloudUnsynced=true;setCloudStatus('offline','離線｜待同步');return false}
+  cloudSyncBusy=true;setCloudStatus('syncing','雲端同步中…');
+  try{
+    if(!cloudUpdatedAt){const row=await ensureCloudRow();cloudUpdatedAt=row?.updated_at||null}
+    const now=new Date().toISOString();
+    let filter=`?id=eq.${encodeURIComponent(CLOUD_ROW_ID)}`;
+    if(cloudUpdatedAt)filter+=`&updated_at=eq.${encodeURIComponent(cloudUpdatedAt)}`;
+    const res=await fetch(cloudApiUrl(filter),{
+      method:'PATCH',headers:{...cloudHeaders(),Prefer:'return=representation'},
+      body:JSON.stringify({data:snapshot,updated_at:now})
+    });
+    if(!res.ok)throw new Error(`雲端寫入失敗 (${res.status})`);
+    const rows=await res.json();
+    if(!rows.length){
+      const latest=await fetchCloudRow();
+      // Preserve the user's just-saved local version before adopting the newer cloud version.
+      localStorage.setItem('nmsInventoryConflictBackup',JSON.stringify({savedAt:new Date().toISOString(),data:snapshot}));
+      cloudUpdatedAt=latest?.updated_at||null;
+      cloudUnsynced=false;
+      setCloudStatus('conflict','同步衝突｜已保留備份');
+      if(latest&&cloudDataIsInitialized(latest.data))adoptCloudData(latest,{notify:false});
+      if(!silent)showToast('偵測到另一台裝置較新的修改。已載入雲端最新版，並在本機保留衝突備份。','error');
+      return false;
+    }
+    cloudUpdatedAt=rows[0].updated_at||now;
+    cloudReady=true;
+    cloudUnsynced=false;
+    setCloudStatus('online','雲端已同步');
+    return true;
+  }catch(err){
+    console.error('[73G cloud sync]',err);
+    cloudUnsynced=true;
+    setCloudStatus('offline',navigator.onLine?'雲端同步失敗｜待重試':'離線｜待同步');
+    if(!silent)showToast('本機已儲存，但雲端同步失敗；網路恢復後會再嘗試。','error');
+    return false;
+  }finally{cloudSyncBusy=false}
+}
+function queueCloudSave(snapshot=JSON.parse(JSON.stringify(store)),options={}){
+  cloudSyncQueue=cloudSyncQueue.catch(()=>{}).then(()=>pushCloudSnapshot(snapshot,options));
+  return cloudSyncQueue;
+}
+function adoptCloudData(row,{notify=false}={}){
+  if(!row||!cloudDataIsInitialized(row.data))return false;
+  store=normalizeInventoryStore(row.data);
+  normalizeStockMovements(store);
+  // Keep serial display deterministic on every device.
+  store.groups.forEach(g=>(g.items||[]).forEach(x=>{x.serials=sortSerialsNatural(x.serials||[])}));
+  cloudUpdatedAt=row.updated_at||null;
+  cloudReady=true;
+  persistLocalSnapshot();
+  render();
+  setCloudStatus('online','雲端已同步');
+  if(notify)showToast('已取得其他裝置的最新庫存資料','success');
+  return true;
+}
+async function refreshFromCloud({notify=false,force=false}={}){
+  if(!navigator.onLine||cloudSyncBusy)return false;
+  if((dirty||cloudUnsynced)&&!force)return false;
+  try{
+    const row=await ensureCloudRow();
+    if(!row)return false;
+    if(!cloudDataIsInitialized(row.data)){
+      cloudUpdatedAt=row.updated_at||null;
+      await queueCloudSave(JSON.parse(JSON.stringify(store)),{silent:true});
+      return true;
+    }
+    if(force||!cloudUpdatedAt||row.updated_at!==cloudUpdatedAt)return adoptCloudData(row,{notify});
+    cloudReady=true;cloudUnsynced=false;setCloudStatus('online','雲端已同步');return true;
+  }catch(err){
+    console.error('[73G cloud refresh]',err);
+    setCloudStatus('offline',navigator.onLine?'雲端連線失敗｜使用本機資料':'離線｜使用本機資料');
+    return false;
+  }
+}
+async function initializeCloudSync(){
+  setCloudStatus('syncing','雲端連線中…');
+  await refreshFromCloud({force:true});
+  if(cloudPollTimer)clearInterval(cloudPollTimer);
+  cloudPollTimer=setInterval(()=>{if(!document.hidden&&!dirty&&!cloudUnsynced&&!cloudSyncBusy)refreshFromCloud({notify:true})},CLOUD_POLL_MS);
+}
+window.addEventListener('online',()=>{
+  setCloudStatus('syncing','網路恢復｜同步中…');
+  if(cloudUnsynced)queueCloudSave(JSON.parse(JSON.stringify(store)),{silent:false});
+  else refreshFromCloud({notify:true});
+});
+window.addEventListener('offline',()=>setCloudStatus('offline','離線｜使用本機資料'));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!dirty&&!cloudUnsynced)refreshFromCloud({notify:false})});
+
 let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:JSON.parse(JSON.stringify(baseGroups)),replacements:[],stockMovements:[]};
 /* Built-in catalog migration: add new catalog groups/items without overwriting user-entered data. */
 (function mergeBuiltInCatalog(){
@@ -490,12 +643,20 @@ function updateSaveUI(){
  if(bar)bar.classList.toggle('show',dirty);
 }
 function markDirty(){dirty=true;updateSaveUI()}
-function save(){localStorage.setItem('nmsInventoryV2',JSON.stringify(store));localStorage.setItem('nmsInventoryLastSaved',new Date().toISOString());savedSnapshot=JSON.stringify(store);dirty=false;updateSaveUI();updateLastSaved()}
-function saveAll(){
+function save(){
+ normalizeInventoryStore();
+ persistLocalSnapshot();
+ cloudUnsynced=true;
+ const snapshot=JSON.parse(JSON.stringify(store));
+ queueCloudSave(snapshot,{silent:false});
+}
+async function saveAll(){
  normalizeInventoryStore();
  const dups=findDuplicateSerials();
  if(dups.length){alert('無法儲存：發現重複設備序號。\n\n'+dups.slice(0,8).join('\n')+(dups.length>8?'\n…':''));return}
- save();render();showSavedNotice();showToast('資料已儲存','success')
+ persistLocalSnapshot();cloudUnsynced=true;render();showSavedNotice();
+ const ok=await queueCloudSave(JSON.parse(JSON.stringify(store)),{silent:false});
+ showToast(ok?'資料已儲存並同步雲端':'資料已存本機；雲端尚未完成同步',ok?'success':'error')
 }
 function showSavedNotice(){const b=document.getElementById('saveMainBtn');if(!b)return;const t=b.textContent;b.textContent='✓ 儲存完成';setTimeout(()=>{b.textContent=dirty?'💾 儲存變更':'💾 已儲存'},900)}
 function discardChanges(){if(!dirty)return;if(!confirm('確定取消尚未儲存的變更？'))return;store=JSON.parse(savedSnapshot);dirty=false;updateSaveUI();render();showToast('已取消未儲存變更')}
@@ -510,7 +671,7 @@ function findDuplicateSerials(){
  return dups;
 }
 function showToast(msg,type=''){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+type;clearTimeout(showToast.t);showToast.t=setTimeout(()=>el.className='toast',1800)}
-function updateLastSaved(){const el=document.getElementById('lastSaved');if(!el)return;const raw=localStorage.getItem('nmsInventoryLastSaved');el.textContent=raw?'最後儲存：'+new Date(raw).toLocaleString('zh-TW',{dateStyle:'short',timeStyle:'short'}):'尚無儲存紀錄'}
+function updateLastSaved(){const el=document.getElementById('lastSaved');if(!el)return;const raw=localStorage.getItem('nmsInventoryLastSaved');el.textContent=raw?'本機最後儲存：'+new Date(raw).toLocaleString('zh-TW',{dateStyle:'short',timeStyle:'short'}):'尚無儲存紀錄'}
 function updateSummary(){
  const all=store.groups.flatMap(g=>g.items);
  sGroups.textContent=store.groups.length;sTypes.textContent=all.length;sQty.textContent=all.reduce((a,x)=>a+(Number(x.qty)||0),0);sTracked.textContent=all.reduce((a,x)=>a+(x.serials?.filter(Boolean).length||0),0);
@@ -1054,6 +1215,6 @@ installSafeModalBackdropClose();
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
-normalizeStockMovements();render();updateSaveUI();updateLastSaved();
+normalizeStockMovements();render();updateSaveUI();updateLastSaved();initializeCloudSync();
 </script>
 </body></html>
