@@ -301,6 +301,11 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
   #stockInModal .dialog-actions .btn{flex:1;min-width:0;height:46px}
 }
 
+/* ===== Modal drag/selection stability ===== */
+.modal,.modal .dialog,.modal .form{overflow-anchor:none}
+#stockInModal .form,#serialBatchModal .form,#modal .form{scroll-behavior:auto}
+#stockInModal textarea,#serialBatchModal textarea{resize:none}
+
 /* ===== Professional stock transaction management ===== */
 .stock-history{margin:0 0 12px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 3px 12px rgba(21,50,89,.045)}
 .stock-history-toggle{width:100%;border:0;background:linear-gradient(100deg,#f4f8fc,#edf4fb);color:#173b70;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer}
@@ -387,17 +392,17 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 </div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveReplace()">💾 儲存更換紀錄</button></div></div></div>
 
 
-<div class="modal" id="addDeviceModal" onclick="if(event.target===this)closeAddDevice()"><div class="dialog"><h3>新增設備</h3><div class="form">
+<div class="modal" id="addDeviceModal"><div class="dialog"><h3>新增設備</h3><div class="form">
 <label>所屬組件<input id="aGroupName" readonly></label>
 <label>設備名稱 <span class="required">必填</span><input id="aName" placeholder="請輸入設備名稱"></label>
 <label>料號<input id="aPart" placeholder="若無料號可填 N/A"></label>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeAddDevice()">取消</button><button class="btn primary" onclick="confirmAddDevice()">加入清單</button></div></div></div>
 
-<div class="modal" id="summaryDetailModal" onclick="if(event.target===this)closeSummaryDetail()"><div class="dialog" style="width:min(1050px,100%);max-height:92vh;overflow:hidden"><h3 id="summaryDetailHeading">統計明細</h3><div id="summaryDetailContent" style="padding:16px;overflow:auto;max-height:76vh"></div><div class="dialog-actions"><button class="btn light" onclick="closeSummaryDetail()">關閉</button></div></div></div>
+<div class="modal" id="summaryDetailModal"><div class="dialog" style="width:min(1050px,100%);max-height:92vh;overflow:hidden"><h3 id="summaryDetailHeading">統計明細</h3><div id="summaryDetailContent" style="padding:16px;overflow:auto;max-height:76vh"></div><div class="dialog-actions"><button class="btn light" onclick="closeSummaryDetail()">關閉</button></div></div></div>
 
 <div class="modal" id="reportModal"><div class="dialog" style="width:min(980px,100%);max-height:90vh;overflow:auto"><h3>裝備庫存 Report 報告</h3><div id="reportContent" style="padding:16px"></div><div class="dialog-actions"><button class="btn light" onclick="closeReport()">關閉</button><button class="btn green" onclick="exportReportCSV()">匯出 CSV</button><button class="btn primary" onclick="printReport()">列印 / PDF</button></div></div></div>
 
-<div class="modal" id="stockInModal" onclick="if(event.target===this)closeStockIn()"><div class="dialog" style="width:min(700px,100%)"><h3>新增庫存｜新設備入庫</h3><div class="form">
+<div class="modal" id="stockInModal"><div class="dialog" style="width:min(700px,100%)"><h3>新增庫存｜新設備入庫</h3><div class="form">
 <div class="stock-in-summary"><div><b id="stockInCurrentQty">0</b><span>目前庫存</span></div><div><b id="stockInCurrentSerials">0</b><span>目前庫存序號</span></div><div><b id="stockInSystem">—</b><span>系統分類</span></div></div>
 <label>設備<input id="stockInDevice" readonly></label>
 <label>本次新增數量 <span class="required">必填</span><input id="stockInQty" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
@@ -408,7 +413,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <div class="stock-in-help"><b>入庫規則：</b>本次序號數不可大於新增數量；序號不可與目前任何庫存設備重複。儲存後會立即增加庫存並建立一筆不可因修改庫存而消失的異動紀錄。</div>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeStockIn()">取消</button><button class="btn primary" onclick="confirmStockIn()">💾 確認入庫</button></div></div></div>
 
-<div class="modal" id="serialBatchModal" onclick="if(event.target===this)closeSerialBatch()"><div class="dialog" style="width:min(620px,100%)"><h3>批次加入庫存序號</h3><div class="form">
+<div class="modal" id="serialBatchModal"><div class="dialog" style="width:min(620px,100%)"><h3>批次加入庫存序號</h3><div class="form">
 <label>設備<input id="serialBatchDevice" readonly></label>
 <label>批次序號<textarea id="serialBatchInput" placeholder="可直接貼上 Excel 一整欄，或使用逗號、全形逗號、換行、Tab 分隔。\n例如：\nSN-A001\nSN-A002\nSN-A003"></textarea></label>
 <div style="font-size:11px;line-height:1.55;color:#70849a;background:#f7fafc;border:1px solid #e1e9f1;border-radius:9px;padding:9px 10px">系統會自動去除空白與重複序號；若序號已存在於其他設備，會略過並提示。序號筆數超過目前庫存時，庫存量會自動補足。</div>
@@ -1012,6 +1017,40 @@ th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color
 .inventory-status::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:#5a9dc5}.inventory-status.empty::before{background:#929eaa}
 </style></head><body><h2>Equipment Inventory Report</h2>${reportContent.innerHTML}</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),200);
 }
+
+// ===== Safe modal backdrop close =====
+// A drag that starts inside a dialog (for example selecting/copying text) must
+// never be treated as a click on the backdrop when the pointer is released
+// outside the white dialog.
+function installSafeModalBackdropClose(){
+  const closers={
+    modal:()=>closeModal(),
+    addDeviceModal:()=>closeAddDevice(),
+    summaryDetailModal:()=>closeSummaryDetail(),
+    reportModal:()=>closeReport(),
+    stockInModal:()=>closeStockIn(),
+    serialBatchModal:()=>closeSerialBatch()
+  };
+  Object.entries(closers).forEach(([id,closeFn])=>{
+    const overlay=document.getElementById(id);if(!overlay)return;
+    let downOnBackdrop=false,startX=0,startY=0,moved=false;
+    overlay.addEventListener('pointerdown',e=>{
+      downOnBackdrop=(e.target===overlay);
+      startX=e.clientX;startY=e.clientY;moved=false;
+    },true);
+    overlay.addEventListener('pointermove',e=>{
+      if(Math.abs(e.clientX-startX)>6||Math.abs(e.clientY-startY)>6)moved=true;
+    },true);
+    overlay.addEventListener('pointerup',e=>{
+      const selection=window.getSelection?.();
+      const hasSelection=!!selection && !selection.isCollapsed && String(selection).trim().length>0;
+      if(downOnBackdrop && e.target===overlay && !moved && !hasSelection)closeFn();
+      downOnBackdrop=false;moved=false;
+    },true);
+    overlay.addEventListener('pointercancel',()=>{downOnBackdrop=false;moved=false},true);
+  });
+}
+installSafeModalBackdropClose();
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
