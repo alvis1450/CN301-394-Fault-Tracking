@@ -1296,16 +1296,16 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <div class="col-title h-index">#</div>
         <div class="col-title">單位<small>Unit</small></div>
         <div class="col-title">車號<small>Vehicle No.</small></div>
-        <div class="col-title">車廂號碼<small>Carriage No.</small></div>
       </div>
       <div class="column-head-right">
+        <div class="col-title">車廂號碼<small>Carriage No.</small></div>
         <div class="col-title">狀態<small>Status</small></div>
         <div class="col-title">故障描述<small>Fault Description</small></div>
         <div class="col-title">維修人員<small>Repair Technician</small></div>
         <div class="col-title h-wit">見證人<small>Witness</small></div>
+        <div class="col-title">地點<small>Location</small></div>
         <div class="col-title action-spacer"></div>
       </div>
-      <div class="column-head-location"><div class="col-title">地點<small>CN / DK Locations</small></div></div>
     </div>
     <div id="app"></div>
   </div>
@@ -1365,11 +1365,24 @@ function setCloudStatus(text,state=""){
   el.textContent=text;
   el.dataset.state=state;
 }
+function parentCarFromDkCode(code){
+  const m=String(code||"").toUpperCase().match(/^DK(\d{3})$/);
+  if(!m) return "";
+  const n=Number(m[1]);
+  if(n===301) return "CN-D-301";
+  if(n>=302 && n<=378) return `CN-B-${n}`;
+  return "";
+}
 function dbRowToRecord(row){
+  const rawCar=String(row.carriage_no||"");
+  const dkParent=parentCarFromDkCode(rawCar);
+  const assetType=dkParent?"DK":"CN";
+  const car=dkParent||normalizeCarId(rawCar);
   return {
     id:"db_"+row.id,
     dbId:row.id,
-    car:normalizeCarId(row.carriage_no),
+    car,
+    assetType,
     unit:row.unit||"",
     vehicleNo:row.vehicle_no||"",
     status:row.status||"Fault / 故障",
@@ -1385,12 +1398,14 @@ function dbRowToRecord(row){
   };
 }
 function faultToDbRow(r){
+  const isDk=r.assetType==="DK";
+  const assetLoc=isDk?(dkLocations[r.car]||{}):(locations[r.car]||{});
   const obj={
-    unit:r.unit||units[r.car]||"",
-    vehicle_no:r.vehicleNo||vehicleNos[r.car]||"",
-    carriage_no:r.car,
-    location_type:r.locationType||locations[r.car]?.type||"",
-    location_detail:r.locationDetail||locations[r.car]?.detail||"",
+    unit:isDk?"":(r.unit||units[r.car]||""),
+    vehicle_no:isDk?"":(r.vehicleNo||vehicleNos[r.car]||""),
+    carriage_no:isDk?getDkCode(r.car):r.car,
+    location_type:r.locationType||assetLoc.type||"",
+    location_detail:r.locationDetail||assetLoc.detail||"",
     status:r.status||"Fault / 故障",
     description:r.desc||"",
     repair_technician:r.tech||"",
@@ -1487,9 +1502,13 @@ async function loadFromCloud({force=false,initial=false}={}){
     }
     const r=dbRowToRecord(row);
     nextData.push(r);
-    if(r.unit&&!nextUnits[car])nextUnits[car]=r.unit;
-    if(r.vehicleNo&&!nextVehicles[car])nextVehicles[car]=r.vehicleNo;
-    if((r.locationType||r.locationDetail)&&!nextLocations[car])nextLocations[car]={type:r.locationType||"",detail:r.locationDetail||""};
+    if(r.assetType!=="DK"){
+      if(r.unit&&!nextUnits[r.car])nextUnits[r.car]=r.unit;
+      if(r.vehicleNo&&!nextVehicles[r.car])nextVehicles[r.car]=r.vehicleNo;
+      if((r.locationType||r.locationDetail)&&!nextLocations[r.car])nextLocations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }else if((r.locationType||r.locationDetail)&&!nextDkLocations[r.car]){
+      nextDkLocations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }
   });
   data=nextData;
   units=nextUnits;
@@ -1667,6 +1686,7 @@ function ensureIds(arr){
     if(!r.statusAt){r.statusAt=r.createdAt;changed=true;}
     if(typeof r.locationType!=="string"){r.locationType="";changed=true;}
     if(typeof r.locationDetail!=="string"){r.locationDetail="";changed=true;}
+    if(r.assetType!=="DK" && r.assetType!=="CN"){r.assetType="CN";changed=true;}
   });
   return changed;
 }
@@ -1725,7 +1745,7 @@ function updateCustomVehicleNo(car,value){
 function updateCarLocationType(car,value){
   const cur=locations[car]||{type:"",detail:""};
   locations[car]={type:value,detail:value?String(cur.detail||""):""};
-  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=locations[car].detail;}});
+  data.forEach(r=>{if(r.car===car && r.assetType!=="DK"){r.locationType=locations[car].type;r.locationDetail=locations[car].detail;}});
   markDirty("location:"+car);
   render();
   if(value) setTimeout(()=>document.querySelector(`[data-car-location-detail="${car}"]`)?.focus(),0);
@@ -1733,7 +1753,7 @@ function updateCarLocationType(car,value){
 function updateCarLocationDetail(car,value){
   const cur=locations[car]||{type:"",detail:""};
   locations[car]={type:String(cur.type||""),detail:value};
-  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=value;}});
+  data.forEach(r=>{if(r.car===car && r.assetType!=="DK"){r.locationType=locations[car].type;r.locationDetail=value;}});
   markDirty("location:"+car);
   document.querySelector(`[data-car-location="${car}"]`)?.classList.add("head-unsaved");
 }
@@ -1741,6 +1761,7 @@ function updateDkLocationType(car,value){
   if(!isCnCar(car)) return;
   const cur=dkLocations[car]||{type:"",detail:""};
   dkLocations[car]={type:value,detail:value?String(cur.detail||""):""};
+  data.forEach(r=>{if(r.car===car && r.assetType==="DK"){r.locationType=dkLocations[car].type;r.locationDetail=dkLocations[car].detail;}});
   markDirty("dk-location:"+car);
   render();
   if(value) setTimeout(()=>document.querySelector(`[data-dk-location-detail="${car}"]`)?.focus(),0);
@@ -1749,13 +1770,16 @@ function updateDkLocationDetail(car,value){
   if(!isCnCar(car)) return;
   const cur=dkLocations[car]||{type:"",detail:""};
   dkLocations[car]={type:String(cur.type||""),detail:value};
+  data.forEach(r=>{if(r.car===car && r.assetType==="DK"){r.locationType=dkLocations[car].type;r.locationDetail=value;}});
   markDirty("dk-location:"+car);
   document.querySelector(`[data-dk-location="${car}"]`)?.classList.add("head-unsaved");
 }
 
-function add(car){
+function add(car,assetType="CN"){
   const stamp=nowISO();
-  const r={id:newId(),car,unit:units[car]||"",vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  const isDk=assetType==="DK";
+  const assetLoc=isDk?(dkLocations[car]||{}):(locations[car]||{});
+  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
   render();
@@ -2335,65 +2359,64 @@ function getDkCode(car){
   const m=String(car).match(/(\d+)$/);
   return m ? `DK${m[1]}` : "DK";
 }
+function faultRowHtml(r){
+  const isDirty=dirtyIds.has(r.id);
+  return `<div class="row asset-fault-row ${isDirty?'unsaved':''}" data-id="${r.id}">
+    <div class="status-wrap">
+      <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
+        <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
+        <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
+        <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
+        <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
+        <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
+      </select>
+      <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
+    </div>
+    ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障描述 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障描述 / Fault description'}</div>`}
+    <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
+    <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
+    <div class="fault-location-display">${esc(r.locationType||'—')}${r.locationDetail?`<small>${esc(r.locationDetail)}</small>`:''}</div>
+    <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
+  </div>`;
+}
+function assetSectionHtml(c,assetType){
+  const isDk=assetType==="DK";
+  if(isDk && !isCnCar(c)) return "";
+  const assetName=isDk?getDkCode(c):c;
+  const loc=isDk?(dkLocations[c]||{type:"",detail:""}):(locations[c]||{type:"",detail:""});
+  const rows=data.filter(r=>r.car===c && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+  const dirtyKey=(isDk?'dk-location:':'location:')+c;
+  const typeHandler=isDk?'updateDkLocationType':'updateCarLocationType';
+  const detailHandler=isDk?'updateDkLocationDetail':'updateCarLocationDetail';
+  const detailData=isDk?'data-dk-location-detail':'data-car-location-detail';
+  return `<section class="asset-section ${isDk?'dk-asset':'cn-asset'}">
+    <div class="asset-header ${dirtyIds.has(dirtyKey)?'head-unsaved':''}" ${isDk?`data-dk-location="${c}"`:`data-car-location="${c}"`}>
+      <div class="asset-name-wrap"><span class="asset-name">${assetName}</span><button class="asset-add-btn" onclick="add('${c}','${assetType}')">＋ Add Fault / 新增</button></div>
+      <div class="asset-location-controls">
+        <select class="location-select" onchange="${typeHandler}('${c}',this.value)" aria-label="${assetName} 地點">
+          <option value="">📍 選擇地點</option>
+          ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
+        </select>
+        ${loc.type?`<input class="location-detail" ${detailData}="${c}" value="${esc(loc.detail)}" placeholder="${assetName} 詳細位置" oninput="${detailHandler}('${c}',this.value)">`:''}
+      </div>
+    </div>
+    <div class="asset-rows">${rows.length?rows.map(faultRowHtml).join(""):`<div class="asset-empty">尚無故障紀錄 / No fault records</div>`}</div>
+  </section>`;
+}
 function render(){
   const k=(document.getElementById("search").value||"").toUpperCase();
   let h="";
   cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
-    const rows=data.filter(r=>r.car===c);
     const vehicleValue=vehicleNos[c]||"";
     const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
     const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
-    const loc=locations[c]||{type:"",detail:""};
-    const dkLoc=dkLocations[c]||{type:"",detail:""};
-    const dkCode=getDkCode(c);
-    h+=`<div class="car ${dkCode?'has-dk':'no-dk'}">
-      <div class="head" data-car-head="${c}"><span class="rownum">${idx+1}</span><select class="unit-select" onchange="updateUnit('${c}',this.value)"><option value="">選擇單位</option>${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select><div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div><span class="carno">${c}</span><button class="add-btn" onclick="add('${c}')">＋ Add Fault / 新增</button></div>
-      <div class="rows">`;
-    if(!rows.length){
-      h+=`<div class="empty">尚無故障紀錄 / No fault records</div>`;
-    }
-    rows.forEach(r=>{
-      const isDirty=dirtyIds.has(r.id);
-      h+=`<div class="row ${isDirty?'unsaved':''}" data-id="${r.id}">
-        <div class="status-wrap">
-          <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
-            <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
-            <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
-            <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
-            <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
-            <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
-          </select>
-          <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
-        </div>
-        ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障訊息 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障訊息 / Fault description'}</div>`}
-        <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
-        <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
-        <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
-      </div>`;
-    });
-    h+=`</div>
-      <div class="car-location ${dkCode?'dual-location':'standard-location'}">
-        <div class="location-panel cn-location-panel ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
-          <div class="location-identity cn-identity"><span class="cn-location-badge">${c}</span><span class="location-caption">CN Location</span></div>
-          <div class="location-controls">
-            <select class="location-select" aria-label="${c} 地點" onchange="updateCarLocationType('${c}',this.value)">
-              <option value="">📍 選擇 CN 地點</option>
-              ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
-            </select>
-            ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="CN：輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
-          </div>
-        </div>
-        ${dkCode?`<div class="location-panel dk-location-panel ${dirtyIds.has('dk-location:'+c)?'head-unsaved':''}" data-dk-location="${c}">
-          <div class="dk-identity"><span class="dk-badge">${dkCode}</span><span class="dk-caption">DK Location</span></div>
-          <div class="location-controls">
-            <select class="location-select dk-location-select" aria-label="${dkCode} 地點" onchange="updateDkLocationType('${c}',this.value)">
-              <option value="">📍 選擇 DK 地點</option>
-              ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${dkLoc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
-            </select>
-            ${dkLoc.type?`<input class="location-detail" data-dk-location-detail="${c}" value="${esc(dkLoc.detail)}" placeholder="${dkCode}：輸入${esc(dkLoc.type)}詳細位置" oninput="updateDkLocationDetail('${c}',this.value)">`:''}
-          </div>
-        </div>`:''}
+    h+=`<div class="car asset-car">
+      <div class="shared-vehicle" data-car-head="${c}">
+        <span class="rownum">${idx+1}</span>
+        <select class="unit-select" onchange="updateUnit('${c}',this.value)"><option value="">選擇單位</option>${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select>
+        <div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div>
       </div>
+      <div class="asset-stack">${assetSectionHtml(c,"CN")}${assetSectionHtml(c,"DK")}</div>
     </div>`;
   });
   document.getElementById("app").innerHTML=h;
@@ -2767,7 +2790,7 @@ function applyQuickFilters(){
   const allCars=[...document.querySelectorAll("#app .car")];
   let visibleCars=0, visibleRows=0;
   allCars.forEach(carEl=>{
-    const head=carEl.querySelector(".head");
+    const head=carEl.querySelector(".shared-vehicle")||carEl.querySelector(".head");
     const unitSel=head?.querySelector(".unit-select");
     const unitMatch=!quickUnitFilter || (unitSel?.value||"")===quickUnitFilter;
     const rows=[...carEl.querySelectorAll(".row")];
@@ -3238,5 +3261,69 @@ main{background:transparent !important;}
   }
   .status-select,.tech,.wit{font-size:11px!important;padding-left:7px!important;padding-right:7px!important;}
   .desc-display,.row textarea{font-size:11.5px!important;}
+}
+</style>
+
+<style>
+/* ===== CN + DK INDEPENDENT ASSET ROW MASTER LAYOUT ===== */
+.column-head{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important}
+.column-head-left{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;padding:0 10px!important}
+.column-head-left .col-title:nth-child(3){display:block!important}
+.column-head-right{display:grid!important;grid-template-columns:155px 180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;padding:0 8px!important}
+.column-head-location{display:none!important}
+.asset-car{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important;padding:0!important;border-radius:0!important;margin:0!important;border:0!important;border-bottom:1px solid #dfe7f0!important;box-shadow:none!important;overflow:visible!important;background:#fff!important}
+.shared-vehicle{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;align-items:start!important;padding:12px 10px!important;background:#f8fbff!important;border-right:1px solid #e2e9f2!important}
+.shared-vehicle .rownum{display:flex!important;justify-content:center!important;padding-top:9px!important}
+.shared-vehicle .unit-select{width:92px!important;height:36px!important}
+.shared-vehicle .vehicle-no-wrap{width:100%!important}
+.asset-stack{min-width:0!important;display:block!important}
+.asset-section{border-bottom:1px solid #e6edf5!important;background:#fff!important}
+.asset-section:last-child{border-bottom:0!important}
+.dk-asset{background:#fbfdff!important}
+.asset-header{display:grid!important;grid-template-columns:155px minmax(0,1fr) 180px!important;gap:6px!important;align-items:center!important;min-height:58px!important;padding:7px 8px!important;border-bottom:1px solid #edf2f7!important}
+.asset-name-wrap{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;min-width:0!important}
+.asset-name{display:inline-flex!important;align-items:center!important;min-height:28px!important;padding:4px 10px!important;border-radius:8px!important;background:#173b70!important;color:#fff!important;font-size:15px!important;font-weight:850!important;white-space:nowrap!important}
+.dk-asset .asset-name{background:#446b9d!important}
+.asset-add-btn{border:1px dashed #9bb6d6!important;background:#fff!important;color:#315f91!important;border-radius:8px!important;padding:4px 9px!important;font-size:10.5px!important;font-weight:750!important;cursor:pointer!important;white-space:nowrap!important}
+.asset-add-btn:hover{background:#eef5fc!important;border-style:solid!important}
+.asset-location-controls{grid-column:3!important;display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important}
+.asset-location-controls .location-select,.asset-location-controls .location-detail{width:100%!important;height:34px!important;font-size:11.5px!important;border-radius:8px!important}
+.asset-rows{padding:0 8px 7px!important}
+.asset-fault-row{display:grid!important;grid-template-columns:180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;align-items:center!important;min-height:54px!important;margin:6px 0 0!important;padding:6px!important;border-radius:10px!important;background:#fff!important}
+.dk-asset .asset-fault-row{background:#f8fbff!important}
+.asset-fault-row .status-select{height:36px!important;font-size:12px!important}
+.asset-fault-row textarea{height:40px!important;min-height:40px!important}
+.fault-location-display{min-height:36px!important;padding:6px 8px!important;border:1px solid #d6e2ee!important;border-radius:8px!important;background:#f8fbfe!important;color:#24496f!important;font-size:11.5px!important;font-weight:700!important;overflow:hidden!important}
+.fault-location-display small{display:block!important;margin-top:2px!important;color:#6f8299!important;font-size:10px!important;font-weight:500!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.asset-empty{margin:7px 0 0!important;padding:10px 12px!important;border-radius:8px!important;background:#f8fafc!important;color:#93a2b5!important;font-size:11.5px!important}
+.car-location,.head,.rows{display:none!important}
+@media(max-width:950px){
+  .table-panel{overflow:visible!important}
+  .column-head{display:none!important}
+  .asset-car{display:block!important;min-width:0!important;width:100%!important;margin-bottom:16px!important;border:1px solid #cedbea!important;border-radius:16px!important;overflow:hidden!important;box-shadow:0 4px 14px rgba(20,55,100,.08)!important}
+  .shared-vehicle{display:grid!important;grid-template-columns:1fr 1.4fr!important;gap:8px!important;padding:10px!important;border-right:0!important;border-bottom:2px solid #173b70!important;background:#edf5ff!important}
+  .shared-vehicle .rownum{display:none!important}
+  .shared-vehicle .unit-select{width:100%!important;height:42px!important}
+  .shared-vehicle .vehicle-no-wrap{width:100%!important}
+  .shared-vehicle .vehicle-no-select{height:42px!important}
+  .asset-header{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:10px!important;min-height:0!important}
+  .asset-name-wrap{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+  .asset-name{font-size:17px!important;padding:7px 12px!important}
+  .asset-add-btn{min-height:40px!important;padding:7px 12px!important;font-size:12px!important}
+  .asset-location-controls{grid-column:1!important;display:grid!important;grid-template-columns:120px minmax(0,1fr)!important;gap:7px!important}
+  .asset-location-controls .location-select,.asset-location-controls .location-detail{height:42px!important;font-size:13px!important}
+  .asset-rows{padding:0 10px 10px!important}
+  .asset-fault-row{display:grid!important;grid-template-columns:1fr 30px!important;gap:8px!important;padding:10px 42px 10px 10px!important;position:relative!important;margin-top:8px!important}
+  .asset-fault-row>*:not(.delete-btn){grid-column:1!important;width:100%!important}
+  .asset-fault-row .delete-btn{position:absolute!important;right:8px!important;top:8px!important;width:28px!important}
+  .asset-fault-row textarea{min-height:68px!important;height:68px!important}
+  .asset-fault-row .tech,.asset-fault-row .wit,.asset-fault-row .status-select{height:42px!important;font-size:13px!important}
+  .fault-location-display{min-height:42px!important;font-size:12.5px!important}
+}
+@media(max-width:520px){
+  .shared-vehicle{grid-template-columns:1fr!important}
+  .asset-location-controls{grid-template-columns:1fr!important}
+  .asset-name-wrap{align-items:stretch!important;flex-direction:column!important}
+  .asset-add-btn{width:100%!important}
 }
 </style>
