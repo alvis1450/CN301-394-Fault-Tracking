@@ -2215,7 +2215,7 @@ function exportWordReport(){
     }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
     const placeText=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"未設定";
     const assetClass=isDk?'dk-block':assetType==='NMS'?'nms-block':assetType==='SSS'?'sss-block':'cn-block';
-    return `<div class="asset-block ${assetClass}"><div class="asset-title"><span class="asset-badge">${wordEsc(assetName)}</span><span class="asset-type">${wordEsc(assetType)}</span><span class="asset-place">地點 Location：${placeText}</span></div><table class="fault-table"><thead><tr><th class="c-num">#</th><th class="c-status">狀態<br><small>Status</small></th><th class="c-desc">故障描述<br><small>Fault Description</small></th><th class="c-tech">維修人員<br><small>Repair Technician</small></th><th class="c-wit">見證人<br><small>Witness</small></th><th class="c-location">地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    return `<div class="asset-block ${assetClass}"><table class="asset-head-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="asset-name-cell">${wordEsc(assetName)}</td><td class="asset-location-cell">地點 Location：${placeText}</td></tr></table><table class="fault-table" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:4%"><col style="width:17%"><col style="width:33%"><col style="width:14%"><col style="width:13%"><col style="width:19%"></colgroup><thead><tr><th>#</th><th>狀態<br><small>Status</small></th><th>故障描述<br><small>Fault Description</small></th><th>維修人員<br><small>Repair Technician</small></th><th>見證人<br><small>Witness</small></th><th>地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
   };
   const sections=unitOrder.map(unit=>{
     const unitCars=scopedCars.filter(c=>carUnit(c)===unit);
@@ -2227,8 +2227,136 @@ function exportWordReport(){
     return `<div class="unit-section"><div class="unit-title"><span>單位 Unit：${wordEsc(unit)}</span><span class="unit-count">車廂數 Carriages：${unitCars.length}</span></div>${body}</div>`;
   }).join("");
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><style>
-@page{size:A4;margin:12mm 11mm 13mm}body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif;color:#1f3046;font-size:9.5pt;line-height:1.42;margin:0;background:#fff}*{box-sizing:border-box}.report-head{text-align:center;border-top:6pt solid #173b70;border-bottom:1pt solid #c7d5e6;padding:10pt 6pt 9pt;margin-bottom:11pt}h1{font-size:19pt;line-height:1.15;margin:0 0 4pt;color:#173b70;letter-spacing:.2pt}.en{display:inline;font-size:9.5pt;color:#6a7f9b;font-weight:600;margin-left:4pt}.meta{font-size:9pt;color:#5d7087}.meta b{color:#203b5d}.summary-title{font-size:11pt;color:#173b70;font-weight:800;margin:10pt 0 5pt;padding:4pt 7pt;border-left:4pt solid #3c6fa8;background:#f6f9fd}.summary{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 11pt;text-align:center;border:1pt solid #cbd8e8}.summary th{background:#eaf1f8;color:#405a78;border:1pt solid #cbd8e8;padding:5pt 2pt 4pt;font-size:8pt;font-weight:800}.summary th small{font-size:7pt;color:#71849d;font-weight:600}.summary td{background:#f9fbfe;border:1pt solid #cbd8e8;padding:6pt 2pt;font-size:14pt;font-weight:850;color:#173b70}.type-summary td{background:#f7fafd}.type-summary td:nth-child(2),.type-summary td:nth-child(3),.type-summary td:nth-child(4),.type-summary td:nth-child(5){color:#173b70}.status-summary .fault-cell{background:#fff1f2;color:#a42432;border-color:#e7b8bd}.status-summary .repair-cell{background:#fff7e8;color:#80570b;border-color:#e6cf9f}.status-summary .pending-cell{background:#f5f2fb;color:#5a4a89;border-color:#cdc4e4}.status-summary .fixed-cell{background:#eef8f2;color:#236747;border-color:#b9dbc7}.status-summary .clear-cell{background:#eef6fb;color:#2f6587;border-color:#bdd7e8}.unit-section{margin-top:13pt;page-break-before:auto}.unit-title{background:#173b70;color:#fff;font-size:10.5pt;font-weight:800;padding:6.5pt 8pt}.unit-count{float:right;font-size:8.3pt;font-weight:600;color:#d9e5f2}.car-block{page-break-inside:avoid;margin:7pt 0 11pt;border:1pt solid #d5e0ec;padding:7pt;background:#fff}.car-title{margin:-7pt -7pt 6pt;padding:5pt 7pt;background:#fff;border-bottom:1pt solid #dbe4ee}.vehicle-badge{font-size:9.3pt;font-weight:800;color:#334e6e}.asset-block{margin-top:7pt;page-break-inside:avoid}.asset-title{display:block;padding:5.5pt 7pt;font-weight:800;border-left:4pt solid #315b8f;background:#f5f8fc;min-height:25pt;border-top:.5pt solid #e2e9f1;border-bottom:.5pt solid #e2e9f1}.cn-block .asset-title{border-left-color:#245d99}.dk-block .asset-title{border-left-color:#536f9f}.nms-block .asset-title{border-left-color:#4a7185}.sss-block .asset-title{border-left-color:#6d7b8c}.asset-badge{font-size:12.2pt;color:#173b70}.dk-block .asset-badge,.nms-block .asset-badge,.sss-block .asset-badge{color:#173b70}.asset-type{display:inline-block;margin-left:6pt;padding:1.5pt 4pt;border:1pt solid #c7d5e5;background:#fff;color:#61748d;font-size:6.8pt;font-weight:800;vertical-align:2pt}.asset-place{float:right;font-size:8.4pt;color:#50657f;font-weight:700;padding-top:2pt}.fault-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:3pt;border:1pt solid #cfdae7}.fault-table th{background:#e9f0f7;color:#294866;border:1pt solid #cfdae7;padding:4.5pt 3pt;font-size:8pt;font-weight:800;line-height:1.2}.fault-table th small{font-size:6.8pt;color:#6c8099;font-weight:600}.fault-table td{background:#fff;border:1pt solid #e0e7ef;padding:5.5pt 4pt;vertical-align:middle;font-size:8.8pt;color:#26394f}.c-num{width:4%}.c-status{width:17%}.c-desc{width:33%}.c-tech{width:14%}.c-wit{width:13%}.c-location{width:19%}.num,.person{text-align:center}.num{font-weight:700;color:#6e8096}.status{text-align:center;font-size:8.5pt!important}.report-time{font-size:7.2pt;color:#6f8093;margin-top:2.5pt;font-weight:500}.place{font-size:8.3pt}.none{text-align:center;font-style:italic;color:#7f8fa2;background:#fff;padding:8pt!important}.none span{color:#9aa7b6}.footer{margin-top:14pt;border-top:.7pt solid #d3dbe5;padding-top:5pt;text-align:right;color:#8996a6;font-size:7.2pt}
-</style></head><body><div class="report-head"><h1>73G 故障日報 <span class="en">DAILY FAULT REPORT</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b>　｜　範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要　Asset Summary</div><table class="summary type-summary" border="1" cellspacing="0" cellpadding="0"><tr><th>總車廂數<br><small>Total Carriages</small></th><th>CN</th><th>DK</th><th>NMS</th><th>SSS</th><th>有紀錄車廂<br><small>With Records</small></th></tr><tr><td>${scopedCars.length}</td><td>${countCN}</td><td>${countDK}</td><td>${countNMS}</td><td>${countSSS}</td><td>${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要　Status Summary</div><table class="summary status-summary" border="1" cellspacing="0" cellpadding="0"><tr><th>故障<br><small>Fault</small></th><th>維修中<br><small>Under Repair</small></th><th>待確認<br><small>Pending</small></th><th>已修復<br><small>Fixed</small></th><th>均完成<br><small>All Clear</small></th></tr><tr><td class="fault-cell">${fault}</td><td class="repair-cell">${repair}</td><td class="pending-cell">${pending}</td><td class="fixed-cell">${fixed}</td><td class="clear-cell">${clear}</td></tr></table>${sections}<div class="footer">73G Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+@page{size:A4;margin:12mm 11mm 13mm}
+body{
+  font-family:"Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif;
+  color:#1e2f45;font-size:9.5pt;line-height:1.4;margin:0;background:#fff;
+}
+*{box-sizing:border-box}
+.report-head{
+  text-align:center;border-top:6pt solid #173b70;border-bottom:1pt solid #bfcfe1;
+  padding:10pt 6pt 9pt;margin-bottom:12pt
+}
+h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.2pt}
+.en{display:inline;font-size:9.5pt;color:#6a7f9b;font-weight:600;margin-left:4pt}
+.meta{font-size:9pt;color:#5d7087}.meta b{color:#203b5d}
+
+/* section headings */
+.summary-title{
+  width:100%;font-size:11pt;color:#173b70;font-weight:800;
+  margin:11pt 0 5pt;padding:5pt 8pt;
+  border-left:4pt solid #356ba6;background:#edf3f9
+}
+
+/* Word-safe summary tables: fixed grid, exact widths, full cell fills */
+.summary{
+  width:100%;border-collapse:collapse;table-layout:fixed;
+  margin:0 0 12pt;text-align:center;border:1pt solid #b8c7d8
+}
+.summary th,.summary td{
+  border:1pt solid #b8c7d8;padding:0;vertical-align:middle
+}
+.summary th{
+  height:39pt;font-size:8.5pt;font-weight:800;color:#243a55;line-height:1.2
+}
+.summary th small{font-size:7.2pt;font-weight:600}
+.summary td{
+  height:29pt;font-size:14pt;font-weight:850;color:#173b70;line-height:1
+}
+
+/* Asset summary full backgrounds */
+.type-summary .total-h{background:#dce8f5;color:#173b70}
+.type-summary .cn-h{background:#e8f1fb;color:#245d99}
+.type-summary .dk-h{background:#edf0f8;color:#4d6491}
+.type-summary .nms-h{background:#e8f1f3;color:#3e6874}
+.type-summary .sss-h{background:#eef0f2;color:#566471}
+.type-summary .records-h{background:#e3eaf3;color:#314d6c}
+.type-summary .total-v{background:#f0f5fb;color:#173b70}
+.type-summary .cn-v{background:#f3f7fc;color:#245d99}
+.type-summary .dk-v{background:#f5f6fb;color:#4d6491}
+.type-summary .nms-v{background:#f2f7f8;color:#3e6874}
+.type-summary .sss-v{background:#f5f6f7;color:#566471}
+.type-summary .records-v{background:#f2f5f9;color:#314d6c}
+
+/* Status summary: heading AND value cell use same status family */
+.status-summary .fault-h{background:#f6dadd;color:#9a2632}
+.status-summary .repair-h{background:#f6e9c9;color:#7a570f}
+.status-summary .pending-h{background:#e8e2f4;color:#58477d}
+.status-summary .fixed-h{background:#dcefe4;color:#246243}
+.status-summary .clear-h{background:#dcebf5;color:#2e6284}
+.status-summary .fault-cell{background:#fff0f1;color:#a42432}
+.status-summary .repair-cell{background:#fff7e8;color:#80570b}
+.status-summary .pending-cell{background:#f5f2fb;color:#5a4a89}
+.status-summary .fixed-cell{background:#eef8f2;color:#236747}
+.status-summary .clear-cell{background:#eef6fb;color:#2f6587}
+
+/* unit + carriage */
+.unit-section{margin-top:13pt;page-break-before:auto}
+.unit-title{
+  background:#173f75;color:#fff;font-size:10.5pt;font-weight:800;
+  padding:6pt 8pt;border:1pt solid #173f75
+}
+.unit-count{float:right;font-size:8.3pt;font-weight:600;color:#d9e5f2}
+.car-block{
+  page-break-inside:avoid;margin:7pt 0 12pt;border:1pt solid #cbd8e5;
+  padding:0;background:#fff
+}
+.car-title{
+  margin:0;padding:6pt 8pt;background:#f7f9fc;
+  border-bottom:1pt solid #cbd8e5
+}
+.vehicle-badge{font-size:9.5pt;font-weight:800;color:#334e6e}
+
+/* asset heading uses a real table so Word keeps left/right alignment */
+.asset-block{margin:0;padding:7pt 8pt 8pt;page-break-inside:avoid}
+.asset-block + .asset-block{border-top:1pt solid #d7e0ea}
+.asset-head-table{
+  width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 4pt;
+  border-left:4pt solid #315b8f;background:#f2f6fa
+}
+.asset-head-table td{border:0!important;background:#f2f6fa!important}
+.asset-name-cell{
+  width:48%;padding:5pt 7pt;font-size:12.5pt;font-weight:850;color:#173b70;
+  white-space:nowrap
+}
+.asset-location-cell{
+  width:52%;padding:5pt 7pt;text-align:right;font-size:8.7pt;
+  color:#50657f;font-weight:700
+}
+.cn-block .asset-head-table{border-left-color:#245d99}
+.dk-block .asset-head-table{border-left-color:#6278a0}
+.nms-block .asset-head-table{border-left-color:#4b7880}
+.sss-block .asset-head-table{border-left-color:#6d7b8c}
+
+/* fault table: one exact grid, no floating borders */
+.fault-table{
+  width:100%;border-collapse:collapse;table-layout:fixed;margin:0;
+  border:1pt solid #bfcddd
+}
+.fault-table th{
+  background:#dfe9f3;color:#294866;border:1pt solid #bfcddd;
+  padding:5pt 3pt;font-size:8.2pt;font-weight:800;line-height:1.2;
+  vertical-align:middle;text-align:center
+}
+.fault-table th small{font-size:6.9pt;color:#6c8099;font-weight:600}
+.fault-table td{
+  border:1pt solid #cfd9e5;padding:5.5pt 4pt;vertical-align:middle;
+  font-size:8.8pt;color:#26394f
+}
+.num,.person{text-align:center}.num{font-weight:700;color:#6e8096}
+.status{text-align:center;font-size:8.5pt!important}
+.report-time{font-size:7.2pt;color:#6f8093;margin-top:2.5pt;font-weight:500}
+.place{font-size:8.3pt}
+.none{
+  text-align:center;font-style:italic;color:#7f8fa2;background:#fff!important;
+  padding:8pt!important
+}
+.none span{color:#9aa7b6}
+.footer{
+  margin-top:14pt;border-top:.7pt solid #d3dbe5;padding-top:5pt;
+  text-align:right;color:#8996a6;font-size:7.2pt
+}
+</style></head><body><div class="report-head"><h1>73G 故障日報 <span class="en">DAILY FAULT REPORT</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b>　｜　範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要　Asset Summary</div><table class="summary type-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:31%"><col style="width:8.5%"><col style="width:8.5%"><col style="width:13%"><col style="width:10%"><col style="width:29%"></colgroup><tr><th class="total-h" bgcolor="#dce8f5">總車廂數<br><small>Total Carriages</small></th><th class="cn-h" bgcolor="#e8f1fb">CN</th><th class="dk-h" bgcolor="#edf0f8">DK</th><th class="nms-h" bgcolor="#e8f1f3">NMS</th><th class="sss-h" bgcolor="#eef0f2">SSS</th><th class="records-h" bgcolor="#e3eaf3">有紀錄車廂<br><small>With Records</small></th></tr><tr><td class="total-v" bgcolor="#f0f5fb">${scopedCars.length}</td><td class="cn-v" bgcolor="#f3f7fc">${countCN}</td><td class="dk-v" bgcolor="#f5f6fb">${countDK}</td><td class="nms-v" bgcolor="#f2f7f8">${countNMS}</td><td class="sss-v" bgcolor="#f5f6f7">${countSSS}</td><td class="records-v" bgcolor="#f2f5f9">${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要　Status Summary</div><table class="summary status-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><tr><th class="fault-h" bgcolor="#f6dadd">故障<br><small>Fault</small></th><th class="repair-h" bgcolor="#f6e9c9">維修中<br><small>Under Repair</small></th><th class="pending-h" bgcolor="#e8e2f4">待確認<br><small>Pending</small></th><th class="fixed-h" bgcolor="#dcefe4">已修復<br><small>Fixed</small></th><th class="clear-h" bgcolor="#dcebf5">均完成<br><small>All Clear</small></th></tr><tr><td class="fault-cell" bgcolor="#fff0f1">${fault}</td><td class="repair-cell" bgcolor="#fff7e8">${repair}</td><td class="pending-cell" bgcolor="#f5f2fb">${pending}</td><td class="fixed-cell" bgcolor="#eef8f2">${fixed}</td><td class="clear-cell" bgcolor="#eef6fb">${clear}</td></tr></table>${sections}<div class="footer">73G Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
   const unitSuffix=activeUnit?`_${activeUnit}`:"";
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G_Daily_Fault_Report${unitSuffix}_${dateText}.doc`);
 }
