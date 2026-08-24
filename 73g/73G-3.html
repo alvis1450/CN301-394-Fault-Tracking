@@ -1217,21 +1217,6 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
   }
 }
 </style>
-
-<style>
-/* ===== iPhone mobile input/save stability fix ===== */
-@media (max-width: 680px){
-  html,body{width:100% !important;max-width:100% !important;overflow-x:hidden !important;}
-  input,select,textarea,button,.unit-select,.vehicle-no-select,.vehicle-no-custom,.status-select,.tech,.wit,.location-select,.location-detail,#search,.filter-select,.filter-btn{font-size:16px !important;}
-  textarea,.row textarea{font-size:16px !important;line-height:1.45 !important;}
-  .savebar{left:0 !important;right:0 !important;width:100% !important;max-width:100vw !important;padding:8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;box-sizing:border-box !important;}
-  .savebar .inside{width:100% !important;max-width:100% !important;min-width:0 !important;display:grid !important;grid-template-columns:minmax(0,1fr) auto !important;align-items:center !important;gap:8px !important;}
-  .savebar .msg{display:block !important;min-width:0 !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;font-size:12px !important;}
-  .savebar .discard{display:none !important;}
-  .savebar .save-submit{min-width:0 !important;max-width:62vw !important;width:auto !important;height:44px !important;padding:0 14px !important;font-size:14px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;border-radius:10px !important;}
-  body{padding-bottom:calc(78px + env(safe-area-inset-bottom)) !important;}
-}
-</style>
 </head>
 <body>
 <div class="topbar">
@@ -1268,10 +1253,22 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
   </div>
 </div>
 <section class="dashboard-summary" aria-label="系統統計摘要">
-  <div class="dashboard-total-card" title="目前系統車廂總數">
-    <div class="dashboard-total-number" id="statVehicleTotal">0</div>
-    <div class="dashboard-total-title">總車廂數</div>
-    <div class="dashboard-total-subtitle">Total Carriages</div>
+  <div class="dashboard-total-wrap">
+    <button type="button" class="dashboard-total-card dashboard-total-toggle" id="vehicleBreakdownToggle" aria-expanded="false" aria-controls="vehicleBreakdownPanel" onclick="toggleVehicleBreakdown()" title="點擊查看 CN / DK / NMS / SSS 數量">
+      <div class="dashboard-total-number" id="statVehicleTotal">0</div>
+      <div class="dashboard-total-title">總車廂數 <span class="total-expand-icon" aria-hidden="true">⌄</span></div>
+      <div class="dashboard-total-subtitle" id="totalScopeLabel">Total Carriages · 全部單位</div>
+    </button>
+    <div class="vehicle-breakdown-panel" id="vehicleBreakdownPanel" hidden>
+      <div class="vehicle-breakdown-head"><span>車廂 / 設備分類</span><small id="breakdownScopeLabel">全部單位</small></div>
+      <div class="vehicle-breakdown-grid">
+        <div class="vehicle-breakdown-item type-cn"><span>CN</span><b id="statTypeCN">0</b><small>Carriages</small></div>
+        <div class="vehicle-breakdown-item type-dk"><span>DK</span><b id="statTypeDK">0</b><small>CN Equipment</small></div>
+        <div class="vehicle-breakdown-item type-nms"><span>NMS</span><b id="statTypeNMS">0</b><small>Carriages</small></div>
+        <div class="vehicle-breakdown-item type-sss"><span>SSS</span><b id="statTypeSSS">0</b><small>Carriages</small></div>
+      </div>
+      <div class="vehicle-breakdown-note">總車廂數不重複計入 DK；DK 為 CN 對應的獨立設備列。</div>
+    </div>
   </div>
   <div class="dashboard-status-cards">
     <div class="dashboard-status-card stat-all" data-filter="all" role="button" tabindex="0" onclick="setQuickFilter('all')"><span class="stat-name">全部紀錄</span><b id="statAll">0</b></div>
@@ -1300,7 +1297,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <option value="">全部單位 / All Units</option>
         <option value="1C">1C</option><option value="2C">2C</option><option value="3C">3C</option><option value="4C">4C</option><option value="73G-HC">73G-HC</option><option value="HQ">HQ</option><option value="STC">STC</option>
       </select>
-      <label class="unfinished-toggle"><input id="unfinishedOnly" type="checkbox" onchange="setUnfinishedOnly(this.checked)"><span>只看未完成</span></label>
+      <label class="unfinished-toggle"><input id="unfinishedOnly" type="checkbox" onchange="setUnfinishedOnly(this.checked)"><span>只顯示未完成</span></label>
       <button type="button" class="clear-filter-btn" onclick="clearQuickFilters()">清除篩選</button>
     </div>
     <div class="toolbar-note"><span id="visibleCountNote">顯示全部車廂</span><span class="toolbar-note-sep">｜</span>修改後請按「儲存並送出」</div>
@@ -1311,16 +1308,16 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <div class="col-title h-index">#</div>
         <div class="col-title">單位<small>Unit</small></div>
         <div class="col-title">車號<small>Vehicle No.</small></div>
-        <div class="col-title">車廂號碼<small>Carriage No.</small></div>
       </div>
       <div class="column-head-right">
+        <div class="col-title">車廂號碼<small>Carriage No.</small></div>
         <div class="col-title">狀態<small>Status</small></div>
         <div class="col-title">故障描述<small>Fault Description</small></div>
         <div class="col-title">維修人員<small>Repair Technician</small></div>
         <div class="col-title h-wit">見證人<small>Witness</small></div>
+        <div class="col-title">地點<small>Location</small></div>
         <div class="col-title action-spacer"></div>
       </div>
-      <div class="column-head-location"><div class="col-title">地點<small>Location</small></div></div>
     </div>
     <div id="app"></div>
   </div>
@@ -1338,21 +1335,23 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SYSTEM_ID="73G-3";
+const PAGE_ID="73G-3";
+const PAGE_UNIT="3C";
 const SUPABASE_URL="https://jyjgbduvmfmzlhhciylc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let cloudUpdatedAt=null;
 let metaDbIds={};
+let dkMetaDbIds={};
 let realtimeReloadTimer=null;
 let cloudReady=false;
 
-const PAGE_ID="73G-3";
-const PAGE_UNIT="3C";
 const cars=["CN-B-336","CN-B-337","CN-B-338","CN-B-339","CN-B-340","CN-B-341","CN-B-342","CN-B-343","CN-B-344","CN-B-345","CN-B-346","CN-B-347","CN-B-348","CN-B-349","CN-B-350","CN-B-351","CN-B-352"];
 const STORAGE_KEY="cn_fault_73g_3_final";
 const UNIT_STORAGE_KEY="cn_fault_73g_3_units";
 const VEHICLE_STORAGE_KEY="cn_fault_73g_3_vehicle_numbers";
 const LOCATION_STORAGE_KEY="cn_fault_73g_3_car_locations";
+const DK_LOCATION_STORAGE_KEY="cn_fault_73g_3_dk_locations";
 const UPDATED_KEY="cn_fault_73g_3_last_updated";
 const UNIT_OPTIONS=["3C"];
 const VEHICLE_OPTIONS=[
@@ -1368,13 +1367,11 @@ let savedVehicleNos=readVehicleNos();
 let vehicleNos=clone(savedVehicleNos);
 let savedLocations=readLocations();
 let locations=clone(savedLocations);
+let savedDkLocations=readDkLocations();
+let dkLocations=clone(savedDkLocations);
 let customVehicleMode={};
 let dirtyIds=new Set();
 let deletedCount=0;
-// Independent-unit guard: this page owns only its assigned carriages.
-savedData=savedData.filter(r=>cars.includes(normalizeCarId(r.car))).map(r=>({...r,car:normalizeCarId(r.car),unit:PAGE_UNIT}));
-data=clone(savedData);
-cars.forEach(c=>{savedUnits[c]=PAGE_UNIT;units[c]=PAGE_UNIT;});
 
 function setCloudStatus(text,state=""){
   const el=document.getElementById("cloudStatus");
@@ -1382,12 +1379,23 @@ function setCloudStatus(text,state=""){
   el.textContent=text;
   el.dataset.state=state;
 }
+function parentCarFromDkCode(code){
+  const m=String(code||"").toUpperCase().match(/^DK(\d{3})$/);
+  if(!m) return "";
+  const suffix=m[1];
+  return cars.find(c=>/^CN-[A-Z]-\d{3}$/i.test(c) && c.slice(-3)===suffix)||"";
+}
 function dbRowToRecord(row){
+  const rawCar=String(row.carriage_no||"");
+  const dkParent=parentCarFromDkCode(rawCar);
+  const assetType=dkParent?"DK":"CN";
+  const car=dkParent||normalizeCarId(rawCar);
   return {
     id:"db_"+row.id,
     dbId:row.id,
-    car:normalizeCarId(row.carriage_no),
-    unit:PAGE_UNIT,
+    car,
+    assetType,
+    unit:row.unit||"",
     vehicleNo:row.vehicle_no||"",
     status:row.status||"Fault / 故障",
     desc:row.description||"",
@@ -1402,12 +1410,14 @@ function dbRowToRecord(row){
   };
 }
 function faultToDbRow(r){
+  const isDk=r.assetType==="DK";
+  const assetLoc=isDk?(dkLocations[r.car]||{}):(locations[r.car]||{});
   const obj={
-    unit:PAGE_UNIT,
-    vehicle_no:r.vehicleNo||vehicleNos[r.car]||"",
-    carriage_no:r.car,
-    location_type:r.locationType||locations[r.car]?.type||"",
-    location_detail:r.locationDetail||locations[r.car]?.detail||"",
+    unit:isDk?"":(r.unit||units[r.car]||""),
+    vehicle_no:isDk?"":(r.vehicleNo||vehicleNos[r.car]||""),
+    carriage_no:isDk?getDkCode(r.car):r.car,
+    location_type:r.locationType||assetLoc.type||"",
+    location_detail:r.locationDetail||assetLoc.detail||"",
     status:r.status||"Fault / 故障",
     description:r.desc||"",
     repair_technician:r.tech||"",
@@ -1423,7 +1433,7 @@ function faultToDbRow(r){
 function metaToDbRow(car){
   const loc=locations[car]||{type:"",detail:""};
   const obj={
-    unit:PAGE_UNIT,
+    unit:units[car]||"",
     vehicle_no:vehicleNos[car]||"",
     carriage_no:car,
     location_type:loc.type||"",
@@ -1439,6 +1449,25 @@ function metaToDbRow(car){
   if(metaDbIds[car])obj.id=metaDbIds[car];
   return obj;
 }
+function dkMetaToDbRow(car){
+  const loc=dkLocations[car]||{type:"",detail:""};
+  const obj={
+    unit:"",
+    vehicle_no:"",
+    carriage_no:car,
+    location_type:loc.type||"",
+    location_detail:loc.detail||"",
+    status:"__DK_META__",
+    description:getDkCode(car),
+    repair_technician:"",
+    witness:"",
+    status_updated_at:null,
+    updated_at:new Date().toISOString(),
+    system_id:SYSTEM_ID
+  };
+  if(dkMetaDbIds[car])obj.id=dkMetaDbIds[car];
+  return obj;
+}
 async function loadFromCloud({force=false,initial=false}={}){
   setCloudStatus("同步中...","syncing");
   const {data:rows,error}=await supabaseClient.from("fault_records").select("*").eq("system_id",SYSTEM_ID).order("id",{ascending:true});
@@ -1448,10 +1477,10 @@ async function loadFromCloud({force=false,initial=false}={}){
     return false;
   }
   cloudReady=true;
-  const cloudRows=(rows||[]).filter(row=>cars.includes(normalizeCarId(row.carriage_no)));
+  const cloudRows=rows||[];
   // First migration safety: if cloud is empty but this browser already has local data,
   // keep local data and let Save & Submit upload it instead of wiping it.
-  if(initial && cloudRows.length===0 && (savedData.length>0 || Object.keys(savedUnits).length>0 || Object.keys(savedVehicleNos).length>0 || Object.keys(savedLocations).length>0)){
+  if(initial && cloudRows.length===0 && (savedData.length>0 || Object.keys(savedUnits).length>0 || Object.keys(savedVehicleNos).length>0 || Object.keys(savedLocations).length>0 || Object.keys(savedDkLocations).length>0)){
     setCloudStatus("待上傳舊資料","pending");
     return true;
   }
@@ -1463,40 +1492,55 @@ async function loadFromCloud({force=false,initial=false}={}){
   const nextUnits={};
   const nextVehicles={};
   const nextLocations={};
+  const nextDkLocations={};
   const nextMetaIds={};
+  const nextDkMetaIds={};
   let latest=null;
   cloudRows.forEach(row=>{
     const car=normalizeCarId(row.carriage_no);
     const stamp=row.updated_at||row.status_updated_at||row.created_at;
     if(stamp && (!latest || new Date(stamp)>new Date(latest))) latest=stamp;
+    if(row.status==="__DK_META__"){
+      nextDkMetaIds[car]=row.id;
+      nextDkLocations[car]={type:row.location_type||"",detail:row.location_detail||""};
+      return;
+    }
     if(row.status==="__CAR_META__"){
       nextMetaIds[car]=row.id;
-      nextUnits[car]=PAGE_UNIT;
+      nextUnits[car]=row.unit||"";
       nextVehicles[car]=row.vehicle_no||"";
       nextLocations[car]={type:row.location_type||"",detail:row.location_detail||""};
       return;
     }
     const r=dbRowToRecord(row);
     nextData.push(r);
-    nextUnits[car]=PAGE_UNIT;
-    if(r.vehicleNo&&!nextVehicles[car])nextVehicles[car]=r.vehicleNo;
-    if((r.locationType||r.locationDetail)&&!nextLocations[car])nextLocations[car]={type:r.locationType||"",detail:r.locationDetail||""};
+    if(r.assetType!=="DK"){
+      if(r.unit&&!nextUnits[r.car])nextUnits[r.car]=r.unit;
+      if(r.vehicleNo&&!nextVehicles[r.car])nextVehicles[r.car]=r.vehicleNo;
+      if((r.locationType||r.locationDetail)&&!nextLocations[r.car])nextLocations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }else if((r.locationType||r.locationDetail)&&!nextDkLocations[r.car]){
+      nextDkLocations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }
   });
   data=nextData;
   units=nextUnits;
   vehicleNos=nextVehicles;
   locations=nextLocations;
+  dkLocations=nextDkLocations;
   metaDbIds=nextMetaIds;
+  dkMetaDbIds=nextDkMetaIds;
   savedData=clone(data);
   savedUnits=clone(units);
   savedVehicleNos=clone(vehicleNos);
   savedLocations=clone(locations);
+  savedDkLocations=clone(dkLocations);
   dirtyIds.clear(); deletedCount=0;
   cloudUpdatedAt=latest||new Date().toISOString();
   localStorage.setItem(STORAGE_KEY,JSON.stringify(savedData));
   localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
   localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
   localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+  localStorage.setItem(DK_LOCATION_STORAGE_KEY,JSON.stringify(savedDkLocations));
   localStorage.setItem(UPDATED_KEY,cloudUpdatedAt);
   render();
   setCloudStatus("已同步","ok");
@@ -1535,10 +1579,21 @@ async function saveToCloud(){
     const {error}=await supabaseClient.from("fault_records").insert(newMeta);
     if(error)throw error;
   }
+  const cnCars=cars.filter(isCnCar);
+  const existingDkMeta=cnCars.filter(c=>dkMetaDbIds[c]).map(dkMetaToDbRow);
+  const newDkMeta=cnCars.filter(c=>!dkMetaDbIds[c]).map(dkMetaToDbRow);
+  if(existingDkMeta.length){
+    const {error}=await supabaseClient.from("fault_records").upsert(existingDkMeta,{onConflict:"id"});
+    if(error)throw error;
+  }
+  if(newDkMeta.length){
+    const {error}=await supabaseClient.from("fault_records").insert(newDkMeta);
+    if(error)throw error;
+  }
   await loadFromCloud({force:true});
 }
 function subscribeRealtime(){
-  supabaseClient.channel(`fault-tracking-live-${PAGE_ID}`)
+  supabaseClient.channel("fault-tracking-live-index")
     .on("postgres_changes",{event:"*",schema:"public",table:"fault_records",},()=>{
       clearTimeout(realtimeReloadTimer);
       realtimeReloadTimer=setTimeout(()=>loadFromCloud({force:false}),650);
@@ -1570,53 +1625,50 @@ function readLocations(){
   try{return JSON.parse(localStorage.getItem(LOCATION_STORAGE_KEY)||"{}");}
   catch(e){return {};}
 }
+function readDkLocations(){
+  try{return JSON.parse(localStorage.getItem(DK_LOCATION_STORAGE_KEY)||"{}");}
+  catch(e){return {};}
+}
 function normalizeCarId(car){
-  const value=String(car||"");
-  if(value==="CN301") return "CN-D-301";
-  const m=value.match(/^CN(\d{3})$/);
-  if(m){
-    const n=Number(m[1]);
-    if(n>=302 && n<=378) return `CN-B-${n}`;
+  const value=String(car||"").trim();
+  if(cars.includes(value)) return value;
+  const cn=value.toUpperCase().match(/^CN-?(\d{3})$/);
+  if(cn){
+    const suffix=cn[1];
+    const hit=cars.find(c=>/^CN-[A-Z]-\d{3}$/i.test(c) && c.slice(-3)===suffix);
+    if(hit) return hit;
   }
-  const nms=value.match(/^NMS-?(38[1-4])$/);
-  if(nms) return `NMS-${nms[1]}`;
-  const sss=value.match(/^SSS-?(39[1-4])$/);
-  if(sss) return `SSS-${sss[1]}`;
-  return value;
+  const compact=value.toUpperCase().replace(/\s+/g,"");
+  const hit=cars.find(c=>c.replace(/-/g,"").toUpperCase()===compact.replace(/-/g,""));
+  return hit||value;
 }
 function migrateLegacyData(){
   let changed=false;
   savedData.forEach(r=>{
     const nextCar=normalizeCarId(r.car);
     if(nextCar!==r.car){r.car=nextCar;changed=true;}
-    if(r.unit!==PAGE_UNIT){r.unit=PAGE_UNIT;changed=true;}
+    
+    if(!r.assetType) r.assetType=assetTypeForCar(nextCar);
   });
   const migratedUnits={};
   Object.entries(savedUnits||{}).forEach(([car,unit])=>{
-    const nextCar=normalizeCarId(car);
-    const nextUnit=unit==="73G-HQ"?"73G-HC":unit;
-    migratedUnits[nextCar]=nextUnit;
-    if(nextCar!==car || nextUnit!==unit) changed=true;
+    const nextCar=normalizeCarId(car),nextUnit=unit;
+    migratedUnits[nextCar]=nextUnit;if(nextCar!==car||nextUnit!==unit)changed=true;
   });
   savedUnits=migratedUnits;
   const migratedVehicleNos={};
-  Object.entries(savedVehicleNos||{}).forEach(([car,no])=>{
-    const nextCar=normalizeCarId(car);
-    migratedVehicleNos[nextCar]=no;
-    if(nextCar!==car) changed=true;
-  });
+  Object.entries(savedVehicleNos||{}).forEach(([car,no])=>{const nextCar=normalizeCarId(car);migratedVehicleNos[nextCar]=no;if(nextCar!==car)changed=true;});
   savedVehicleNos=migratedVehicleNos;
-  const migratedLocations={};
-  Object.entries(savedLocations||{}).forEach(([car,loc])=>{
-    const nextCar=normalizeCarId(car);
-    migratedLocations[nextCar]={type:String(loc?.type||""),detail:String(loc?.detail||"")};
-    if(nextCar!==car) changed=true;
-  });
-  savedLocations=migratedLocations;
+  const migrateLocMap=map=>{
+    const out={};Object.entries(map||{}).forEach(([car,loc])=>{const nextCar=normalizeCarId(car);out[nextCar]={type:String(loc?.type||""),detail:String(loc?.detail||"")};if(nextCar!==car)changed=true;});return out;
+  };
+  savedLocations=migrateLocMap(savedLocations);
+  savedDkLocations=migrateLocMap(savedDkLocations);
   savedData.forEach(r=>{
-    if(r.vehicleNo && !savedVehicleNos[r.car]){savedVehicleNos[r.car]=r.vehicleNo;changed=true;}
-    if((r.locationType||r.locationDetail) && !savedLocations[r.car]){
-      savedLocations[r.car]={type:String(r.locationType||""),detail:String(r.locationDetail||"")};changed=true;
+    if(r.vehicleNo&&!savedVehicleNos[r.car]){savedVehicleNos[r.car]=r.vehicleNo;changed=true;}
+    if(r.locationType||r.locationDetail){
+      const target=r.assetType==="DK"?savedDkLocations:savedLocations;
+      if(!target[r.car]){target[r.car]={type:String(r.locationType||""),detail:String(r.locationDetail||"")};changed=true;}
     }
   });
   if(changed){
@@ -1624,6 +1676,7 @@ function migrateLegacyData(){
     localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
     localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
     localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+    localStorage.setItem(DK_LOCATION_STORAGE_KEY,JSON.stringify(savedDkLocations));
   }
 }
 function esc(v){
@@ -1639,6 +1692,7 @@ function ensureIds(arr){
     if(!r.statusAt){r.statusAt=r.createdAt;changed=true;}
     if(typeof r.locationType!=="string"){r.locationType="";changed=true;}
     if(typeof r.locationDetail!=="string"){r.locationDetail="";changed=true;}
+    if(r.assetType!=="DK" && r.assetType!=="CN"){r.assetType="CN";changed=true;}
   });
   return changed;
 }
@@ -1648,6 +1702,8 @@ data=clone(savedData);
 units=clone(savedUnits);
 vehicleNos=clone(savedVehicleNos);
 locations=clone(savedLocations);
+savedDkLocations=readDkLocations();
+dkLocations=clone(savedDkLocations);
 // Backward compatibility: keep any existing record unit / vehicle number values.
 data.forEach(r=>{
   if(r.unit && !units[r.car]) units[r.car]=r.unit;
@@ -1695,7 +1751,7 @@ function updateCustomVehicleNo(car,value){
 function updateCarLocationType(car,value){
   const cur=locations[car]||{type:"",detail:""};
   locations[car]={type:value,detail:value?String(cur.detail||""):""};
-  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=locations[car].detail;}});
+  data.forEach(r=>{if(r.car===car && r.assetType!=="DK"){r.locationType=locations[car].type;r.locationDetail=locations[car].detail;}});
   markDirty("location:"+car);
   render();
   if(value) setTimeout(()=>document.querySelector(`[data-car-location-detail="${car}"]`)?.focus(),0);
@@ -1703,15 +1759,33 @@ function updateCarLocationType(car,value){
 function updateCarLocationDetail(car,value){
   const cur=locations[car]||{type:"",detail:""};
   locations[car]={type:String(cur.type||""),detail:value};
-  data.forEach(r=>{if(r.car===car){r.locationType=locations[car].type;r.locationDetail=value;}});
+  data.forEach(r=>{if(r.car===car && r.assetType!=="DK"){r.locationType=locations[car].type;r.locationDetail=value;}});
   markDirty("location:"+car);
   document.querySelector(`[data-car-location="${car}"]`)?.classList.add("head-unsaved");
 }
+function updateDkLocationType(car,value){
+  if(!isCnCar(car)) return;
+  const cur=dkLocations[car]||{type:"",detail:""};
+  dkLocations[car]={type:value,detail:value?String(cur.detail||""):""};
+  data.forEach(r=>{if(r.car===car && r.assetType==="DK"){r.locationType=dkLocations[car].type;r.locationDetail=dkLocations[car].detail;}});
+  markDirty("dk-location:"+car);
+  render();
+  if(value) setTimeout(()=>document.querySelector(`[data-dk-location-detail="${car}"]`)?.focus(),0);
+}
+function updateDkLocationDetail(car,value){
+  if(!isCnCar(car)) return;
+  const cur=dkLocations[car]||{type:"",detail:""};
+  dkLocations[car]={type:String(cur.type||""),detail:value};
+  data.forEach(r=>{if(r.car===car && r.assetType==="DK"){r.locationType=dkLocations[car].type;r.locationDetail=value;}});
+  markDirty("dk-location:"+car);
+  document.querySelector(`[data-dk-location="${car}"]`)?.classList.add("head-unsaved");
+}
 
-function add(car){
+function add(car,assetType="CN"){
   const stamp=nowISO();
-  const r={id:newId(),car,
-    unit:PAGE_UNIT,vehicleNo:vehicleNos[car]||"",status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(locations[car]?.type||""),locationDetail:(locations[car]?.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  const isDk=assetType==="DK";
+  const assetLoc=isDk?(dkLocations[car]||{}):(locations[car]||{});
+  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
   render();
@@ -1783,6 +1857,7 @@ function discardChanges(){
   units=clone(savedUnits);
   vehicleNos=clone(savedVehicleNos);
   locations=clone(savedLocations);
+  dkLocations=clone(savedDkLocations);
   dirtyIds.clear();
   deletedCount=0;
   updateSavebar();
@@ -1802,13 +1877,47 @@ function formatRecordTime(v,compact=false){
     : {year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false};
   return d.toLocaleString("zh-TW",opt).replace(/\//g,"-");
 }
+function getDashboardScopeCars(){
+  const activeUnit=(typeof quickUnitFilter!=="undefined" ? quickUnitFilter : "");
+  return cars.filter(c=>!activeUnit || (units[c]||"")===activeUnit);
+}
+function getDashboardScopeRecords(scopeCars){
+  const set=new Set(scopeCars);
+  return data.filter(r=>set.has(r.car));
+}
+function updateVehicleBreakdown(){
+  const scopedCars=getDashboardScopeCars();
+  const cn=scopedCars.filter(isCnCar).length;
+  const nms=scopedCars.filter(c=>String(c).toUpperCase().startsWith("NMS")).length;
+  const sss=scopedCars.filter(c=>String(c).toUpperCase().startsWith("SSS")).length;
+  const dk=cn; // Every CN carriage has one matching DK equipment row.
+  const activeUnit=(typeof quickUnitFilter!=="undefined" ? quickUnitFilter : "");
+  const scopeLabel=activeUnit?`${activeUnit} 單位`:`全部單位`;
+  const values={statVehicleTotal:scopedCars.length,statTypeCN:cn,statTypeDK:dk,statTypeNMS:nms,statTypeSSS:sss};
+  Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=value;});
+  const scope=document.getElementById("breakdownScopeLabel");if(scope)scope.textContent=scopeLabel;
+  const subtitle=document.getElementById("totalScopeLabel");if(subtitle)subtitle.textContent=`Total Carriages · ${scopeLabel}`;
+  return scopedCars;
+}
+function toggleVehicleBreakdown(force){
+  const panel=document.getElementById("vehicleBreakdownPanel");
+  const btn=document.getElementById("vehicleBreakdownToggle");
+  if(!panel||!btn)return;
+  const open=typeof force==="boolean"?force:panel.hidden;
+  panel.hidden=!open;
+  btn.setAttribute("aria-expanded",String(open));
+  btn.classList.toggle("open",open);
+}
 function updateDashboard(){
-  const all=data.length;
+  const scopedCars=updateVehicleBreakdown();
+  const scopedRecords=getDashboardScopeRecords(scopedCars);
+  const all=scopedRecords.length;
   const counts={fault:0,repair:0,pending:0,fixed:0,clear:0};
-  data.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
-  document.getElementById("vehicleTotal").textContent=cars.length;
-  document.getElementById("statVehicleTotal").textContent=cars.length;
-  document.getElementById("recordTotal").textContent=all;
+  scopedRecords.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
+  const vehicleTotal=document.getElementById("vehicleTotal");
+  if(vehicleTotal)vehicleTotal.textContent=scopedCars.length;
+  const recordTotal=document.getElementById("recordTotal");
+  if(recordTotal)recordTotal.textContent=all;
   document.getElementById("statAll").textContent=all;
   document.getElementById("statFault").textContent=counts.fault;
   document.getElementById("statRepair").textContent=counts.repair;
@@ -1853,27 +1962,45 @@ function normalizeImportedStatus(v){
   if(t.includes("clear")||t.includes("均完成")||t.includes("完成")) return "All Clear / 均完成";
   return "Fault / 故障";
 }
+function assetTypeForCar(car){
+  const c=String(car||"").toUpperCase();
+  if(c.startsWith("CN-")) return "CN";
+  if(c.startsWith("NMS")) return "NMS";
+  if(c.startsWith("SSS")) return "SSS";
+  return "OTHER";
+}
+function assetLabelForRecord(r){
+  return r?.assetType==="DK" ? getDkCode(r.car) : r?.car||"";
+}
 function exportCsvData(){
   document.getElementById("ioMenu")?.classList.remove("show");
-  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const rows=[];
-  cars.forEach(car=>{
-    const rr=data.filter(r=>r.car===car);
-    const base=[units[car]||"",vehicleNos[car]||"",car,locations[car]?.type||"",locations[car]?.detail||""];
+  const scopedCars=getDashboardScopeCars();
+  const pushAsset=(car,assetType)=>{
+    const isDk=assetType==="DK";
+    const assetNo=isDk?getDkCode(car):car;
+    const loc=isDk?(dkLocations[car]||{}):(locations[car]||{});
+    const rr=data.filter(r=>r.car===car && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+    const base=[units[car]||"",vehicleNos[car]||"",assetType,assetNo,car,loc.type||"",loc.detail||""];
     if(rr.length){
       rr.forEach(r=>rows.push([...base,statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
-    }else{
-      rows.push([...base,"","","","","",""]);
-    }
+    }else rows.push([...base,"","","","","",""]);
+  };
+  scopedCars.forEach(car=>{
+    pushAsset(car,assetTypeForCar(car));
+    if(isCnCar(car)) pushAsset(car,"DK");
   });
   const csv='\ufeff'+[headers,...rows].map(row=>row.map(csvEscape).join(",")).join("\r\n");
-  downloadBlob(csv,"text/csv;charset=utf-8",`73G-3_Data_${new Date().toISOString().slice(0,10)}.csv`);
+  const unitSuffix=quickUnitFilter?`_${quickUnitFilter}`:"";
+  downloadBlob(csv,"text/csv;charset=utf-8",`73G-3_Data${unitSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
 }
 function csvTemplateText(){
-  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const examples=[
-    ["1C","軍2-24586","CN-D-301","外臺","南側機房","故障","伺服器故障","Mason","王先生","2026-08-21 10:20","2026-08-21 10:20"],
-    ["2C","軍2-24481","CN-B-302","營區","車庫A區","已修復","網路線接頭鬆脫","Emma","林先生","2026-08-21 08:30","2026-08-21 10:10"]
+    ["4C","軍2-24467","CN","CN-B-336","CN-B-336","營區","A區","故障","冷氣異常","Mason","王先生","2026-08-24 09:20","2026-08-24 09:20"],
+    ["4C","軍2-24467","DK","DK336","CN-B-336","外臺","B區","維修中","電源異常","Emma","林先生","2026-08-24 09:25","2026-08-24 09:40"],
+    ["1C","軍2-24586","NMS","NMS-381","NMS-381","演訓","北側","已修復","網路線接頭鬆脫","Alex","陳先生","2026-08-24 08:30","2026-08-24 09:10"]
   ];
   return '\ufeff'+[headers,...examples].map(row=>row.map(csvEscape).join(",")).join("\r\n");
 }
@@ -1923,6 +2050,9 @@ function importCsvText(text){
   const idx={
     unit:findColumn(h,["單位 unit","單位","unit"]),
     vehicle:findColumn(h,["車號 vehicle no.","車號","vehicle no","vehicle"]),
+    assetType:findColumn(h,["設備類型 asset type","設備類型","asset type"]),
+    assetNo:findColumn(h,["設備編號 asset no.","設備編號","asset no","asset"]),
+    parent:findColumn(h,["母車廂號碼 parent carriage no.","母車廂號碼","parent carriage no","parent carriage"]),
     car:findColumn(h,["車廂號碼 carriage no.","車廂號碼","carriage no","carriage"]),
     loc:findColumn(h,["地點 location","地點","location"]),
     detail:findColumn(h,["詳細地點 location detail","詳細地點","location detail"]),
@@ -1933,23 +2063,34 @@ function importCsvText(text){
     created:findColumn(h,["建立時間 created at","建立時間","created at"]),
     updated:findColumn(h,["狀態時間 status updated at","狀態時間","status updated at"])
   };
-  if(idx.car<0) throw new Error("找不到『車廂號碼 Carriage No.』欄位");
+  if(idx.assetNo<0 && idx.car<0 && idx.parent<0) throw new Error("找不到『設備編號 Asset No.』或『車廂號碼 Carriage No.』欄位");
   let count=0,metaCount=0,skipped=0;
   table.slice(1).forEach(row=>{
-    const rawCar=String(row[idx.car]||"").trim();
-    if(!rawCar)return;
-    const car=normalizeCarId(rawCar);
-    if(!cars.includes(car)){skipped++;return;}
     const get=k=>idx[k]>=0?String(row[idx[k]]??"").trim():"";
+    let assetType=get("assetType").toUpperCase();
+    const assetNoRaw=get("assetNo")||get("car");
+    let parentRaw=get("parent")||get("car")||assetNoRaw;
+    if(!assetType) assetType=String(assetNoRaw).toUpperCase().startsWith("DK")?"DK":assetTypeForCar(parentRaw||assetNoRaw);
+    let car;
+    if(assetType==="DK"){
+      if(parentRaw && !String(parentRaw).toUpperCase().startsWith("DK")) car=normalizeCarId(parentRaw);
+      if(!car || !cars.includes(car)){
+        const dk=String(assetNoRaw||parentRaw).toUpperCase().replace(/\s+/g,"");
+        car=cars.find(c=>getDkCode(c).toUpperCase()===dk)||"";
+      }
+    }else car=normalizeCarId(parentRaw||assetNoRaw);
+    if(!car || !cars.includes(car)){skipped++;return;}
+    if(assetType==="DK" && !isCnCar(car)){skipped++;return;}
     const unit=get("unit"),vehicle=get("vehicle"),loc=get("loc"),detail=get("detail");
     if(unit){units[car]=unit;metaCount++;}
     if(vehicle){vehicleNos[car]=vehicle;metaCount++;}
-    if(loc||detail){locations[car]={type:loc,detail};metaCount++;}
+    const targetLoc=assetType==="DK"?dkLocations:locations;
+    if(loc||detail){targetLoc[car]={type:loc,detail};metaCount++;}
     const desc=get("desc"),statusRaw=get("status"),tech=get("tech"),wit=get("wit");
     if(desc||statusRaw||tech||wit){
       const created=idx.created>=0&&get("created")?parseImportDate(get("created")):nowISO();
       const updated=idx.updated>=0&&get("updated")?parseImportDate(get("updated")):created;
-      data.push({id:newId(),car,unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||locations[car]?.type||"",locationDetail:detail||locations[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
+      data.push({id:newId(),car,assetType:assetType==="DK"?"DK":assetTypeForCar(car),unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||targetLoc[car]?.type||"",locationDetail:detail||targetLoc[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
       count++;
     }
   });
@@ -1957,23 +2098,39 @@ function importCsvText(text){
 }
 function importJsonText(text){
   const obj=JSON.parse(text);
+  const normalizeRecord=r=>{
+    const x={...r,car:normalizeCarId(r.car||r.parentCarriageNo||r.carriageNo||"")};
+    if(String(r.assetType||r.assetNo||"").toUpperCase().startsWith("DK")) x.assetType="DK";
+    else if(!x.assetType) x.assetType=assetTypeForCar(x.car);
+    x.id=x.id||newId();x.createdAt=x.createdAt||nowISO();x.statusAt=x.statusAt||x.createdAt;x.status=normalizeImportedStatus(x.status);
+    return x;
+  };
   if(Array.isArray(obj)){
-    // Simple record array compatibility.
-    const incoming=obj.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
-    incoming.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
-    data=incoming;
-    units={};vehicleNos={};locations={};
-    incoming.forEach(r=>{if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;if(r.locationType||r.locationDetail)locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+    const incoming=obj.map(normalizeRecord).filter(r=>cars.includes(r.car));
+    data=incoming; units={};vehicleNos={};locations={};dkLocations={};
+    incoming.forEach(r=>{
+      if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;
+      if(r.locationType||r.locationDetail){
+        const target=r.assetType==="DK"?dkLocations:locations;
+        target[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+      }
+    });
     return incoming.length;
   }
   if(!obj||!Array.isArray(obj.records)) throw new Error("JSON 格式不符合系統備份格式");
-  const recs=obj.records.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
-  recs.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
+  const recs=obj.records.map(normalizeRecord).filter(r=>cars.includes(r.car));
   data=recs;
   units={}; Object.entries(obj.units||{}).forEach(([k,v])=>units[normalizeCarId(k)]=v);
   vehicleNos={}; Object.entries(obj.vehicleNumbers||obj.vehicleNos||{}).forEach(([k,v])=>vehicleNos[normalizeCarId(k)]=v);
   locations={}; Object.entries(obj.locations||{}).forEach(([k,v])=>locations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
-  recs.forEach(r=>{if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;if((r.locationType||r.locationDetail)&&!locations[r.car])locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+  dkLocations={}; Object.entries(obj.dkLocations||{}).forEach(([k,v])=>dkLocations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
+  recs.forEach(r=>{
+    if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;
+    if(r.locationType||r.locationDetail){
+      const target=r.assetType==="DK"?dkLocations:locations;
+      if(!target[r.car])target[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }
+  });
   return recs.length;
 }
 async function handleImportFile(file){
@@ -1998,7 +2155,7 @@ async function handleImportFile(file){
   }
 }
 function backupData(){
-  const payload={system:"73G-3 Fault Tracking System",exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,records:data};
+  const payload={system:"73G-3 Fault Tracking System",schemaVersion:3,exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,dkLocations,records:data};
   downloadBlob(JSON.stringify(payload,null,2),"application/json;charset=utf-8",`73G-3_Backup_${new Date().toISOString().slice(0,10)}.json`);
 }
 function wordEsc(v){
@@ -2018,220 +2175,189 @@ function reportStatusText(s){
 function exportWordReport(){
   const today=new Date();
   const dateText=today.toLocaleDateString("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit"}).replaceAll("/","-");
-  const records=data.slice();
-  const carsWithRecords=new Set(records.map(r=>r.car)).size;
+  const scopedCars=getDashboardScopeCars();
+  const carSet=new Set(scopedCars);
+  const records=data.filter(r=>carSet.has(r.car));
+  const activeUnit=(typeof quickUnitFilter!=="undefined"&&quickUnitFilter)?quickUnitFilter:"";
+  const scopeLabel=activeUnit?`${activeUnit} 單位`:`全部單位`;
+  const countCN=scopedCars.filter(isCnCar).length;
+  const countDK=countCN;
+  const countNMS=scopedCars.filter(c=>String(c).toUpperCase().startsWith("NMS")).length;
+  const countSSS=scopedCars.filter(c=>String(c).toUpperCase().startsWith("SSS")).length;
   const fault=records.filter(r=>color(r.status)==="fault").length;
   const fixed=records.filter(r=>color(r.status)==="fixed").length;
   const clear=records.filter(r=>color(r.status)==="clear").length;
   const repair=records.filter(r=>color(r.status)==="repair").length;
   const pending=records.filter(r=>color(r.status)==="pending").length;
-  const unitOrder=[...UNIT_OPTIONS,"未指定"];
+  const carsWithRecords=new Set(records.map(r=>r.car)).size;
+  const unitOrder=activeUnit?[activeUnit]:[...UNIT_OPTIONS,"未指定"];
   const carUnit=c=>units[c]||records.find(r=>r.car===c)?.unit||"未指定";
+  const palMap={
+    fault:{rowBg:"#FDE9EB",statusBg:"#F8CDD2",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
+    repair:{rowBg:"#FFF3D9",statusBg:"#FBE1A8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
+    pending:{rowBg:"#F0EBFA",statusBg:"#DED3F4",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
+    fixed:{rowBg:"#E7F5ED",statusBg:"#CDEAD9",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
+    clear:{rowBg:"#E8F4FA",statusBg:"#D0E9F4",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
+  };
+  const assetBlock=(c,assetType)=>{
+    const isDk=assetType==="DK";
+    if(isDk&&!isCnCar(c))return "";
+    const assetName=isDk?getDkCode(c):c;
+    const loc=isDk?(dkLocations[c]||{}):(locations[c]||{});
+    const rr=records.filter(r=>r.car===c&&(isDk?r.assetType==="DK":r.assetType!=="DK"));
+    const rows=rr.length?rr.map((r,i)=>{
+      const st=reportStatusClass(r.status),pal=palMap[st];
+      const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
+      const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
+      const place=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"—";
+      return `<tr><td class="num" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="background:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">${timeHtml}</div></td><td bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${place}</td></tr>`;
+    }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
+    const placeText=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"未設定";
+    const assetClass=isDk?'dk-block':assetType==='NMS'?'nms-block':assetType==='SSS'?'sss-block':'cn-block';
+    return `<div class="asset-block ${assetClass}"><table class="asset-head-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="asset-name-cell">${wordEsc(assetName)}</td><td class="asset-location-cell">地點 Location：${placeText}</td></tr></table><table class="fault-table" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:4%"><col style="width:17%"><col style="width:33%"><col style="width:14%"><col style="width:13%"><col style="width:19%"></colgroup><thead><tr><th>#</th><th>狀態<br><small>Status</small></th><th>故障描述<br><small>Fault Description</small></th><th>維修人員<br><small>Repair Technician</small></th><th>見證人<br><small>Witness</small></th><th>地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
   const sections=unitOrder.map(unit=>{
-    const unitCars=cars.filter(c=>carUnit(c)===unit);
-    if(!unitCars.length) return "";
+    const unitCars=scopedCars.filter(c=>carUnit(c)===unit);
+    if(!unitCars.length)return "";
     const body=unitCars.map(c=>{
-      const rr=records.filter(r=>r.car===c);
-      const rows=rr.length?rr.map((r,i)=>{
-        const st=reportStatusClass(r.status);
-        const pal={
-          fault:{rowBg:"#FFF2F3",statusBg:"#FFD9DD",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
-          repair:{rowBg:"#FFF8E8",statusBg:"#FFE7B8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
-          pending:{rowBg:"#F5F1FF",statusBg:"#E4DAFA",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
-          fixed:{rowBg:"#EDF9F2",statusBg:"#D4F0DF",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
-          clear:{rowBg:"#EEF8FC",statusBg:"#D8EFF8",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
-        }[st];
-        const cell=`background-color:${pal.rowBg};`;
-        const statusStyle=`background-color:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar};text-align:center;`;
-        const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
-        const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
-        return `<tr><td class="num" bgcolor="${pal.rowBg}" style="${cell}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="${statusStyle}"><div class="status-text" style="background-color:${pal.statusBg};color:${pal.text};font-weight:800;border:0;padding:0;margin:0">${statusHtml}</div><div class="report-time" style="background-color:${pal.statusBg};color:${pal.sub};font-weight:500;border:0;padding:2pt 0 0;margin:0">${timeHtml}</div></td><td class="desc" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc([locations[c]?.type,locations[c]?.detail].filter(Boolean).join("｜"))||"—"}</td></tr>`;
-      }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
       const vehicleLabel=vehicleNos[c]||records.find(r=>r.car===c)?.vehicleNo||"未指定";
-      return `<div class="car-block"><div class="car-title"><span class="car-badge">${wordEsc(c)}</span><span class="vehicle-badge">車號 Vehicle No.：${wordEsc(vehicleLabel)}</span></div><table class="fault-table"><thead><tr><th class="c-num">#</th><th class="c-status">狀態<br><small>Status</small></th><th class="c-desc">故障描述<br><small>Fault Description</small></th><th class="c-tech">維修人員<br><small>Repair Technician</small></th><th class="c-wit">見證人<br><small>Witness</small></th><th class="c-location">地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      return `<div class="car-block"><div class="car-title"><span class="vehicle-badge">車號 Vehicle No.：${wordEsc(vehicleLabel)}</span></div>${assetBlock(c,assetTypeForCar(c))}${isCnCar(c)?assetBlock(c,"DK"):""}</div>`;
     }).join("");
     return `<div class="unit-section"><div class="unit-title"><span>單位 Unit：${wordEsc(unit)}</span><span class="unit-count">車廂數 Carriages：${unitCars.length}</span></div>${body}</div>`;
   }).join("");
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><style>
-@page{size:A4;margin:13mm 13mm 14mm 13mm}
-body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans CJK TC","Segoe UI",Aptos,Calibri,Arial,sans-serif;color:#1d2b3d;font-size:9.4pt;line-height:1.38;margin:0;background:#fff;-webkit-font-smoothing:antialiased}
-.report-head{text-align:center;border-bottom:1.5pt solid #244b7c;padding:0 0 9pt;margin-bottom:12pt}
-h1{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Segoe UI",Aptos,Arial,sans-serif;text-align:center;font-size:20pt;line-height:1.18;margin:0 0 7pt;font-weight:800;letter-spacing:.1pt;color:#17263a}
-h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;color:#60728a;margin:0}.meta b{color:#2c425f;font-weight:700}
-.summary-title{font-size:11pt;font-weight:800;margin:0 0 6pt;color:#22344c}.summary-title span{font-size:8.8pt;font-weight:500;color:#7d8ba0;margin-left:3pt}
-.summary{width:100%;margin:0 0 15pt;border-collapse:separate;border-spacing:2pt 0;text-align:center;table-layout:fixed}.summary th{color:#fff;padding:5pt 2pt 4pt;font-size:7.9pt;line-height:1.2;font-weight:700;border:0}.summary th small{font-size:7.1pt;font-weight:500;color:#f3f6fa}.summary td{font-size:16pt;font-weight:800;padding:6pt 2pt 7pt;color:#17263a;border-bottom:1pt solid #dfe6ee;background:#fbfcfe}.s-total{background:#334b65}.s-record{background:#29415d}.s-fault{background:#c92b38}.s-fixed{background:#238b8f}.s-repair{background:#a36a13}.s-pending{background:#6756a8}.s-clear{background:#357aa2}
-.unit-section{margin-top:13pt;page-break-inside:auto}.unit-title{background:#20334e;color:#fff;font-size:10.2pt;font-weight:800;padding:5.5pt 8pt;display:block;border-left:4pt solid #4a74a9}.unit-count{float:right;font-size:8.8pt;font-weight:600;color:#e6edf6}
-.car-block{page-break-inside:avoid;margin:0 0 9pt;padding-top:5pt}.car-title{font-size:12.5pt;font-weight:800;color:#17263a;margin:0 0 4pt}.car-badge{display:inline-block;padding:0 0 1pt;border-bottom:1.5pt solid #4b6f9d}.vehicle-badge{display:inline-block;margin-left:9pt;font-size:8.7pt;font-weight:650;color:#5d718a}
-.fault-table{width:100%;margin:0;border-collapse:collapse;table-layout:fixed;border:1pt solid #d9e1ea}.fault-table thead{display:table-header-group}.fault-table th{background:#315989;color:#fff;padding:4.5pt 4pt;font-size:7.9pt;line-height:1.15;font-weight:700;border-right:.5pt solid #6f8db3}.fault-table th:last-child{border-right:0}.fault-table th small{font-size:7pt;font-weight:500;color:#edf3fa}.c-num{width:4%}.c-status{width:16%}.c-desc{width:36%}.c-tech{width:14%}.c-wit{width:13%}.c-location{width:17%}
-.fault-table td{padding:5pt 4.5pt;vertical-align:middle;border-bottom:.5pt solid #e1e7ee;border-right:.5pt solid #eef2f6;font-size:8.7pt;line-height:1.32}
-.fault-table td{mso-pattern:auto none}.fault-table td:last-child{border-right:0}.fault-table tr:last-child td{border-bottom:0}.num{text-align:center;color:#687a90}.status{text-align:center;font-weight:800}.status span{display:block;font-weight:500;color:#69798c;font-size:7.2pt;margin-top:.5pt}.status .report-time{display:block;font-size:6.7pt;line-height:1.2;color:#7c8999;margin:1.8pt 0 0;padding:0;border:0!important;background:transparent!important;mso-border-alt:none;mso-shading:transparent}.status .status-text{display:block;border:0!important;margin:0;padding:0;background:transparent!important}.desc{text-align:left;word-wrap:break-word}.person{text-align:center;word-wrap:break-word}.place{text-align:left;word-wrap:break-word;font-size:8.2pt}.fixed td{background:#f3fbf7}.fault td{background:#fff6f6}.repair td{background:#fffaf0}.pending td{background:#f7f5ff}.clear td{background:#f2f9fc}
-.fixed .status{background:#d9f3e5!important;color:#0f6b42!important;border-left:3pt solid #22a06b}
-.fault .status{background:#ffe0e3!important;color:#b4232f!important;border-left:3pt solid #e5484d}
-.repair .status{background:#ffedcc!important;color:#8a5600!important;border-left:3pt solid #d98900}
-.pending .status{background:#e8e1fb!important;color:#5a3ea1!important;border-left:3pt solid #7c5cc4}
-.clear .status{background:#dff2fa!important;color:#1f6587!important;border-left:3pt solid #3a91b7}
-.fixed .status span{color:#3f7f63}.fault .status span{color:#9d4b53}.repair .status span{color:#8c6c39}.pending .status span{color:#6d5a9d}.clear .status span{color:#4d7b91}.none{font-style:italic;color:#8c99aa;padding:6pt 7pt;text-align:left;background:#fafbfd}.none span{color:#a7b0bd;margin-left:3pt}.footer{margin-top:13pt;border-top:.7pt solid #d2dae4;padding-top:5pt;text-align:right;color:#8996a6;font-size:7.2pt}
+@page{size:A4;margin:12mm 11mm 13mm}
+body{
+  font-family:"Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif;
+  color:#1e2f45;font-size:9.5pt;line-height:1.4;margin:0;background:#fff;
+}
+*{box-sizing:border-box}
+.report-head{
+  text-align:center;border-top:6pt solid #173b70;border-bottom:1pt solid #bfcfe1;
+  padding:10pt 6pt 9pt;margin-bottom:12pt
+}
+h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.2pt}
+.en{display:inline;font-size:9.5pt;color:#6a7f9b;font-weight:600;margin-left:4pt}
+.meta{font-size:9pt;color:#5d7087}.meta b{color:#203b5d}
 
-/* Summary quantity card */
-.status-summary-wrap{max-width:1840px;margin:12px auto 0;padding:0 12px;display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
-.total-card{width:170px;min-height:100px;border:1px solid #d9e4f0;border-radius:16px;background:linear-gradient(180deg,#ffffff 0%,#f7faff 100%);box-shadow:0 5px 18px rgba(18,55,105,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;text-align:center}
-.total-card .total-number{font-size:34px;line-height:1;font-weight:850;color:#153b72;font-variant-numeric:tabular-nums;letter-spacing:.3px}
-.total-card .total-label{margin-top:7px;font-size:13px;font-weight:750;color:#516d90;line-height:1.25}
-.total-card .total-label small{display:block;margin-top:2px;font-size:11px;font-weight:500;color:#7f91a8}
-.status-summary-wrap .status-strip{flex:1;max-width:none;margin:0;padding:0;align-content:center}
-@media(max-width:900px){.status-summary-wrap{padding:0 8px;gap:8px}.total-card{width:135px;min-height:82px;border-radius:13px}.total-card .total-number{font-size:28px}.total-card .total-label{font-size:12px}.status-summary-wrap .status-strip{overflow:auto;flex-wrap:nowrap}}
-@media(max-width:680px){.status-summary-wrap{display:block}.total-card{width:100%;min-height:74px;flex-direction:row;gap:12px;margin-bottom:8px}.total-card .total-label{margin-top:0;text-align:left}.status-summary-wrap .status-strip{display:flex}}
-/* Dashboard status counters mirror the actual row statuses 1:1 */
-.status-strip .stat-chip{display:inline-flex;align-items:center;gap:4px;font-weight:650}
-.status-strip .stat-chip b{margin-left:2px;font-variant-numeric:tabular-nums}
-.status-strip .stat-fault{background:#fff0f1;border-color:#f1a1a8;color:#a91c2a}.status-strip .stat-fault b{color:#a91c2a}
-.status-strip .stat-repair{background:#fff7e6;border-color:#e4bd6a;color:#845400}.status-strip .stat-repair b{color:#845400}
-.status-strip .stat-pending{background:#f0edff;border-color:#b5a4e6;color:#59439a}.status-strip .stat-pending b{color:#59439a}
-.status-strip .stat-fixed{background:#eaf8f0;border-color:#86d2a7;color:#126a40}.status-strip .stat-fixed b{color:#126a40}
-.status-strip .stat-clear{background:#edf6fc;border-color:#98c7e4;color:#286287}.status-strip .stat-clear b{color:#286287}
-
-/* ===== LOCATION COLUMN FINAL LAYOUT ===== */
-.col-location{text-align:left}
-.location-cell{display:grid;grid-template-columns:86px minmax(95px,1fr) 24px;gap:5px;align-items:center;min-width:0}
-.location-select,.location-detail{height:34px;border:1px solid #d7e1ed;border-radius:9px;background:#fff;color:#17386d;font-size:12px;outline:none;min-width:0}
-.location-select{padding:0 6px;font-weight:700}.location-detail{padding:6px 8px}
-.location-select:focus,.location-detail:focus{border-color:#72a8d8;box-shadow:0 0 0 2px #e4f0fb}
-.location-cell .delete-btn{position:static;width:24px;height:28px;font-size:22px;line-height:24px;justify-self:end}
-@media (min-width:1381px){.column-head-right,.row{grid-template-columns:205px minmax(320px,1fr) 138px 138px minmax(220px,260px) !important;gap:7px !important}}
-@media (min-width:1121px) and (max-width:1380px){.column-head-right,.row{grid-template-columns:172px minmax(220px,1fr) 108px 108px minmax(190px,220px) !important;gap:5px !important}.location-cell{grid-template-columns:72px minmax(82px,1fr) 22px}.location-select,.location-detail{font-size:10.5px}}
-@media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
-@media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
-@media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
-</style></head><body><div class="report-head"><h1>73G-3 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>73G-3 Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">73G-3 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div><style>
-.cloud-pill{min-width:150px}.cloud-pill #cloudStatus{font-weight:800}.cloud-pill #cloudStatus[data-state="ok"]{color:#b9f6ca}.cloud-pill #cloudStatus[data-state="syncing"]{color:#fff0a6}.cloud-pill #cloudStatus[data-state="pending"]{color:#ffe082}.cloud-pill #cloudStatus[data-state="error"]{color:#ffcdd2}.save-submit:disabled{opacity:.7;cursor:wait}
-
-/* =====================================
-   iPhone Final Responsive Fix
-   CN301-394 Fault Tracking System
-===================================== */
-@media(max-width:680px){
-    html,body{width:100%;overflow-x:hidden;}
-    main{padding:8px !important;width:100%;}
-    .table-panel{width:100%;border-radius:12px;overflow:hidden !important;}
-    .column-head{display:none !important;}
-    .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff;}
-    .head{
-        display:grid !important;
-        grid-template-columns:1fr 1fr !important;
-        grid-template-rows:auto auto auto !important;
-        gap:8px !important;
-        min-height:auto !important;
-        padding:10px !important;
-    }
-    .head .unit-select{grid-column:1;grid-row:1;width:100% !important;}
-    .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;}
-    .head .carno{grid-column:1 / -1 !important;grid-row:2;font-size:16px !important;}
-    .head .add-btn{
-        grid-column:1 / -1 !important;
-        grid-row:3;
-        position:static !important;
-        width:max-content !important;
-        margin-top:3px !important;
-    }
-    .rows{padding:8px 0 !important;}
-    .row{
-        display:grid !important;
-        grid-template-columns:1fr 32px !important;
-        gap:8px !important;
-        padding:10px !important;
-        border-radius:12px !important;
-        margin-bottom:10px !important;
-    }
-    .row>*:not(.delete-btn){grid-column:1 !important;}
-    .delete-btn{grid-column:2 !important;grid-row:1 !important;}
-    textarea{width:100% !important;min-height:70px !important;font-size:15px !important;background:#fff !important;border:1px solid #d8e2ef !important;border-radius:10px !important;}
-    .status-select{width:100% !important;height:40px !important;font-size:14px !important;}
-    .tech,.wit{width:100% !important;height:40px !important;font-size:14px !important;}
-    .savebar{padding:8px !important;}
-    .savebar .inside{gap:8px !important;}
-    .discard,.save-submit{flex:1;height:42px !important;font-size:14px !important;}
+/* section headings */
+.summary-title{
+  width:100%;font-size:11pt;color:#173b70;font-weight:800;
+  margin:11pt 0 5pt;padding:5pt 8pt;
+  border-left:4pt solid #356ba6;background:#edf3f9
 }
 
-
-/* ===== Mobile v5 orientation fix ===== */
-@media (max-width:950px){
-  .column-head{display:none !important;}
-  .car{
-    display:block !important;
-    min-width:0 !important;
-    width:100% !important;
-  }
-  .head{
-    display:grid !important;
-    grid-template-columns:1fr 1fr !important;
-    grid-template-rows:auto auto auto !important;
-    min-height:130px !important;
-    height:auto !important;
-    overflow:visible !important;
-    padding:10px !important;
-  }
-  .head .unit-select{
-    grid-column:1 !important;
-    grid-row:1 !important;
-    width:100% !important;
-  }
-  .head .vehicle-no-wrap{
-    grid-column:2 !important;
-    grid-row:1 !important;
-    width:100% !important;
-  }
-  .head .carno{
-    grid-column:1 / -1 !important;
-    grid-row:2 !important;
-    white-space:normal !important;
-  }
-  .head .add-btn{
-    position:static !important;
-    grid-column:1 / -1 !important;
-    grid-row:3 !important;
-    justify-self:start !important;
-    display:inline-flex !important;
-    margin-top:6px !important;
-  }
-  .rows{padding:8px 0 !important;}
+/* Word-safe summary tables: fixed grid, exact widths, full cell fills */
+.summary{
+  width:100%;border-collapse:collapse;table-layout:fixed;
+  margin:0 0 12pt;text-align:center;border:1pt solid #b8c7d8
+}
+.summary th,.summary td{
+  border:1pt solid #b8c7d8;padding:0;vertical-align:middle
+}
+.summary th{
+  height:39pt;font-size:8.5pt;font-weight:800;color:#243a55;line-height:1.2
+}
+.summary th small{font-size:7.2pt;font-weight:600}
+.summary td{
+  height:29pt;font-size:14pt;font-weight:850;color:#173b70;line-height:1
 }
 
-@media (max-width:680px){
-  .head{
-    min-height:145px !important;
-  }
-}
-</style>
+/* Asset summary full backgrounds */
+.type-summary .total-h{background:#dce8f5;color:#173b70}
+.type-summary .cn-h{background:#e8f1fb;color:#245d99}
+.type-summary .dk-h{background:#edf0f8;color:#4d6491}
+.type-summary .nms-h{background:#e8f1f3;color:#3e6874}
+.type-summary .sss-h{background:#eef0f2;color:#566471}
+.type-summary .records-h{background:#e3eaf3;color:#314d6c}
+.type-summary .total-v{background:#f0f5fb;color:#173b70}
+.type-summary .cn-v{background:#f3f7fc;color:#245d99}
+.type-summary .dk-v{background:#f5f6fb;color:#4d6491}
+.type-summary .nms-v{background:#f2f7f8;color:#3e6874}
+.type-summary .sss-v{background:#f5f6f7;color:#566471}
+.type-summary .records-v{background:#f2f5f9;color:#314d6c}
 
-<div class="mobile-app-bar" style="position:fixed;bottom:0;left:0;right:0;height:70px;background:#102f62;display:flex;gap:8px;padding:8px;z-index:999;">
-<button style="flex:1;border-radius:10px;">首頁</button>
-<button style="flex:1;border-radius:10px;">新增</button>
-<button style="flex:1;border-radius:10px;">列印</button>
-</div>
+/* Status summary: heading AND value cell use same status family */
+.status-summary .fault-h{background:#f6dadd;color:#9a2632}
+.status-summary .repair-h{background:#f6e9c9;color:#7a570f}
+.status-summary .pending-h{background:#e8e2f4;color:#58477d}
+.status-summary .fixed-h{background:#dcefe4;color:#246243}
+.status-summary .clear-h{background:#dcebf5;color:#2e6284}
+.status-summary .fault-cell{background:#fff0f1;color:#a42432}
+.status-summary .repair-cell{background:#fff7e8;color:#80570b}
+.status-summary .pending-cell{background:#f5f2fb;color:#5a4a89}
+.status-summary .fixed-cell{background:#eef8f2;color:#236747}
+.status-summary .clear-cell{background:#eef6fb;color:#2f6587}
 
-</body>
-<style>
-/* ===== 73G mobile layout match index.html ===== */
-@media(max-width:950px){
-  .column-head{display:none !important;}
-  .table-panel{overflow:visible !important;}
-  .car{display:block !important;width:100% !important;min-width:0 !important;padding:8px !important;background:#fff !important;border-radius:14px !important;margin-bottom:10px !important;}
-  .head{display:grid !important;grid-template-columns:92px minmax(0,1fr) !important;grid-template-rows:auto auto auto !important;gap:8px !important;min-height:0 !important;padding:10px !important;background:#f7faff !important;border:1px solid #dce6f3 !important;border-radius:12px !important;}
-  .head .rownum{display:none !important;}
-  .head .unit-select{grid-column:1 !important;grid-row:1 !important;width:100% !important;height:42px !important;background:#eaf3ff !important;border-color:#b8d3ef !important;}
-  .head .vehicle-no-wrap{grid-column:2 !important;grid-row:1 !important;width:100% !important;background:#fff7e8 !important;border:1px solid #ead39c !important;border-radius:10px !important;min-height:42px !important;}
-  .head .vehicle-no-select{background:transparent !important;border:0 !important;height:40px !important;}
-  .head .carno{grid-column:1 / -1 !important;grid-row:2 !important;padding:10px 12px !important;border-radius:10px !important;background:#eaf8f0 !important;border:1px solid #b7ddc5 !important;color:#0c3b78 !important;font-size:18px !important;white-space:nowrap !important;}
-  .head .add-btn{position:static !important;grid-column:1 / -1 !important;grid-row:3 !important;justify-self:start !important;margin:0 !important;}
-  .rows{padding:8px 0 0 !important;}
+/* unit + carriage */
+.unit-section{margin-top:13pt;page-break-before:auto}
+.unit-title{
+  background:#173f75;color:#fff;font-size:10.5pt;font-weight:800;
+  padding:6pt 8pt;border:1pt solid #173f75
 }
-@media(max-width:680px){
-  .head{grid-template-columns:1fr !important;}
-  .head .unit-select,.head .vehicle-no-wrap,.head .carno,.head .add-btn{grid-column:1 !important;}
+.unit-count{float:right;font-size:8.3pt;font-weight:600;color:#d9e5f2}
+.car-block{
+  page-break-inside:avoid;margin:7pt 0 12pt;border:1pt solid #cbd8e5;
+  padding:0;background:#fff
 }
-</style>
-</html>`;
-  downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-3_Daily_Fault_Report_${dateText}.doc`);
+.car-title{
+  margin:0;padding:6pt 8pt;background:#f7f9fc;
+  border-bottom:1pt solid #cbd8e5
+}
+.vehicle-badge{font-size:9.5pt;font-weight:800;color:#334e6e}
+
+/* asset heading uses a real table so Word keeps left/right alignment */
+.asset-block{margin:0;padding:7pt 8pt 8pt;page-break-inside:avoid}
+.asset-block + .asset-block{border-top:1pt solid #d7e0ea}
+.asset-head-table{
+  width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 4pt;
+  border-left:4pt solid #315b8f;background:#f2f6fa
+}
+.asset-head-table td{border:0!important;background:#f2f6fa!important}
+.asset-name-cell{
+  width:48%;padding:5pt 7pt;font-size:12.5pt;font-weight:850;color:#173b70;
+  white-space:nowrap
+}
+.asset-location-cell{
+  width:52%;padding:5pt 7pt;text-align:right;font-size:8.7pt;
+  color:#50657f;font-weight:700
+}
+.cn-block .asset-head-table{border-left-color:#245d99}
+.dk-block .asset-head-table{border-left-color:#6278a0}
+.nms-block .asset-head-table{border-left-color:#4b7880}
+.sss-block .asset-head-table{border-left-color:#6d7b8c}
+
+/* fault table: one exact grid, no floating borders */
+.fault-table{
+  width:100%;border-collapse:collapse;table-layout:fixed;margin:0;
+  border:1pt solid #bfcddd
+}
+.fault-table th{
+  background:#dfe9f3;color:#294866;border:1pt solid #bfcddd;
+  padding:5pt 3pt;font-size:8.2pt;font-weight:800;line-height:1.2;
+  vertical-align:middle;text-align:center
+}
+.fault-table th small{font-size:6.9pt;color:#6c8099;font-weight:600}
+.fault-table td{
+  border:1pt solid #cfd9e5;padding:5.5pt 4pt;vertical-align:middle;
+  font-size:8.8pt;color:#26394f
+}
+.num,.person{text-align:center}.num{font-weight:700;color:#6e8096}
+.status{text-align:center;font-size:8.5pt!important}
+.report-time{font-size:7.2pt;color:#6f8093;margin-top:2.5pt;font-weight:500}
+.place{font-size:8.3pt}
+.none{
+  text-align:center;font-style:italic;color:#7f8fa2;background:#fff!important;
+  padding:8pt!important
+}
+.none span{color:#9aa7b6}
+.footer{
+  margin-top:14pt;border-top:.7pt solid #d3dbe5;padding-top:5pt;
+  text-align:right;color:#8996a6;font-size:7.2pt
+}
+</style></head><body><div class="report-head"><h1>73G-3 故障日報 <span class="en">DAILY FAULT REPORT</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b>　｜　範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要　Asset Summary</div><table class="summary type-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:31%"><col style="width:8.5%"><col style="width:8.5%"><col style="width:13%"><col style="width:10%"><col style="width:29%"></colgroup><tr><th class="total-h" bgcolor="#dce8f5">總車廂數<br><small>Total Carriages</small></th><th class="cn-h" bgcolor="#e8f1fb">CN</th><th class="dk-h" bgcolor="#edf0f8">DK</th><th class="nms-h" bgcolor="#e8f1f3">NMS</th><th class="sss-h" bgcolor="#eef0f2">SSS</th><th class="records-h" bgcolor="#e3eaf3">有紀錄車廂<br><small>With Records</small></th></tr><tr><td class="total-v" bgcolor="#f0f5fb">${scopedCars.length}</td><td class="cn-v" bgcolor="#f3f7fc">${countCN}</td><td class="dk-v" bgcolor="#f5f6fb">${countDK}</td><td class="nms-v" bgcolor="#f2f7f8">${countNMS}</td><td class="sss-v" bgcolor="#f5f6f7">${countSSS}</td><td class="records-v" bgcolor="#f2f5f9">${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要　Status Summary</div><table class="summary status-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><tr><th class="fault-h" bgcolor="#f6dadd">故障<br><small>Fault</small></th><th class="repair-h" bgcolor="#f6e9c9">維修中<br><small>Under Repair</small></th><th class="pending-h" bgcolor="#e8e2f4">待確認<br><small>Pending</small></th><th class="fixed-h" bgcolor="#dcefe4">已修復<br><small>Fixed</small></th><th class="clear-h" bgcolor="#dcebf5">均完成<br><small>All Clear</small></th></tr><tr><td class="fault-cell" bgcolor="#fff0f1">${fault}</td><td class="repair-cell" bgcolor="#fff7e8">${repair}</td><td class="pending-cell" bgcolor="#f5f2fb">${pending}</td><td class="fixed-cell" bgcolor="#eef8f2">${fixed}</td><td class="clear-cell" bgcolor="#eef6fb">${clear}</td></tr></table>${sections}<div class="footer">73G-3 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+  const unitSuffix=activeUnit?`_${activeUnit}`:"";
+  downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-3_Daily_Fault_Report${unitSuffix}_${dateText}.doc`);
 }
 function statusText(s){
   if((s||"").includes("Fixed")||(s||"").includes("修復")) return "✅  已修復完成 Fixed";
@@ -2240,48 +2366,72 @@ function statusText(s){
   if((s||"").includes("Clear")||(s||"").includes("均完成")) return "🟢  均完成 All Clear";
   return "🚨  故障 Fault";
 }
-function render(){
-  const k=(document.getElementById("search").value||"").toUpperCase();
-  let h="";
-  cars.filter(c=>c.includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
-    const rows=data.filter(r=>r.car===c);
-    const vehicleValue=vehicleNos[c]||"";
-    const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
-    const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
-    const loc=locations[c]||{type:"",detail:""};
-    h+=`<div class="car">
-      <div class="head" data-car-head="${c}"><span class="rownum">${idx+1}</span><select class="unit-select" disabled title="此頁單位固定">${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select><div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div><span class="carno">${c}</span><button class="add-btn" onclick="add('${c}')">＋ Add Fault / 新增</button></div>
-      <div class="rows">`;
-    if(!rows.length){
-      h+=`<div class="empty">尚無故障紀錄 / No fault records</div>`;
-    }
-    rows.forEach(r=>{
-      const isDirty=dirtyIds.has(r.id);
-      h+=`<div class="row ${isDirty?'unsaved':''}" data-id="${r.id}">
-        <div class="status-wrap">
-          <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
-            <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
-            <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
-            <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
-            <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
-            <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
-          </select>
-          <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
-        </div>
-        ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障訊息 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障訊息 / Fault description'}</div>`}
-        <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
-        <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
-        <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
-      </div>`;
-    });
-    h+=`</div>
-      <div class="car-location ${dirtyIds.has('location:'+c)?'head-unsaved':''}" data-car-location="${c}">
-        <select class="location-select" onchange="updateCarLocationType('${c}',this.value)">
+function isCnCar(car){
+  return String(car||"").toUpperCase().startsWith("CN-");
+}
+function getDkCode(car){
+  if(!isCnCar(car)) return "";
+  const m=String(car).match(/(\d+)$/);
+  return m ? `DK${m[1]}` : "DK";
+}
+function faultRowHtml(r){
+  const isDirty=dirtyIds.has(r.id);
+  return `<div class="row asset-fault-row ${isDirty?'unsaved':''}" data-id="${r.id}">
+    <div class="status-wrap">
+      <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
+        <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
+        <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
+        <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
+        <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
+        <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
+      </select>
+      <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
+    </div>
+    ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障描述 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障描述 / Fault description'}</div>`}
+    <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
+    <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
+    <div class="fault-location-display">${esc(r.locationType||'—')}${r.locationDetail?`<small>${esc(r.locationDetail)}</small>`:''}</div>
+    <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
+  </div>`;
+}
+function assetSectionHtml(c,assetType){
+  const isDk=assetType==="DK";
+  if(isDk && !isCnCar(c)) return "";
+  const assetName=isDk?getDkCode(c):c;
+  const loc=isDk?(dkLocations[c]||{type:"",detail:""}):(locations[c]||{type:"",detail:""});
+  const rows=data.filter(r=>r.car===c && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+  const dirtyKey=(isDk?'dk-location:':'location:')+c;
+  const typeHandler=isDk?'updateDkLocationType':'updateCarLocationType';
+  const detailHandler=isDk?'updateDkLocationDetail':'updateCarLocationDetail';
+  const detailData=isDk?'data-dk-location-detail':'data-car-location-detail';
+  return `<section class="asset-section ${isDk?'dk-asset':'cn-asset'}">
+    <div class="asset-header ${dirtyIds.has(dirtyKey)?'head-unsaved':''}" ${isDk?`data-dk-location="${c}"`:`data-car-location="${c}"`}>
+      <div class="asset-name-wrap"><span class="asset-name">${assetName}</span><button class="asset-add-btn" onclick="add('${c}','${assetType}')">＋ Add Fault / 新增</button></div>
+      <div class="asset-location-controls">
+        <select class="location-select" onchange="${typeHandler}('${c}',this.value)" aria-label="${assetName} 地點">
           <option value="">📍 選擇地點</option>
           ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
         </select>
-        ${loc.type?`<input class="location-detail" data-car-location-detail="${c}" value="${esc(loc.detail)}" placeholder="輸入${esc(loc.type)}詳細位置" oninput="updateCarLocationDetail('${c}',this.value)">`:''}
+        ${loc.type?`<input class="location-detail" ${detailData}="${c}" value="${esc(loc.detail)}" placeholder="${assetName} 詳細位置" oninput="${detailHandler}('${c}',this.value)">`:''}
       </div>
+    </div>
+    <div class="asset-rows">${rows.length?rows.map(faultRowHtml).join(""):`<div class="asset-empty">尚無故障紀錄 / No fault records</div>`}</div>
+  </section>`;
+}
+function render(){
+  const k=(document.getElementById("search").value||"").toUpperCase();
+  let h="";
+  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
+    const vehicleValue=vehicleNos[c]||"";
+    const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
+    const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
+    h+=`<div class="car asset-car">
+      <div class="shared-vehicle" data-car-head="${c}">
+        <span class="rownum">${idx+1}</span>
+        <select class="unit-select" onchange="updateUnit('${c}',this.value)"><option value="">選擇單位</option>${UNIT_OPTIONS.map(u=>`<option value="${u}" ${units[c]===u?'selected':''}>${u}</option>`).join("")}</select>
+        <div class="vehicle-no-wrap"><select class="vehicle-no-select" onchange="updateVehicleNo('${c}',this.value)"><option value="">選擇車號</option>${VEHICLE_OPTIONS.map(v=>`<option value="${v}" ${vehicleSelectValue===v?'selected':''}>${v}</option>`).join("")}<option value="__custom__" ${vehicleSelectValue==='__custom__'?'selected':''}>✎ 自行輸入...</option></select>${vehicleSelectValue==='__custom__'?`<input class="vehicle-no-custom" data-custom-vehicle="${c}" value="${esc(vehicleValue)}" placeholder="自行輸入車號" oninput="updateCustomVehicleNo('${c}',this.value)">`:''}</div>
+      </div>
+      <div class="asset-stack">${assetSectionHtml(c,"CN")}${assetSectionHtml(c,"DK")}</div>
     </div>`;
   });
   document.getElementById("app").innerHTML=h;
@@ -2642,6 +2792,22 @@ initCloud();
 }
 @media(max-width:390px){.toolbar-controls{grid-template-columns:1fr!important}.search-wrap{grid-column:1!important}.quick-filter,.unfinished-toggle,.clear-filter-btn{grid-column:1!important}.header-actions{grid-template-columns:1fr!important}.car-location{grid-template-columns:1fr!important}}
 </style>
+
+<style id="vehicle-breakdown-2026">
+.dashboard-total-wrap{position:relative;min-width:0}
+.dashboard-total-toggle{width:100%;border:1px solid #d8e3ef;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.dashboard-total-toggle:hover{border-color:#a9bfd9;box-shadow:0 7px 20px rgba(18,55,105,.10)!important;transform:translateY(-1px)}
+.dashboard-total-toggle:focus-visible{outline:3px solid rgba(70,126,190,.2);outline-offset:2px}
+.total-expand-icon{display:inline-block;margin-left:4px;font-size:13px;transition:transform .18s ease;color:#6680a0}.dashboard-total-toggle.open .total-expand-icon{transform:rotate(180deg)}
+.vehicle-breakdown-panel{position:absolute;left:0;top:calc(100% + 8px);z-index:80;width:390px;max-width:min(92vw,390px);padding:12px;background:#fff;border:1px solid #cfdeed;border-radius:14px;box-shadow:0 18px 44px rgba(16,48,89,.18)}
+.vehicle-breakdown-panel[hidden]{display:none!important}
+.vehicle-breakdown-head{display:flex;justify-content:space-between;align-items:center;padding:1px 2px 9px;font-size:12.5px;font-weight:850;color:#173b70}.vehicle-breakdown-head small{font-size:10.5px;color:#7a8da7;font-weight:650;background:#f1f5fa;padding:4px 7px;border-radius:999px}
+.vehicle-breakdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.vehicle-breakdown-item{min-width:0;padding:9px 7px 8px;text-align:center;border:1px solid #dce6f1;border-radius:11px;background:#f8fbff}.vehicle-breakdown-item span{display:block;font-size:11px;font-weight:850;color:#5f7693}.vehicle-breakdown-item b{display:block;margin:3px 0 1px;font-size:22px;line-height:1;font-weight:900;color:#173b70;font-variant-numeric:tabular-nums}.vehicle-breakdown-item small{display:block;font-size:8.5px;line-height:1.15;color:#8a9ab0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vehicle-breakdown-item.type-dk{background:#f2f7ff;border-color:#c9dbef}.vehicle-breakdown-item.type-dk b{color:#245d99}.vehicle-breakdown-item.type-nms{background:#f6f8fb}.vehicle-breakdown-item.type-sss{background:#f8f6fc}
+.vehicle-breakdown-note{margin-top:9px;padding-top:8px;border-top:1px solid #edf2f7;color:#71849d;font-size:9.5px;line-height:1.35}
+@media(max-width:680px){.dashboard-total-wrap{width:100%}.vehicle-breakdown-panel{position:static;width:100%;max-width:none;margin-top:7px;box-shadow:0 5px 15px rgba(16,48,89,.08)}.vehicle-breakdown-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.vehicle-breakdown-item{padding:8px 4px}.vehicle-breakdown-item b{font-size:20px}.vehicle-breakdown-item small{font-size:7.5px}}
+</style>
 <script id="ux-optimization-2026-js">
 let quickStatusFilter="all";
 let quickUnitFilter="";
@@ -2652,10 +2818,11 @@ function rowStatusKey(rowEl){
   return sel ? color(sel.value) : "";
 }
 function applyQuickFilters(){
+  updateDashboard();
   const allCars=[...document.querySelectorAll("#app .car")];
   let visibleCars=0, visibleRows=0;
   allCars.forEach(carEl=>{
-    const head=carEl.querySelector(".head");
+    const head=carEl.querySelector(".shared-vehicle")||carEl.querySelector(".head");
     const unitSel=head?.querySelector(".unit-select");
     const unitMatch=!quickUnitFilter || (unitSel?.value||"")===quickUnitFilter;
     const rows=[...carEl.querySelectorAll(".row")];
@@ -2688,7 +2855,7 @@ function setQuickFilter(v){
   const sel=document.getElementById("quickStatusFilter");if(sel)sel.value=quickStatusFilter;
   applyQuickFilters();
 }
-function setUnitFilter(v){quickUnitFilter=v||"";applyQuickFilters();}
+function setUnitFilter(v){quickUnitFilter=v||"";updateDashboard();applyQuickFilters();}
 function setUnfinishedOnly(v){quickUnfinishedOnly=!!v;applyQuickFilters();}
 function clearQuickFilters(){
   quickStatusFilter="all";quickUnitFilter="";quickUnfinishedOnly=false;
@@ -2702,6 +2869,11 @@ render=function(){__coreRender();requestAnimationFrame(applyQuickFilters);};
 // Keyboard access for dashboard filters.
 document.querySelectorAll(".dashboard-status-card[data-filter]").forEach(card=>card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setQuickFilter(card.dataset.filter);}}));
 requestAnimationFrame(applyQuickFilters);
+document.addEventListener("click",e=>{
+  const wrap=e.target.closest?.(".dashboard-total-wrap");
+  if(!wrap)toggleVehicleBreakdown(false);
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleVehicleBreakdown(false);});
 </script>
 
 <style id="ux-optimization-v2-2026">
@@ -2781,73 +2953,210 @@ requestAnimationFrame(applyQuickFilters);
   .savebar{min-height:52px!important;padding:5px 8px!important}.save-submit{height:38px!important;min-width:118px!important;font-size:11.5px!important}
 }
 </style>
+</body>
 
 <style>
-/* ===== V3 Mobile Carriage Group Boundary Fix =====
-   One carriage = identity header + fault records + location.
-   The navy end marker belongs at the very bottom of the carriage card. */
-@media (max-width:680px){
-  /* Make the whole carriage read as one continuous card. */
-  .car{
-    position:relative !important;
-    margin:0 0 16px 0 !important;
-    padding:0 !important;
-    border:1.5px solid #c8d8e9 !important;
-    border-left:4px solid #1f4f86 !important;
-    border-radius:15px !important;
-    overflow:hidden !important;
-    background:#ffffff !important;
-    box-shadow:0 4px 13px rgba(23,59,112,.08) !important;
-  }
+/* ===== DK LOCATION — FINAL MASTER ===== */
+.column-head-location{
+  background:rgba(255,255,255,.035) !important;
+}
+.car-location{
+  position:relative !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  gap:8px !important;
+  padding:10px !important;
+}
+.dk-location{
+  background:linear-gradient(180deg,#f3f8ff 0%,#edf5ff 100%) !important;
+  border-left:1px solid #d6e4f3 !important;
+}
+.dk-identity{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  min-width:0;
+}
+.dk-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:5px 11px;
+  border-radius:9px;
+  background:#173b70;
+  color:#fff;
+  font-size:13px;
+  line-height:1;
+  font-weight:850;
+  letter-spacing:.35px;
+  box-shadow:0 2px 7px rgba(23,59,112,.14);
+  white-space:nowrap;
+}
+.dk-caption{
+  color:#6d83a0;
+  font-size:9.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.location-controls{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+.dk-location .location-select{
+  border-color:#b9cee5 !important;
+  background:#fff !important;
+  color:#173b70 !important;
+  font-weight:750 !important;
+}
+.dk-location .location-select:focus,
+.dk-location .location-detail:focus{
+  border-color:#5d8fc5 !important;
+  box-shadow:0 0 0 3px rgba(93,143,197,.13) !important;
+}
+.standard-location .location-identity{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#637a98;
+  font-size:11px;
+  font-weight:750;
+}
+.standard-location .location-pin{font-size:14px}
+.dk-location.head-unsaved{
+  background:#fff8e8 !important;
+  box-shadow:inset 3px 0 0 #e7b64c !important;
+}
 
-  /* Do NOT visually end the carriage immediately after Add Fault. */
-  .head{
-    border-bottom:1px solid #dbe6f1 !important;
-    border-radius:0 !important;
-    background:#f8fafc !important;
-  }
+@media(max-width:1450px) and (min-width:681px){
+  .dk-badge{font-size:11.5px;padding:5px 8px;min-height:27px}
+  .dk-caption{font-size:8.5px}
+  .car-location{padding:7px !important;gap:6px !important}
+}
 
-  /* Fault record area remains inside the same carriage group. */
-  .rows{
-    border-top:0 !important;
-    border-bottom:1px solid #e2eaf3 !important;
-    background:#f8fafc !important;
-  }
-
-  /* Location is the final section of the SAME carriage. */
-  .car-location{
-    margin:0 !important;
-    border-top:0 !important;
+@media(max-width:900px){
+  .dk-location{
     border-left:0 !important;
-    border-right:0 !important;
-    border-bottom:4px solid #1f4f86 !important;
-    border-radius:0 !important;
-    background:#f2f7fc !important;
-    padding:10px !important;
+    border-top:2px solid #bfd4ea !important;
+    background:linear-gradient(135deg,#e9f3ff,#f8fbff) !important;
   }
+}
 
-  /* Keep the final carriage boundary visually clear. */
-  .car-location::after{
-    content:"";
-    display:block;
-    grid-column:1 / -1;
-    height:0;
+@media(max-width:680px){
+  .car-location.dk-location{
+    display:grid !important;
+    grid-template-columns:96px minmax(0,1fr) !important;
+    align-items:start !important;
+    gap:10px !important;
+    padding:12px !important;
+    border-radius:0 0 16px 16px !important;
   }
+  .dk-identity{
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:5px;
+    padding-top:2px;
+  }
+  .dk-badge{
+    min-height:36px;
+    padding:8px 12px;
+    font-size:15px;
+    border-radius:10px;
+  }
+  .dk-caption{font-size:9px;padding-left:2px}
+  .location-controls{width:100%;gap:7px}
+  .dk-location .location-select,
+  .dk-location .location-detail{
+    width:100% !important;
+    height:44px !important;
+    font-size:13px !important;
+    border-radius:10px !important;
+  }
+  .standard-location .location-controls{width:100%}
+}
 
-  /* Avoid another heavy blue divider around the Add button. */
-  .head .add-btn{
-    border-style:solid !important;
-    border-width:1px !important;
-    border-color:#b8cee5 !important;
-    background:#edf5ff !important;
-    color:#194f89 !important;
+@media(max-width:420px){
+  .car-location.dk-location{
+    grid-template-columns:82px minmax(0,1fr) !important;
+    gap:8px !important;
   }
+  .dk-badge{font-size:13.5px;padding:7px 9px}
 }
 </style>
 
 <style>
-/* ===== V3 Mobile Carriage Group — Natural Card Refinement =====
-   Use one soft rounded card per carriage. No artificial navy rail/divider. */
+/* ===== CN + DK DUAL LOCATION — MASTER ===== */
+.car-location.dual-location{display:grid !important;grid-template-columns:1fr !important;gap:8px !important;background:#f4f8fd !important;padding:8px !important;}
+.location-panel{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid #d8e4f1;border-radius:11px;background:#fff;min-width:0;}
+.cn-location-panel{border-color:#cbdced;background:#fbfdff;}
+.dk-location-panel{border-color:#b9cee5;background:linear-gradient(180deg,#f5f9ff,#eef6ff);}
+.cn-identity,.dk-identity{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.cn-location-badge{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border-radius:8px;background:#e7f0fb;color:#174579;font-size:10.5px;font-weight:850;white-space:nowrap;}
+.location-caption,.dk-caption{font-size:9px;font-weight:750;color:#7185a0;white-space:nowrap;}
+.location-panel.head-unsaved{background:#fff8e8 !important;box-shadow:inset 3px 0 0 #e7b64c !important;}
+.location-panel .location-controls{display:flex;flex-direction:column;gap:5px;}
+.location-panel .location-select,.location-panel .location-detail{width:100% !important;}
+@media(min-width:1180px){.car-location.dual-location{grid-template-columns:1fr 1fr !important;align-content:center;}.location-panel{height:100%;justify-content:center;}}
+@media(max-width:680px){.car-location.dual-location{grid-template-columns:1fr !important;padding:10px !important;gap:9px !important;}.location-panel{padding:9px !important;}.cn-location-badge,.dk-badge{font-size:12px !important;min-height:30px !important;}.location-panel .location-select,.location-panel .location-detail{height:44px !important;font-size:13px !important;}}
+</style>
+</html>
+
+<style>
+/* ===== v3 Neutral Professional Background Palette ===== */
+:root{
+  --canvas:#f5f7fa !important;
+  --panel:#ffffff !important;
+  --soft:#f8fafc !important;
+  --border:#dce4ee !important;
+  --line-soft:#e8edf3 !important;
+}
+html,body{background:#f5f7fa !important;}
+body{background:#f5f7fa !important;}
+main{background:transparent !important;}
+.toolbar,
+.table-panel,
+.dashboard-total-card,
+.dashboard-status-card{background:#ffffff !important;}
+.car{background:#ffffff !important;}
+.head{background:#f8fafc !important;}
+.rows{background:#f8fafc !important;}
+.row{background:#ffffff !important;}
+.row:hover{background:#ffffff !important;}
+.car-location{background:#f2f7fc !important;}
+#search,
+.unit-select,
+.vehicle-no-select,
+.vehicle-no-custom,
+.tech,.wit,
+.location-select,
+.location-detail,
+.row textarea{background:#ffffff !important;}
+.empty{background:#f8fafc !important;}
+
+/* Keep status colors prominent against the more neutral page */
+.status-strip .stat-fault,.dashboard-status-card.stat-fault{background:#fff4f5 !important;}
+.status-strip .stat-repair,.dashboard-status-card.stat-repair{background:#fff9ed !important;}
+.status-strip .stat-pending,.dashboard-status-card.stat-pending{background:#f6f3ff !important;}
+.status-strip .stat-fixed,.dashboard-status-card.stat-fixed{background:#eff9f3 !important;}
+.status-strip .stat-clear,.dashboard-status-card.stat-clear{background:#f0f7fc !important;}
+
+@media(max-width:680px){
+  html,body{background:#f5f7fa !important;}
+  .car{background:#ffffff !important;}
+  .head{background:#f8fafc !important;}
+  .rows{background:#f8fafc !important;}
+  .car-location{background:#f2f7fc !important;}
+}
+</style>
+
+
+<style id="v3-mobile-input-save-final">
+/* ===== V3 Mobile Carriage Group — Natural Card + iPhone Input/Save Final ===== */
 @media (max-width:680px){
   .car{
     position:relative !important;
@@ -2860,20 +3169,17 @@ requestAnimationFrame(applyQuickFilters);
     background:#ffffff !important;
     box-shadow:0 3px 10px rgba(28,62,103,.07) !important;
   }
-
   .head{
     border:0 !important;
     border-bottom:1px solid #e3eaf2 !important;
     border-radius:0 !important;
-    background:#ffffff !important;
+    background:#f8fafc !important;
   }
-
   .rows{
     border:0 !important;
     border-bottom:1px solid #e6edf4 !important;
-    background:#fbfcfe !important;
+    background:#f8fafc !important;
   }
-
   .car-location{
     margin:0 !important;
     border:0 !important;
@@ -2881,40 +3187,69 @@ requestAnimationFrame(applyQuickFilters);
     background:#f2f7fc !important;
     padding:10px !important;
   }
-
   .car-location::after{display:none !important;content:none !important;}
-
-  /* The carriage number remains the strongest grouping cue. */
   .head .carno{
     background:#1f4f86 !important;
     color:#fff !important;
     border-radius:7px !important;
     box-shadow:none !important;
   }
-
-  /* Keep spacing between carriages as the primary boundary. */
   .car + .car{margin-top:2px !important;}
+
+  /* Prevent iPhone Safari from auto-zooming focused form controls. */
+  html,body{width:100% !important;max-width:100% !important;overflow-x:hidden !important;}
+  input,select,textarea,button,
+  .unit-select,.vehicle-no-select,.vehicle-no-custom,.status-select,
+  .tech,.wit,.location-select,.location-detail,#search,
+  .quick-filter,.filter-select,.filter-btn{
+    font-size:16px !important;
+  }
+  textarea,.row textarea{font-size:16px !important;line-height:1.45 !important;}
+
+  /* Keep the save action fully reachable on narrow phones. */
+  .savebar{
+    left:0 !important;right:0 !important;width:100% !important;max-width:100vw !important;
+    padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)) !important;
+    box-sizing:border-box !important;
+  }
+  .savebar .inside{
+    width:100% !important;max-width:100% !important;min-width:0 !important;
+    display:grid !important;grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:center !important;gap:8px !important;
+  }
+  .savebar .msg{
+    display:block !important;min-width:0 !important;overflow:hidden !important;
+    text-overflow:ellipsis !important;white-space:nowrap !important;font-size:12px !important;
+  }
+  .savebar .discard{display:none !important;}
+  .savebar .save-submit{
+    min-width:0 !important;max-width:62vw !important;width:auto !important;height:44px !important;
+    padding:0 14px !important;font-size:14px !important;white-space:nowrap !important;
+    overflow:hidden !important;text-overflow:ellipsis !important;border-radius:10px !important;
+  }
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom)) !important;}
 }
 </style>
 
-<script>
-/* Keep save bar above iOS on-screen keyboard without changing page scale. */
+<script id="v3-ios-keyboard-savebar-fix">
+/* Keep the save bar above the iOS on-screen keyboard without changing page scale. */
 (function(){
-  const vv = window.visualViewport;
+  const vv=window.visualViewport;
   if(!vv) return;
-  const update = function(){
-    const bar = document.getElementById('savebar');
+  const update=function(){
+    const bar=document.getElementById('savebar');
     if(!bar) return;
-    const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    bar.style.transform = keyboard > 80 ? ('translateY(-' + keyboard + 'px)') : '';
+    const keyboard=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+    bar.style.transform=keyboard>80?('translateY(-'+keyboard+'px)'):'';
   };
-  vv.addEventListener('resize', update);
-  vv.addEventListener('scroll', update);
-  window.addEventListener('orientationchange', function(){setTimeout(update,150)});
-  document.addEventListener('focusin', function(){setTimeout(update,100)});
-  document.addEventListener('focusout', function(){setTimeout(update,180)});
+  vv.addEventListener('resize',update);
+  vv.addEventListener('scroll',update);
+  window.addEventListener('orientationchange',function(){setTimeout(update,150)});
+  document.addEventListener('focusin',function(){setTimeout(update,100)});
+  document.addEventListener('focusout',function(){setTimeout(update,180)});
 })();
 </script>
+
 
 <style>
 /* ===== Mobile landscape fault-row overflow fix =====
@@ -2965,53 +3300,67 @@ requestAnimationFrame(applyQuickFilters);
   .desc-display,.row textarea{font-size:11.5px!important;}
 }
 </style>
-</body>
-</html>
 
 <style>
-/* ===== v3 Neutral Professional Background Palette ===== */
-:root{
-  --canvas:#f5f7fa !important;
-  --panel:#ffffff !important;
-  --soft:#f8fafc !important;
-  --border:#dce4ee !important;
-  --line-soft:#e8edf3 !important;
+/* ===== CN + DK INDEPENDENT ASSET ROW MASTER LAYOUT ===== */
+.column-head{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important}
+.column-head-left{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;padding:0 10px!important}
+.column-head-left .col-title:nth-child(3){display:block!important}
+.column-head-right{display:grid!important;grid-template-columns:155px 180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;padding:0 8px!important}
+.column-head-location{display:none!important}
+.asset-car{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important;padding:0!important;border-radius:0!important;margin:0!important;border:0!important;border-bottom:1px solid #dfe7f0!important;box-shadow:none!important;overflow:visible!important;background:#fff!important}
+.shared-vehicle{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;align-items:start!important;padding:12px 10px!important;background:#f8fbff!important;border-right:1px solid #e2e9f2!important}
+.shared-vehicle .rownum{display:flex!important;justify-content:center!important;padding-top:9px!important}
+.shared-vehicle .unit-select{width:92px!important;height:36px!important}
+.shared-vehicle .vehicle-no-wrap{width:100%!important}
+.asset-stack{min-width:0!important;display:block!important}
+.asset-section{border-bottom:1px solid #e6edf5!important;background:#fff!important}
+.asset-section:last-child{border-bottom:0!important}
+.dk-asset{background:#fbfdff!important}
+.asset-header{display:grid!important;grid-template-columns:155px minmax(0,1fr) 180px!important;gap:6px!important;align-items:center!important;min-height:58px!important;padding:7px 8px!important;border-bottom:1px solid #edf2f7!important}
+.asset-name-wrap{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;min-width:0!important}
+.asset-name{display:inline-flex!important;align-items:center!important;min-height:28px!important;padding:4px 10px!important;border-radius:8px!important;background:#173b70!important;color:#fff!important;font-size:15px!important;font-weight:850!important;white-space:nowrap!important}
+.dk-asset .asset-name{background:#446b9d!important}
+.asset-add-btn{border:1px dashed #9bb6d6!important;background:#fff!important;color:#315f91!important;border-radius:8px!important;padding:4px 9px!important;font-size:10.5px!important;font-weight:750!important;cursor:pointer!important;white-space:nowrap!important}
+.asset-add-btn:hover{background:#eef5fc!important;border-style:solid!important}
+.asset-location-controls{grid-column:3!important;display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important}
+.asset-location-controls .location-select,.asset-location-controls .location-detail{width:100%!important;height:34px!important;font-size:11.5px!important;border-radius:8px!important}
+.asset-rows{padding:0 8px 7px!important}
+.asset-fault-row{display:grid!important;grid-template-columns:180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;align-items:center!important;min-height:54px!important;margin:6px 0 0!important;padding:6px!important;border-radius:10px!important;background:#fff!important}
+.dk-asset .asset-fault-row{background:#f8fbff!important}
+.asset-fault-row .status-select{height:36px!important;font-size:12px!important}
+.asset-fault-row textarea{height:40px!important;min-height:40px!important}
+.fault-location-display{min-height:36px!important;padding:6px 8px!important;border:1px solid #d6e2ee!important;border-radius:8px!important;background:#f8fbfe!important;color:#24496f!important;font-size:11.5px!important;font-weight:700!important;overflow:hidden!important}
+.fault-location-display small{display:block!important;margin-top:2px!important;color:#6f8299!important;font-size:10px!important;font-weight:500!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.asset-empty{margin:7px 0 0!important;padding:10px 12px!important;border-radius:8px!important;background:#f8fafc!important;color:#93a2b5!important;font-size:11.5px!important}
+.car-location,.head,.rows{display:none!important}
+@media(max-width:950px){
+  .table-panel{overflow:visible!important}
+  .column-head{display:none!important}
+  .asset-car{display:block!important;min-width:0!important;width:100%!important;margin-bottom:16px!important;border:1px solid #cedbea!important;border-radius:16px!important;overflow:hidden!important;box-shadow:0 4px 14px rgba(20,55,100,.08)!important}
+  .shared-vehicle{display:grid!important;grid-template-columns:1fr 1.4fr!important;gap:8px!important;padding:10px!important;border-right:0!important;border-bottom:2px solid #173b70!important;background:#edf5ff!important}
+  .shared-vehicle .rownum{display:none!important}
+  .shared-vehicle .unit-select{width:100%!important;height:42px!important}
+  .shared-vehicle .vehicle-no-wrap{width:100%!important}
+  .shared-vehicle .vehicle-no-select{height:42px!important}
+  .asset-header{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:10px!important;min-height:0!important}
+  .asset-name-wrap{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+  .asset-name{font-size:17px!important;padding:7px 12px!important}
+  .asset-add-btn{min-height:40px!important;padding:7px 12px!important;font-size:12px!important}
+  .asset-location-controls{grid-column:1!important;display:grid!important;grid-template-columns:120px minmax(0,1fr)!important;gap:7px!important}
+  .asset-location-controls .location-select,.asset-location-controls .location-detail{height:42px!important;font-size:13px!important}
+  .asset-rows{padding:0 10px 10px!important}
+  .asset-fault-row{display:grid!important;grid-template-columns:1fr 30px!important;gap:8px!important;padding:10px 42px 10px 10px!important;position:relative!important;margin-top:8px!important}
+  .asset-fault-row>*:not(.delete-btn){grid-column:1!important;width:100%!important}
+  .asset-fault-row .delete-btn{position:absolute!important;right:8px!important;top:8px!important;width:28px!important}
+  .asset-fault-row textarea{min-height:68px!important;height:68px!important}
+  .asset-fault-row .tech,.asset-fault-row .wit,.asset-fault-row .status-select{height:42px!important;font-size:13px!important}
+  .fault-location-display{min-height:42px!important;font-size:12.5px!important}
 }
-html,body{background:#f5f7fa !important;}
-body{background:#f5f7fa !important;}
-main{background:transparent !important;}
-.toolbar,
-.table-panel,
-.dashboard-total-card,
-.dashboard-status-card{background:#ffffff !important;}
-.car{background:#ffffff !important;}
-.head{background:#f8fafc !important;}
-.rows{background:#f8fafc !important;}
-.row{background:#ffffff !important;}
-.row:hover{background:#ffffff !important;}
-.car-location{background:#f2f7fc !important;}
-#search,
-.unit-select,
-.vehicle-no-select,
-.vehicle-no-custom,
-.tech,.wit,
-.location-select,
-.location-detail,
-.row textarea{background:#ffffff !important;}
-.empty{background:#f8fafc !important;}
-
-/* Keep status colors prominent against the more neutral page */
-.status-strip .stat-fault,.dashboard-status-card.stat-fault{background:#fff4f5 !important;}
-.status-strip .stat-repair,.dashboard-status-card.stat-repair{background:#fff9ed !important;}
-.status-strip .stat-pending,.dashboard-status-card.stat-pending{background:#f6f3ff !important;}
-.status-strip .stat-fixed,.dashboard-status-card.stat-fixed{background:#eff9f3 !important;}
-.status-strip .stat-clear,.dashboard-status-card.stat-clear{background:#f0f7fc !important;}
-
-@media(max-width:680px){
-  html,body{background:#f5f7fa !important;}
-  .car{background:#ffffff !important;}
-  .head{background:#f8fafc !important;}
-  .rows{background:#f8fafc !important;}
-  .car-location{background:#f2f7fc !important;}
+@media(max-width:520px){
+  .shared-vehicle{grid-template-columns:1fr!important}
+  .asset-location-controls{grid-template-columns:1fr!important}
+  .asset-name-wrap{align-items:stretch!important;flex-direction:column!important}
+  .asset-add-btn{width:100%!important}
 }
 </style>
