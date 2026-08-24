@@ -1649,33 +1649,27 @@ function migrateLegacyData(){
     const nextCar=normalizeCarId(r.car);
     if(nextCar!==r.car){r.car=nextCar;changed=true;}
     if(r.unit==="73G-HQ"){r.unit="73G-HC";changed=true;}
+    if(!r.assetType) r.assetType=assetTypeForCar(nextCar);
   });
   const migratedUnits={};
   Object.entries(savedUnits||{}).forEach(([car,unit])=>{
-    const nextCar=normalizeCarId(car);
-    const nextUnit=unit==="73G-HQ"?"73G-HC":unit;
-    migratedUnits[nextCar]=nextUnit;
-    if(nextCar!==car || nextUnit!==unit) changed=true;
+    const nextCar=normalizeCarId(car),nextUnit=unit==="73G-HQ"?"73G-HC":unit;
+    migratedUnits[nextCar]=nextUnit;if(nextCar!==car||nextUnit!==unit)changed=true;
   });
   savedUnits=migratedUnits;
   const migratedVehicleNos={};
-  Object.entries(savedVehicleNos||{}).forEach(([car,no])=>{
-    const nextCar=normalizeCarId(car);
-    migratedVehicleNos[nextCar]=no;
-    if(nextCar!==car) changed=true;
-  });
+  Object.entries(savedVehicleNos||{}).forEach(([car,no])=>{const nextCar=normalizeCarId(car);migratedVehicleNos[nextCar]=no;if(nextCar!==car)changed=true;});
   savedVehicleNos=migratedVehicleNos;
-  const migratedLocations={};
-  Object.entries(savedLocations||{}).forEach(([car,loc])=>{
-    const nextCar=normalizeCarId(car);
-    migratedLocations[nextCar]={type:String(loc?.type||""),detail:String(loc?.detail||"")};
-    if(nextCar!==car) changed=true;
-  });
-  savedLocations=migratedLocations;
+  const migrateLocMap=map=>{
+    const out={};Object.entries(map||{}).forEach(([car,loc])=>{const nextCar=normalizeCarId(car);out[nextCar]={type:String(loc?.type||""),detail:String(loc?.detail||"")};if(nextCar!==car)changed=true;});return out;
+  };
+  savedLocations=migrateLocMap(savedLocations);
+  savedDkLocations=migrateLocMap(savedDkLocations);
   savedData.forEach(r=>{
-    if(r.vehicleNo && !savedVehicleNos[r.car]){savedVehicleNos[r.car]=r.vehicleNo;changed=true;}
-    if((r.locationType||r.locationDetail) && !savedLocations[r.car]){
-      savedLocations[r.car]={type:String(r.locationType||""),detail:String(r.locationDetail||"")};changed=true;
+    if(r.vehicleNo&&!savedVehicleNos[r.car]){savedVehicleNos[r.car]=r.vehicleNo;changed=true;}
+    if(r.locationType||r.locationDetail){
+      const target=r.assetType==="DK"?savedDkLocations:savedLocations;
+      if(!target[r.car]){target[r.car]={type:String(r.locationType||""),detail:String(r.locationDetail||"")};changed=true;}
     }
   });
   if(changed){
@@ -1683,6 +1677,7 @@ function migrateLegacyData(){
     localStorage.setItem(UNIT_STORAGE_KEY,JSON.stringify(savedUnits));
     localStorage.setItem(VEHICLE_STORAGE_KEY,JSON.stringify(savedVehicleNos));
     localStorage.setItem(LOCATION_STORAGE_KEY,JSON.stringify(savedLocations));
+    localStorage.setItem(DK_LOCATION_STORAGE_KEY,JSON.stringify(savedDkLocations));
   }
 }
 function esc(v){
@@ -1968,27 +1963,45 @@ function normalizeImportedStatus(v){
   if(t.includes("clear")||t.includes("均完成")||t.includes("完成")) return "All Clear / 均完成";
   return "Fault / 故障";
 }
+function assetTypeForCar(car){
+  const c=String(car||"").toUpperCase();
+  if(c.startsWith("CN-")) return "CN";
+  if(c.startsWith("NMS")) return "NMS";
+  if(c.startsWith("SSS")) return "SSS";
+  return "OTHER";
+}
+function assetLabelForRecord(r){
+  return r?.assetType==="DK" ? getDkCode(r.car) : r?.car||"";
+}
 function exportCsvData(){
   document.getElementById("ioMenu")?.classList.remove("show");
-  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const rows=[];
-  cars.forEach(car=>{
-    const rr=data.filter(r=>r.car===car);
-    const base=[units[car]||"",vehicleNos[car]||"",car,locations[car]?.type||"",locations[car]?.detail||""];
+  const scopedCars=getDashboardScopeCars();
+  const pushAsset=(car,assetType)=>{
+    const isDk=assetType==="DK";
+    const assetNo=isDk?getDkCode(car):car;
+    const loc=isDk?(dkLocations[car]||{}):(locations[car]||{});
+    const rr=data.filter(r=>r.car===car && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+    const base=[units[car]||"",vehicleNos[car]||"",assetType,assetNo,car,loc.type||"",loc.detail||""];
     if(rr.length){
       rr.forEach(r=>rows.push([...base,statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
-    }else{
-      rows.push([...base,"","","","","",""]);
-    }
+    }else rows.push([...base,"","","","","",""]);
+  };
+  scopedCars.forEach(car=>{
+    pushAsset(car,assetTypeForCar(car));
+    if(isCnCar(car)) pushAsset(car,"DK");
   });
   const csv='\ufeff'+[headers,...rows].map(row=>row.map(csvEscape).join(",")).join("\r\n");
-  downloadBlob(csv,"text/csv;charset=utf-8",`CN301-394_Data_${new Date().toISOString().slice(0,10)}.csv`);
+  const unitSuffix=quickUnitFilter?`_${quickUnitFilter}`:"";
+  downloadBlob(csv,"text/csv;charset=utf-8",`CN301-394_Data${unitSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
 }
 function csvTemplateText(){
-  const headers=["單位 Unit","車號 Vehicle No.","車廂號碼 Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const examples=[
-    ["1C","軍2-24586","CN-D-301","外臺","南側機房","故障","伺服器故障","Mason","王先生","2026-08-21 10:20","2026-08-21 10:20"],
-    ["2C","軍2-24481","CN-B-302","營區","車庫A區","已修復","網路線接頭鬆脫","Emma","林先生","2026-08-21 08:30","2026-08-21 10:10"]
+    ["4C","軍2-24467","CN","CN-D-301","CN-D-301","營區","A區","故障","冷氣異常","Mason","王先生","2026-08-24 09:20","2026-08-24 09:20"],
+    ["4C","軍2-24467","DK","DK301","CN-D-301","外臺","B區","維修中","電源異常","Emma","林先生","2026-08-24 09:25","2026-08-24 09:40"],
+    ["1C","軍2-24586","NMS","NMS-381","NMS-381","演訓","北側","已修復","網路線接頭鬆脫","Alex","陳先生","2026-08-24 08:30","2026-08-24 09:10"]
   ];
   return '\ufeff'+[headers,...examples].map(row=>row.map(csvEscape).join(",")).join("\r\n");
 }
@@ -2038,6 +2051,9 @@ function importCsvText(text){
   const idx={
     unit:findColumn(h,["單位 unit","單位","unit"]),
     vehicle:findColumn(h,["車號 vehicle no.","車號","vehicle no","vehicle"]),
+    assetType:findColumn(h,["設備類型 asset type","設備類型","asset type"]),
+    assetNo:findColumn(h,["設備編號 asset no.","設備編號","asset no","asset"]),
+    parent:findColumn(h,["母車廂號碼 parent carriage no.","母車廂號碼","parent carriage no","parent carriage"]),
     car:findColumn(h,["車廂號碼 carriage no.","車廂號碼","carriage no","carriage"]),
     loc:findColumn(h,["地點 location","地點","location"]),
     detail:findColumn(h,["詳細地點 location detail","詳細地點","location detail"]),
@@ -2048,23 +2064,34 @@ function importCsvText(text){
     created:findColumn(h,["建立時間 created at","建立時間","created at"]),
     updated:findColumn(h,["狀態時間 status updated at","狀態時間","status updated at"])
   };
-  if(idx.car<0) throw new Error("找不到『車廂號碼 Carriage No.』欄位");
+  if(idx.assetNo<0 && idx.car<0 && idx.parent<0) throw new Error("找不到『設備編號 Asset No.』或『車廂號碼 Carriage No.』欄位");
   let count=0,metaCount=0,skipped=0;
   table.slice(1).forEach(row=>{
-    const rawCar=String(row[idx.car]||"").trim();
-    if(!rawCar)return;
-    const car=normalizeCarId(rawCar);
-    if(!cars.includes(car)){skipped++;return;}
     const get=k=>idx[k]>=0?String(row[idx[k]]??"").trim():"";
+    let assetType=get("assetType").toUpperCase();
+    const assetNoRaw=get("assetNo")||get("car");
+    let parentRaw=get("parent")||get("car")||assetNoRaw;
+    if(!assetType) assetType=String(assetNoRaw).toUpperCase().startsWith("DK")?"DK":assetTypeForCar(parentRaw||assetNoRaw);
+    let car;
+    if(assetType==="DK"){
+      if(parentRaw && !String(parentRaw).toUpperCase().startsWith("DK")) car=normalizeCarId(parentRaw);
+      if(!car || !cars.includes(car)){
+        const dk=String(assetNoRaw||parentRaw).toUpperCase().replace(/\s+/g,"");
+        car=cars.find(c=>getDkCode(c).toUpperCase()===dk)||"";
+      }
+    }else car=normalizeCarId(parentRaw||assetNoRaw);
+    if(!car || !cars.includes(car)){skipped++;return;}
+    if(assetType==="DK" && !isCnCar(car)){skipped++;return;}
     const unit=get("unit"),vehicle=get("vehicle"),loc=get("loc"),detail=get("detail");
     if(unit){units[car]=unit;metaCount++;}
     if(vehicle){vehicleNos[car]=vehicle;metaCount++;}
-    if(loc||detail){locations[car]={type:loc,detail};metaCount++;}
+    const targetLoc=assetType==="DK"?dkLocations:locations;
+    if(loc||detail){targetLoc[car]={type:loc,detail};metaCount++;}
     const desc=get("desc"),statusRaw=get("status"),tech=get("tech"),wit=get("wit");
     if(desc||statusRaw||tech||wit){
       const created=idx.created>=0&&get("created")?parseImportDate(get("created")):nowISO();
       const updated=idx.updated>=0&&get("updated")?parseImportDate(get("updated")):created;
-      data.push({id:newId(),car,unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||locations[car]?.type||"",locationDetail:detail||locations[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
+      data.push({id:newId(),car,assetType:assetType==="DK"?"DK":assetTypeForCar(car),unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||targetLoc[car]?.type||"",locationDetail:detail||targetLoc[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
       count++;
     }
   });
@@ -2072,24 +2099,39 @@ function importCsvText(text){
 }
 function importJsonText(text){
   const obj=JSON.parse(text);
+  const normalizeRecord=r=>{
+    const x={...r,car:normalizeCarId(r.car||r.parentCarriageNo||r.carriageNo||"")};
+    if(String(r.assetType||r.assetNo||"").toUpperCase().startsWith("DK")) x.assetType="DK";
+    else if(!x.assetType) x.assetType=assetTypeForCar(x.car);
+    x.id=x.id||newId();x.createdAt=x.createdAt||nowISO();x.statusAt=x.statusAt||x.createdAt;x.status=normalizeImportedStatus(x.status);
+    return x;
+  };
   if(Array.isArray(obj)){
-    // Simple record array compatibility.
-    const incoming=obj.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
-    incoming.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
-    data=incoming;
-    units={};vehicleNos={};locations={};dkLocations={};
-    incoming.forEach(r=>{if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;if(r.locationType||r.locationDetail)locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+    const incoming=obj.map(normalizeRecord).filter(r=>cars.includes(r.car));
+    data=incoming; units={};vehicleNos={};locations={};dkLocations={};
+    incoming.forEach(r=>{
+      if(r.unit)units[r.car]=r.unit;if(r.vehicleNo)vehicleNos[r.car]=r.vehicleNo;
+      if(r.locationType||r.locationDetail){
+        const target=r.assetType==="DK"?dkLocations:locations;
+        target[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+      }
+    });
     return incoming.length;
   }
   if(!obj||!Array.isArray(obj.records)) throw new Error("JSON 格式不符合系統備份格式");
-  const recs=obj.records.map(r=>({...r,car:normalizeCarId(r.car||r.carriageNo||"")})).filter(r=>cars.includes(r.car));
-  recs.forEach(r=>{r.id=r.id||newId();r.createdAt=r.createdAt||nowISO();r.statusAt=r.statusAt||r.createdAt;r.status=normalizeImportedStatus(r.status);});
+  const recs=obj.records.map(normalizeRecord).filter(r=>cars.includes(r.car));
   data=recs;
   units={}; Object.entries(obj.units||{}).forEach(([k,v])=>units[normalizeCarId(k)]=v);
   vehicleNos={}; Object.entries(obj.vehicleNumbers||obj.vehicleNos||{}).forEach(([k,v])=>vehicleNos[normalizeCarId(k)]=v);
   locations={}; Object.entries(obj.locations||{}).forEach(([k,v])=>locations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
   dkLocations={}; Object.entries(obj.dkLocations||{}).forEach(([k,v])=>dkLocations[normalizeCarId(k)]={type:v?.type||"",detail:v?.detail||""});
-  recs.forEach(r=>{if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;if((r.locationType||r.locationDetail)&&!locations[r.car])locations[r.car]={type:r.locationType||"",detail:r.locationDetail||""};});
+  recs.forEach(r=>{
+    if(r.unit&&!units[r.car])units[r.car]=r.unit;if(r.vehicleNo&&!vehicleNos[r.car])vehicleNos[r.car]=r.vehicleNo;
+    if(r.locationType||r.locationDetail){
+      const target=r.assetType==="DK"?dkLocations:locations;
+      if(!target[r.car])target[r.car]={type:r.locationType||"",detail:r.locationDetail||""};
+    }
+  });
   return recs.length;
 }
 async function handleImportFile(file){
@@ -2114,7 +2156,7 @@ async function handleImportFile(file){
   }
 }
 function backupData(){
-  const payload={system:"CN301-394 Fault Tracking System",exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,dkLocations,records:data};
+  const payload={system:"CN301-394 Fault Tracking System",schemaVersion:3,exportedAt:new Date().toISOString(),units,vehicleNumbers:vehicleNos,locations,dkLocations,records:data};
   downloadBlob(JSON.stringify(payload,null,2),"application/json;charset=utf-8",`CN301-394_Backup_${new Date().toISOString().slice(0,10)}.json`);
 }
 function wordEsc(v){
@@ -2134,261 +2176,60 @@ function reportStatusText(s){
 function exportWordReport(){
   const today=new Date();
   const dateText=today.toLocaleDateString("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit"}).replaceAll("/","-");
-  const records=data.slice();
-  const carsWithRecords=new Set(records.map(r=>r.car)).size;
+  const scopedCars=getDashboardScopeCars();
+  const carSet=new Set(scopedCars);
+  const records=data.filter(r=>carSet.has(r.car));
+  const activeUnit=(typeof quickUnitFilter!=="undefined"&&quickUnitFilter)?quickUnitFilter:"";
+  const scopeLabel=activeUnit?`${activeUnit} 單位`:`全部單位`;
+  const countCN=scopedCars.filter(isCnCar).length;
+  const countDK=countCN;
+  const countNMS=scopedCars.filter(c=>String(c).toUpperCase().startsWith("NMS")).length;
+  const countSSS=scopedCars.filter(c=>String(c).toUpperCase().startsWith("SSS")).length;
   const fault=records.filter(r=>color(r.status)==="fault").length;
   const fixed=records.filter(r=>color(r.status)==="fixed").length;
   const clear=records.filter(r=>color(r.status)==="clear").length;
   const repair=records.filter(r=>color(r.status)==="repair").length;
   const pending=records.filter(r=>color(r.status)==="pending").length;
-  const unitOrder=[...UNIT_OPTIONS,"未指定"];
+  const carsWithRecords=new Set(records.map(r=>r.car)).size;
+  const unitOrder=activeUnit?[activeUnit]:[...UNIT_OPTIONS,"未指定"];
   const carUnit=c=>units[c]||records.find(r=>r.car===c)?.unit||"未指定";
+  const palMap={
+    fault:{rowBg:"#FFF2F3",statusBg:"#FFD9DD",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
+    repair:{rowBg:"#FFF8E8",statusBg:"#FFE7B8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
+    pending:{rowBg:"#F5F1FF",statusBg:"#E4DAFA",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
+    fixed:{rowBg:"#EDF9F2",statusBg:"#D4F0DF",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
+    clear:{rowBg:"#EEF8FC",statusBg:"#D8EFF8",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
+  };
+  const assetBlock=(c,assetType)=>{
+    const isDk=assetType==="DK";
+    if(isDk&&!isCnCar(c))return "";
+    const assetName=isDk?getDkCode(c):c;
+    const loc=isDk?(dkLocations[c]||{}):(locations[c]||{});
+    const rr=records.filter(r=>r.car===c&&(isDk?r.assetType==="DK":r.assetType!=="DK"));
+    const rows=rr.length?rr.map((r,i)=>{
+      const st=reportStatusClass(r.status),pal=palMap[st];
+      const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
+      const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
+      const place=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"—";
+      return `<tr><td class="num" bgcolor="${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">${timeHtml}</div></td><td>${wordEsc(r.desc)||"&nbsp;"}</td><td class="person">${wordEsc(r.tech)||"—"}</td><td class="person">${wordEsc(r.wit)||"—"}</td><td class="place">${place}</td></tr>`;
+    }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
+    const placeText=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"未設定";
+    return `<div class="asset-block ${isDk?'dk-block':'primary-block'}"><div class="asset-title"><span class="asset-badge">${wordEsc(assetName)}</span><span class="asset-place">地點 Location：${placeText}</span></div><table class="fault-table"><thead><tr><th class="c-num">#</th><th class="c-status">狀態<br><small>Status</small></th><th class="c-desc">故障描述<br><small>Fault Description</small></th><th class="c-tech">維修人員<br><small>Repair Technician</small></th><th class="c-wit">見證人<br><small>Witness</small></th><th class="c-location">地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
   const sections=unitOrder.map(unit=>{
-    const unitCars=cars.filter(c=>carUnit(c)===unit);
-    if(!unitCars.length) return "";
+    const unitCars=scopedCars.filter(c=>carUnit(c)===unit);
+    if(!unitCars.length)return "";
     const body=unitCars.map(c=>{
-      const rr=records.filter(r=>r.car===c);
-      const rows=rr.length?rr.map((r,i)=>{
-        const st=reportStatusClass(r.status);
-        const pal={
-          fault:{rowBg:"#FFF2F3",statusBg:"#FFD9DD",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
-          repair:{rowBg:"#FFF8E8",statusBg:"#FFE7B8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
-          pending:{rowBg:"#F5F1FF",statusBg:"#E4DAFA",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
-          fixed:{rowBg:"#EDF9F2",statusBg:"#D4F0DF",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
-          clear:{rowBg:"#EEF8FC",statusBg:"#D8EFF8",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
-        }[st];
-        const cell=`background-color:${pal.rowBg};`;
-        const statusStyle=`background-color:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar};text-align:center;`;
-        const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
-        const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
-        return `<tr><td class="num" bgcolor="${pal.rowBg}" style="${cell}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="${statusStyle}"><div class="status-text" style="background-color:${pal.statusBg};color:${pal.text};font-weight:800;border:0;padding:0;margin:0">${statusHtml}</div><div class="report-time" style="background-color:${pal.statusBg};color:${pal.sub};font-weight:500;border:0;padding:2pt 0 0;margin:0">${timeHtml}</div></td><td class="desc" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="${cell}">${wordEsc([locations[c]?.type,locations[c]?.detail].filter(Boolean).join("｜"))||"—"}</td></tr>`;
-      }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
       const vehicleLabel=vehicleNos[c]||records.find(r=>r.car===c)?.vehicleNo||"未指定";
-      return `<div class="car-block"><div class="car-title"><span class="car-badge">${wordEsc(c)}</span><span class="vehicle-badge">車號 Vehicle No.：${wordEsc(vehicleLabel)}</span></div><table class="fault-table"><thead><tr><th class="c-num">#</th><th class="c-status">狀態<br><small>Status</small></th><th class="c-desc">故障描述<br><small>Fault Description</small></th><th class="c-tech">維修人員<br><small>Repair Technician</small></th><th class="c-wit">見證人<br><small>Witness</small></th><th class="c-location">地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      return `<div class="car-block"><div class="car-title"><span class="vehicle-badge">車號 Vehicle No.：${wordEsc(vehicleLabel)}</span></div>${assetBlock(c,assetTypeForCar(c))}${isCnCar(c)?assetBlock(c,"DK"):""}</div>`;
     }).join("");
     return `<div class="unit-section"><div class="unit-title"><span>單位 Unit：${wordEsc(unit)}</span><span class="unit-count">車廂數 Carriages：${unitCars.length}</span></div>${body}</div>`;
   }).join("");
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><style>
-@page{size:A4;margin:13mm 13mm 14mm 13mm}
-body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans CJK TC","Segoe UI",Aptos,Calibri,Arial,sans-serif;color:#1d2b3d;font-size:9.4pt;line-height:1.38;margin:0;background:#fff;-webkit-font-smoothing:antialiased}
-.report-head{text-align:center;border-bottom:1.5pt solid #244b7c;padding:0 0 9pt;margin-bottom:12pt}
-h1{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Segoe UI",Aptos,Arial,sans-serif;text-align:center;font-size:20pt;line-height:1.18;margin:0 0 7pt;font-weight:800;letter-spacing:.1pt;color:#17263a}
-h1 .en{font-size:18.5pt;font-weight:700}.meta{text-align:center;font-size:9.2pt;color:#60728a;margin:0}.meta b{color:#2c425f;font-weight:700}
-.summary-title{font-size:11pt;font-weight:800;margin:0 0 6pt;color:#22344c}.summary-title span{font-size:8.8pt;font-weight:500;color:#7d8ba0;margin-left:3pt}
-.summary{width:100%;margin:0 0 15pt;border-collapse:separate;border-spacing:2pt 0;text-align:center;table-layout:fixed}.summary th{color:#fff;padding:5pt 2pt 4pt;font-size:7.9pt;line-height:1.2;font-weight:700;border:0}.summary th small{font-size:7.1pt;font-weight:500;color:#f3f6fa}.summary td{font-size:16pt;font-weight:800;padding:6pt 2pt 7pt;color:#17263a;border-bottom:1pt solid #dfe6ee;background:#fbfcfe}.s-total{background:#334b65}.s-record{background:#29415d}.s-fault{background:#c92b38}.s-fixed{background:#238b8f}.s-repair{background:#a36a13}.s-pending{background:#6756a8}.s-clear{background:#357aa2}
-.unit-section{margin-top:13pt;page-break-inside:auto}.unit-title{background:#20334e;color:#fff;font-size:10.2pt;font-weight:800;padding:5.5pt 8pt;display:block;border-left:4pt solid #4a74a9}.unit-count{float:right;font-size:8.8pt;font-weight:600;color:#e6edf6}
-.car-block{page-break-inside:avoid;margin:0 0 9pt;padding-top:5pt}.car-title{font-size:12.5pt;font-weight:800;color:#17263a;margin:0 0 4pt}.car-badge{display:inline-block;padding:0 0 1pt;border-bottom:1.5pt solid #4b6f9d}.vehicle-badge{display:inline-block;margin-left:9pt;font-size:8.7pt;font-weight:650;color:#5d718a}
-.fault-table{width:100%;margin:0;border-collapse:collapse;table-layout:fixed;border:1pt solid #d9e1ea}.fault-table thead{display:table-header-group}.fault-table th{background:#315989;color:#fff;padding:4.5pt 4pt;font-size:7.9pt;line-height:1.15;font-weight:700;border-right:.5pt solid #6f8db3}.fault-table th:last-child{border-right:0}.fault-table th small{font-size:7pt;font-weight:500;color:#edf3fa}.c-num{width:4%}.c-status{width:16%}.c-desc{width:36%}.c-tech{width:14%}.c-wit{width:13%}.c-location{width:17%}
-.fault-table td{padding:5pt 4.5pt;vertical-align:middle;border-bottom:.5pt solid #e1e7ee;border-right:.5pt solid #eef2f6;font-size:8.7pt;line-height:1.32}
-.fault-table td{mso-pattern:auto none}.fault-table td:last-child{border-right:0}.fault-table tr:last-child td{border-bottom:0}.num{text-align:center;color:#687a90}.status{text-align:center;font-weight:800}.status span{display:block;font-weight:500;color:#69798c;font-size:7.2pt;margin-top:.5pt}.status .report-time{display:block;font-size:6.7pt;line-height:1.2;color:#7c8999;margin:1.8pt 0 0;padding:0;border:0!important;background:transparent!important;mso-border-alt:none;mso-shading:transparent}.status .status-text{display:block;border:0!important;margin:0;padding:0;background:transparent!important}.desc{text-align:left;word-wrap:break-word}.person{text-align:center;word-wrap:break-word}.place{text-align:left;word-wrap:break-word;font-size:8.2pt}.fixed td{background:#f3fbf7}.fault td{background:#fff6f6}.repair td{background:#fffaf0}.pending td{background:#f7f5ff}.clear td{background:#f2f9fc}
-.fixed .status{background:#d9f3e5!important;color:#0f6b42!important;border-left:3pt solid #22a06b}
-.fault .status{background:#ffe0e3!important;color:#b4232f!important;border-left:3pt solid #e5484d}
-.repair .status{background:#ffedcc!important;color:#8a5600!important;border-left:3pt solid #d98900}
-.pending .status{background:#e8e1fb!important;color:#5a3ea1!important;border-left:3pt solid #7c5cc4}
-.clear .status{background:#dff2fa!important;color:#1f6587!important;border-left:3pt solid #3a91b7}
-.fixed .status span{color:#3f7f63}.fault .status span{color:#9d4b53}.repair .status span{color:#8c6c39}.pending .status span{color:#6d5a9d}.clear .status span{color:#4d7b91}.none{font-style:italic;color:#8c99aa;padding:6pt 7pt;text-align:left;background:#fafbfd}.none span{color:#a7b0bd;margin-left:3pt}.footer{margin-top:13pt;border-top:.7pt solid #d2dae4;padding-top:5pt;text-align:right;color:#8996a6;font-size:7.2pt}
-
-/* Summary quantity card */
-.status-summary-wrap{max-width:1840px;margin:12px auto 0;padding:0 12px;display:flex;gap:12px;align-items:stretch;flex-wrap:wrap}
-.total-card{width:170px;min-height:100px;border:1px solid #d9e4f0;border-radius:16px;background:linear-gradient(180deg,#ffffff 0%,#f7faff 100%);box-shadow:0 5px 18px rgba(18,55,105,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;text-align:center}
-.total-card .total-number{font-size:34px;line-height:1;font-weight:850;color:#153b72;font-variant-numeric:tabular-nums;letter-spacing:.3px}
-.total-card .total-label{margin-top:7px;font-size:13px;font-weight:750;color:#516d90;line-height:1.25}
-.total-card .total-label small{display:block;margin-top:2px;font-size:11px;font-weight:500;color:#7f91a8}
-.status-summary-wrap .status-strip{flex:1;max-width:none;margin:0;padding:0;align-content:center}
-@media(max-width:900px){.status-summary-wrap{padding:0 8px;gap:8px}.total-card{width:135px;min-height:82px;border-radius:13px}.total-card .total-number{font-size:28px}.total-card .total-label{font-size:12px}.status-summary-wrap .status-strip{overflow:auto;flex-wrap:nowrap}}
-@media(max-width:680px){.status-summary-wrap{display:block}.total-card{width:100%;min-height:74px;flex-direction:row;gap:12px;margin-bottom:8px}.total-card .total-label{margin-top:0;text-align:left}.status-summary-wrap .status-strip{display:flex}}
-/* Dashboard status counters mirror the actual row statuses 1:1 */
-.status-strip .stat-chip{display:inline-flex;align-items:center;gap:4px;font-weight:650}
-.status-strip .stat-chip b{margin-left:2px;font-variant-numeric:tabular-nums}
-.status-strip .stat-fault{background:#fff0f1;border-color:#f1a1a8;color:#a91c2a}.status-strip .stat-fault b{color:#a91c2a}
-.status-strip .stat-repair{background:#fff7e6;border-color:#e4bd6a;color:#845400}.status-strip .stat-repair b{color:#845400}
-.status-strip .stat-pending{background:#f0edff;border-color:#b5a4e6;color:#59439a}.status-strip .stat-pending b{color:#59439a}
-.status-strip .stat-fixed{background:#eaf8f0;border-color:#86d2a7;color:#126a40}.status-strip .stat-fixed b{color:#126a40}
-.status-strip .stat-clear{background:#edf6fc;border-color:#98c7e4;color:#286287}.status-strip .stat-clear b{color:#286287}
-
-/* ===== LOCATION COLUMN FINAL LAYOUT ===== */
-.col-location{text-align:left}
-.location-cell{display:grid;grid-template-columns:86px minmax(95px,1fr) 24px;gap:5px;align-items:center;min-width:0}
-.location-select,.location-detail{height:34px;border:1px solid #d7e1ed;border-radius:9px;background:#fff;color:#17386d;font-size:12px;outline:none;min-width:0}
-.location-select{padding:0 6px;font-weight:700}.location-detail{padding:6px 8px}
-.location-select:focus,.location-detail:focus{border-color:#72a8d8;box-shadow:0 0 0 2px #e4f0fb}
-.location-cell .delete-btn{position:static;width:24px;height:28px;font-size:22px;line-height:24px;justify-self:end}
-@media (min-width:1381px){.column-head-right,.row{grid-template-columns:205px minmax(320px,1fr) 138px 138px minmax(220px,260px) !important;gap:7px !important}}
-@media (min-width:1121px) and (max-width:1380px){.column-head-right,.row{grid-template-columns:172px minmax(220px,1fr) 108px 108px minmax(190px,220px) !important;gap:5px !important}.location-cell{grid-template-columns:72px minmax(82px,1fr) 22px}.location-select,.location-detail{font-size:10.5px}}
-@media (min-width:861px) and (max-width:1120px){.column-head-right,.row{grid-template-columns:145px minmax(150px,1fr) 94px 94px minmax(170px,200px) !important;gap:4px !important}.location-cell{grid-template-columns:65px minmax(72px,1fr) 22px}.location-select,.location-detail{height:32px;font-size:10px;padding-left:4px;padding-right:4px}}
-@media (max-width:860px){.row{grid-template-columns:minmax(135px,180px) minmax(180px,1fr) minmax(88px,120px) minmax(88px,120px) minmax(175px,220px) !important;gap:4px !important}.location-cell{grid-template-columns:64px minmax(75px,1fr) 22px}}
-@media (max-width:680px){.row{grid-template-columns:1fr !important;padding:7px !important}.row>*{grid-column:1 !important}.status-wrap{grid-row:auto !important}.row textarea,.row .tech,.row .wit,.location-cell{grid-row:auto !important}.location-cell{grid-template-columns:92px minmax(0,1fr) 28px;width:100%}.location-select,.location-detail{height:36px;font-size:12px}}
-</style></head><body><div class="report-head"><h1>CN301-394 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> &nbsp;&nbsp;｜&nbsp;&nbsp; 系統 System：<b>CN301-394 Fault Tracking</b></div></div><div class="summary-title">摘要 <span>Summary</span></div><table class="summary"><tr><th class="s-total">總車廂數<br><small>Total Carriages</small></th><th class="s-record">有紀錄車廂<br><small>Carriages w/ Records</small></th><th class="s-fault">故障<br><small>Fault</small></th><th class="s-repair">維修中<br><small>Under Repair</small></th><th class="s-pending">待確認<br><small>Pending</small></th><th class="s-fixed">已修復完成<br><small>Fixed</small></th><th class="s-clear">均完成<br><small>All Clear</small></th></tr><tr><td>${cars.length}</td><td>${carsWithRecords}</td><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">CN301-394 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div>
-<style>
-/* ===== Mobile v7 UI Separation Enhancement ===== */
-
-/* 車廂卡片區分 */
-.car{
-    border-radius:16px !important;
-    margin-bottom:14px !important;
-    border:1px solid #d8e4f1 !important;
-    background:#ffffff !important;
-    overflow:hidden !important;
-    box-shadow:0 3px 12px rgba(20,60,100,.08) !important;
-}
-
-/* 車廂標題強化 */
-.carno{
-    display:inline-flex !important;
-    align-items:center;
-    background:#173b70 !important;
-    color:#ffffff !important;
-    padding:5px 12px !important;
-    border-radius:8px !important;
-    font-size:16px !important;
-}
-
-/* 左側車廂資訊區 */
-.head{
-    background:linear-gradient(180deg,#f4f8fd,#ffffff) !important;
-    border-bottom:1px solid #e1eaf5 !important;
-    padding:10px !important;
-}
-
-/* 故障內容區 */
-.rows{
-    background:#fbfdff !important;
-    padding:10px !important;
-}
-
-/* 每筆故障紀錄 */
-.row{
-    background:#ffffff !important;
-    border:1px solid #e0e9f3 !important;
-    border-radius:12px !important;
-    margin-bottom:10px !important;
-    padding:10px !important;
-}
-
-/* 地點區清楚分離 */
-.car-location{
-    background:#f1f7ff !important;
-    border-top:1px solid #d8e5f4 !important;
-    padding:10px !important;
-    border-left:0 !important;
-    border-radius:0 0 16px 16px !important;
-}
-
-.location-select,
-.location-detail{
-    background:#ffffff !important;
-    border-color:#c9d9eb !important;
-}
-
-/* 手機版間距 */
-@media(max-width:680px){
-
-    .car{
-        margin-bottom:16px !important;
-    }
-
-    .head{
-        min-height:120px !important;
-    }
-
-    .carno{
-        margin-top:6px !important;
-    }
-
-    .rows{
-        padding:12px !important;
-    }
-
-}
-</style>
-
-
-<style>
-/* ===== Mobile v8 Field Operation UI ===== */
-
-/* stronger carriage separation */
-@media(max-width:900px){
-
-.car{
-    background:#ffffff !important;
-    border:2px solid #c9d9ec !important;
-    border-radius:18px !important;
-    margin:0 0 18px 0 !important;
-    overflow:hidden !important;
-    box-shadow:0 5px 16px rgba(20,55,100,.12) !important;
-}
-
-/* carriage identity header */
-.head{
-    background:linear-gradient(135deg,#eaf3ff,#ffffff) !important;
-    border-bottom:3px solid #173b70 !important;
-    padding:12px !important;
-    min-height:140px !important;
-}
-
-.carno{
-    background:#173b70 !important;
-    color:#fff !important;
-    padding:8px 14px !important;
-    border-radius:10px !important;
-    font-size:18px !important;
-    display:inline-flex !important;
-}
-
-/* add fault button */
-.add-btn{
-    background:#ffffff !important;
-    border:2px dashed #6d99c9 !important;
-    color:#173b70 !important;
-    font-weight:700 !important;
-    padding:7px 12px !important;
-}
-
-/* fault record blocks */
-.row{
-    background:#fff8f8 !important;
-    border-left:5px solid #e85b66 !important;
-    border-radius:12px !important;
-    margin-bottom:12px !important;
-    padding:12px !important;
-}
-
-/* location belongs to carriage */
-.car-location{
-    background:#eaf4ff !important;
-    border-top:2px solid #c3d9ef !important;
-    padding:12px !important;
-}
-
-.location-select,
-.location-detail{
-    border-radius:10px !important;
-    background:#ffffff !important;
-}
-
-/* make empty records visible */
-.empty{
-    background:#f7faff !important;
-    border-radius:10px !important;
-    min-height:60px !important;
-    margin:8px !important;
-}
-
-/* portrait and landscape mobile */
-}
-
-@media(max-width:680px){
-.head{
-    min-height:150px !important;
-}
-.carno{
-    font-size:17px !important;
-}
-}
-
-</style>
-</body></html>`;
-  downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`CN301-394_Daily_Fault_Report_${dateText}.doc`);
+@page{size:A4;margin:13mm}body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif;color:#1d2b3d;font-size:9.2pt;line-height:1.35;margin:0}.report-head{text-align:center;border-bottom:1.5pt solid #244b7c;padding-bottom:9pt;margin-bottom:10pt}h1{font-size:20pt;margin:0 0 6pt;color:#17263a}.en{font-size:16pt;color:#5e7188}.meta{color:#60728a}.summary-title{font-size:11pt;font-weight:800;margin:0 0 5pt}.summary{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:12pt;text-align:center}.summary th{background:#20334e;color:#fff;padding:4pt 2pt;font-size:7.6pt}.summary th small{font-size:6.8pt;color:#dce6f2}.summary td{background:#f8fafc;border:1px solid #dfe6ee;padding:5pt 2pt;font-size:13pt;font-weight:800}.type-summary th{background:#315b8f}.unit-section{margin-top:12pt}.unit-title{background:#20334e;color:#fff;font-size:10pt;font-weight:800;padding:6pt 8pt;border-left:4pt solid #4a74a9}.unit-count{float:right;font-size:8pt}.car-block{page-break-inside:avoid;margin:7pt 0 10pt;border:1px solid #dce5ef;padding:6pt;background:#fff}.car-title{margin-bottom:5pt}.vehicle-badge{font-size:9pt;font-weight:700;color:#455f7d}.asset-block{margin-top:6pt}.asset-title{display:block;background:#eef4fb;border-left:4pt solid #315b8f;padding:5pt 7pt;font-weight:800}.dk-block .asset-title{background:#f2f6fc;border-left-color:#6b83a4}.asset-badge{font-size:12pt;color:#123d74}.asset-place{float:right;font-size:8.4pt;color:#5f738d;font-weight:650}.fault-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:3pt}.fault-table th{background:#e9f0f8;color:#2f4a68;padding:4pt 3pt;font-size:7.8pt}.fault-table td{border-bottom:.5pt solid #e1e7ee;border-right:.5pt solid #eef2f6;padding:5pt 4pt;vertical-align:middle;font-size:8.5pt}.c-num{width:4%}.c-status{width:16%}.c-desc{width:34%}.c-tech{width:14%}.c-wit{width:13%}.c-location{width:19%}.num,.person{text-align:center}.status{text-align:center}.report-time{font-size:6.7pt;color:#6f7f91;margin-top:2pt}.place{font-size:8pt}.none{font-style:italic;color:#8c99aa;background:#fafbfd}.footer{margin-top:12pt;border-top:.7pt solid #d2dae4;padding-top:5pt;text-align:right;color:#8996a6;font-size:7pt}
+</style></head><body><div class="report-head"><h1>CN301-394 故障日報 <span class="en">Daily Fault Report</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b> ｜ 範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要 Summary</div><table class="summary type-summary"><tr><th>總車廂數<br><small>Total Carriages</small></th><th>CN</th><th>DK</th><th>NMS</th><th>SSS</th><th>有紀錄車廂<br><small>With Records</small></th></tr><tr><td>${scopedCars.length}</td><td>${countCN}</td><td>${countDK}</td><td>${countNMS}</td><td>${countSSS}</td><td>${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要 Status Summary</div><table class="summary"><tr><th>故障<br><small>Fault</small></th><th>維修中<br><small>Under Repair</small></th><th>待確認<br><small>Pending</small></th><th>已修復<br><small>Fixed</small></th><th>均完成<br><small>All Clear</small></th></tr><tr><td>${fault}</td><td>${repair}</td><td>${pending}</td><td>${fixed}</td><td>${clear}</td></tr></table>${sections}<div class="footer">CN301-394 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+  const unitSuffix=activeUnit?`_${activeUnit}`:"";
+  downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`CN301-394_Daily_Fault_Report${unitSuffix}_${dateText}.doc`);
 }
 function statusText(s){
   if((s||"").includes("Fixed")||(s||"").includes("修復")) return "✅  已修復完成 Fixed";
