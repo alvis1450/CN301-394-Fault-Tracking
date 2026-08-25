@@ -483,7 +483,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 </head>
 <body>
-<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
+<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存與維修管理 <span>Equipment Inventory & Maintenance</span></h1><small>CN / NMS / SSS｜庫存・序號・維修更換・人員領用・簽收管理</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
 <main>
 <section class="summary">
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('groups')" onkeydown="summaryKey(event,'groups')"><b id="sGroups">0</b><span>組件分類</span><small class="card-sub">依 CN / NMS / SSS 分類查看</small></div>
@@ -493,14 +493,14 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 </section>
 <section class="history" id="historyPanel">
   <button class="history-toggle" type="button" onclick="toggleHistoryPanel()" aria-expanded="false" aria-controls="historyBody">
-    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>設備更換／損壞／人員領用紀錄</h3><p>查看設備更換、損壞設備與人員領用的時間、位置、序號及備註。</p></span></span>
+    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>設備維修更換／人員領用紀錄</h3><p>查看設備維修更換與人員領用的時間、位置、序號及備註。</p></span></span>
     <span id="historyCount" class="history-count">0 筆紀錄</span>
   </button>
   <div id="historyBody" class="history-body"><div id="history"></div></div>
 </section>
 <section class="stock-history" id="stockHistoryPanel">
   <button class="stock-history-toggle" type="button" onclick="toggleStockHistoryPanel()" aria-expanded="false" aria-controls="stockHistoryBody">
-    <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>庫存異動紀錄</h3><p>追蹤新設備入庫與設備更換領出；保留時間、數量、序號與位置。</p></span></span>
+    <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>庫存異動紀錄</h3><p>追蹤新設備入庫與設備維修更換領出；保留時間、數量、序號與位置。</p></span></span>
     <span id="stockHistoryCount" class="stock-history-count">0 筆異動</span>
   </button>
   <div id="stockHistoryBody" class="stock-history-body"><div id="stockHistory"></div></div>
@@ -509,7 +509,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <div class="search-wrap"><span class="search-icon">⌕</span><input id="search" class="search" placeholder="搜尋組件、料號、設備名稱、序號或位置" oninput="render()"></div>
 <div class="action-group primary-actions">
 <button id="saveMainBtn" class="btn save-main" onclick="saveAll()" disabled>💾 已儲存</button>
-<button class="btn primary" onclick="openReplace()">🔄 設備更換</button>
+<button class="btn primary" onclick="openReplace()">🔄 設備維修更換／人員領用</button>
 <button class="btn report-btn" onclick="exportReportWord()">📄 匯出 Word 報告</button>
 <button class="btn green" type="button" onclick="openIssueReceipt()">✍ 裝備領用簽收證明</button>
 </div>
@@ -533,9 +533,9 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
   <div class="guide-title">狀態顏色</div>
   <span class="guide-pill zero"><i></i>無庫存（0）</span>
   <span class="guide-pill stock"><i></i>有庫存</span>
-  <span class="guide-help">主清單狀態由系統依目前庫存自動判定；已安裝與損壞設備請至「設備更換／損壞裝備紀錄」查看。</span>
+  <span class="guide-help">主清單狀態由系統依目前庫存自動判定；已安裝與損壞設備請至「設備維修更換／人員領用紀錄」查看。</span>
 </section>
-<div class="note"><b>操作提醒：</b>收到新設備請使用每列的 <b>＋ 新增庫存</b>，系統會建立可追溯的入庫紀錄；設備更換時系統會自動扣除 1 件庫存並留下領出紀錄。庫存數量為系統計算結果，不提供直接手動調整。</div>
+<div class="note"><b>操作提醒：</b>收到新設備請使用每列的 <b>＋ 新增庫存</b>，系統會建立可追溯的入庫紀錄；設備維修更換時系統會自動扣除 1 件庫存並留下領出紀錄。庫存數量為系統計算結果，不提供直接手動調整。</div>
 <div id="components"></div>
 
 </main>
@@ -543,20 +543,25 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 <div id="savebar" class="savebar"><div class="savebar-inner"><div class="savebar-msg"><span class="unsaved-dot"></span>有尚未儲存的變更</div><button class="btn light" onclick="discardChanges()">取消變更</button><button class="btn save-main" onclick="saveAll()">💾 儲存變更</button></div></div>
 <datalist id="unitList"></datalist>
-<div class="modal" id="modal"><div class="dialog"><h3>登記設備更換</h3><div class="form">
-<label>位置 <span class="required">必填</span><select id="rCN" onchange="updateReplacementMode()"><option value="">請選擇位置</option></select></label>
+<div class="modal" id="modal"><div class="dialog"><h3>設備維修更換／人員領用</h3><div class="form">
+<label>作業類型 <span class="required">必填</span><select id="rActionType" onchange="updateReplacementMode()"><option value="replacement">設備維修更換</option><option value="personnel_issue">人員領用</option></select></label>
+<label><span id="rLocationLabel">更換位置</span> <span class="required">必填</span><select id="rCN"><option value="">請選擇作業位置</option></select></label>
+<div id="rPersonnelWrap" style="display:none;grid-template-columns:1fr 1fr;gap:10px">
+<label>領用人員 <span class="required">必填</span><input id="rPersonnelName" placeholder="請輸入領用人員姓名"></label>
+<label>領用單位<input id="rPersonnelUnit" placeholder="選填，例如：73群1營1連"></label>
+</div>
 <label>組件<select id="rGroup"></select></label>
 <label>設備<select id="rDevice"></select></label>
-<label>壞掉的舊序號 <span id="rOldRequired" class="required">必填</span><input id="rOld" placeholder="請輸入現場故障設備的舊序號"><span id="rOldHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">舊序號屬於現場設備，不會從庫存序號扣除。</span></label>
-<label>換上的新序號 <span class="required">必填</span><select id="rNew"><option value="">請先選擇設備</option></select><span id="rNewHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">新序號必須從目前庫存序號中選擇；儲存後庫存會自動減 1。</span></label>
-<label>備註<textarea id="rNote" placeholder="例如：無法開機、無網路"></textarea></label>
-</div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button id="saveReplaceBtn" class="btn primary" onclick="saveReplace()">💾 儲存更換紀錄</button></div></div></div>
+<label id="rOldLabel">故障設備序號 <span id="rOldRequired" class="required">必填</span><input id="rOld" placeholder="請輸入故障設備原序號"><span id="rOldHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">故障設備原序號屬於現場設備，不會從目前庫存序號扣除。</span></label>
+<label><span id="rNewLabelText">替換設備序號</span> <span class="required">必填</span><select id="rNew"><option value="">請先選擇設備</option></select><span id="rNewHelp" style="display:block;margin-top:5px;font-size:10.5px;color:#7a8da4;font-weight:600">替換設備序號必須從目前庫存序號中選擇；儲存後庫存會自動減 1。</span></label>
+<label>備註<textarea id="rNote" placeholder="例如：無法開機、無網路、領用用途"></textarea></label>
+</div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button id="saveReplaceBtn" class="btn primary" onclick="saveReplace()">💾 儲存維修更換紀錄</button></div></div></div>
 
 
 
 
 <div class="modal" id="issueReceiptModal"><div class="dialog" style="width:min(760px,100%)"><h3>裝備領用簽收證明</h3><div class="form">
-<div style="font-size:11.5px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px"><b>用途：</b>此功能只管理與匯出簽收證明，不會修改庫存數量、庫存序號、設備狀態、設備更換紀錄或其他欄位。</div>
+<div style="font-size:11.5px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px"><b>用途：</b>此功能只管理與匯出簽收證明，不會修改庫存數量、庫存序號、設備狀態、設備維修更換紀錄或其他欄位。</div>
 
 <label>送修單位 <span class="required">必填</span>
 <select id="receiptUnit" onchange="updateReceiptUnitSummary()">
@@ -718,8 +723,19 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <label>設備<input id="stockInDevice" readonly></label>
 <label>本次新增數量 <span class="required">必填</span><input id="stockInQty" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
 <label>本次新增序號<textarea id="stockInSerials" placeholder="有序號的設備請輸入本次收到的序號。可直接貼 Excel 一整欄，也支援逗號、全形逗號、Tab 或換行。"></textarea></label>
-<label>位置 <span class="required">必填</span><select id="stockInLocation"></select></label>
-<label>來源 / 單號<input id="stockInReference" placeholder="選填，例如：採購單、撥補單、工單編號"></label>
+<label>位置 <span class="required">必填</span><select id="stockInLocation">
+<option value="">請選擇位置</option>
+<option value="73G-FSR Site">73G-FSR Site</option>
+<option value="74G-FSR Site">74G-FSR Site</option>
+<option value="75G-FSR Site">75G-FSR Site</option>
+</select></label>
+<label>來源<select id="stockInReference">
+<option value="">請選擇來源</option>
+<option value="基修中心">基修中心</option>
+<option value="73G-FSR Site">73G-FSR Site</option>
+<option value="74G-FSR Site">74G-FSR Site</option>
+<option value="75G-FSR Site">75G-FSR Site</option>
+</select></label>
 <label>備註<textarea id="stockInNote" placeholder="選填，例如：新設備到貨、備品補充"></textarea></label>
 <div class="stock-in-help"><b>入庫規則：</b>本次序號數不可大於新增數量；序號不可與目前任何庫存設備重複。儲存後會立即增加庫存並建立一筆不可因修改庫存而消失的異動紀錄。</div>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeStockIn()">取消</button><button class="btn primary" onclick="confirmStockIn()">💾 確認入庫</button></div></div></div>
@@ -994,7 +1010,17 @@ function locationOptions(current=''){
  return html;
 }
 unitList.innerHTML=unitIds.map(v=>`<option value="${v}"></option>`).join('');
-const rCNSelect=document.getElementById('rCN');if(rCNSelect)rCNSelect.innerHTML='<option value="">請選擇位置</option><option value="人員領用">人員領用</option>'+unitIds.map(v=>`<option value="${v}">${v}</option>`).join('');
+const rCNSelect=document.getElementById('rCN');
+const personnelIssueLocations=['73G-FSR Site','74G-FSR Site','75G-FSR Site'];
+function setReplacementLocationOptions(isPersonnelIssue=false){
+ if(!rCNSelect)return;
+ const current=rCNSelect.value;
+ const locations=isPersonnelIssue?personnelIssueLocations:unitIds;
+ const placeholder=isPersonnelIssue?'請選擇領用位置':'請選擇更換位置';
+ rCNSelect.innerHTML=`<option value="">${placeholder}</option>`+locations.map(v=>`<option value="${v}">${v}</option>`).join('');
+ if(locations.includes(current))rCNSelect.value=current;
+}
+setReplacementLocationOptions(false);
 function refreshGroupFilter(){
  const el=document.getElementById('groupFilter');if(!el)return;
  const current=el.value;
@@ -1064,13 +1090,13 @@ function render(){
  });
  components.innerHTML=html||'<div class="empty">找不到符合資料</div>';
  const fc=document.getElementById('filterCount');if(fc)fc.textContent=`顯示 ${shownGroups} / ${store.groups.length} 個組件`;
- const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(r.cn)}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>損壞裝備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'損壞／已換下')}</span>　→　<b>換上新設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}</div>`}).join('')||'<div class="empty">尚無更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
+ const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
  renderStockHistory();
  updateSummary();
 }
 
 function stockMovementTypeText(type){
- return ({inbound:'新增庫存',replacement_out:'設備更換領出',personnel_issue:'人員領用',adjust:'歷史盤點調整',serial_adjust:'歷史序號修正'}[type]||'庫存異動');
+ return ({inbound:'新增庫存',replacement_out:'設備維修更換領出',personnel_issue:'人員領用',adjust:'歷史盤點調整',serial_adjust:'歷史序號修正'}[type]||'庫存異動');
 }
 function normalizeStockMovementRecord(m={}){
  const raw=String(m.timestamp||'').trim();let dt=null;if(raw){const d=new Date(raw);if(!Number.isNaN(d.getTime()))dt=d}
@@ -1129,7 +1155,7 @@ let stockInGI=null,stockInII=null;
 function openStockIn(g,i){
  stockInGI=g;stockInII=i;const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  stockInCurrentQty.textContent=Number(x.qty)||0;stockInCurrentSerials.textContent=(x.serials||[]).filter(Boolean).length;stockInSystem.textContent=systemType(group);
- stockInDevice.value=`${x.name}｜${x.part}`;stockInQty.value=1;stockInSerials.value='';stockInLocation.innerHTML=locationOptions(x.location||'');stockInReference.value='';stockInNote.value='';
+ stockInDevice.value=`${x.name}｜${x.part}`;stockInQty.value=1;stockInSerials.value='';stockInLocation.value=['73G-FSR Site','74G-FSR Site','75G-FSR Site'].includes(x.location||'')?(x.location||''):'';stockInReference.value='';stockInNote.value='';
  stockInModal.classList.add('show');setTimeout(()=>stockInQty.focus(),80);
 }
 function closeStockIn(){stockInModal.classList.remove('show');stockInGI=stockInII=null}
@@ -1157,7 +1183,7 @@ function toggleHistoryPanel(forceOpen){
 function deleteReplacementRecord(index){
  const arr=store.replacements||[],r=arr[index];if(!r)return;
  const when=r.dateTime||r.date||'未記錄時間',label=`${r.device||'設備'}｜損壞序號 ${r.old||'—'} → 新序號 ${r.next||'—'}`;
- if(!confirm(`確定刪除這筆設備更換 / 損壞紀錄？\n\n${when}\n${label}\n\n注意：只會刪除歷史紀錄，不會增加庫存，也不會把已領出的新序號放回庫存。`))return;
+ if(!confirm(`確定刪除這筆設備維修更換 / 損壞紀錄？\n\n${when}\n${label}\n\n注意：只會刪除歷史紀錄，不會增加庫存，也不會把已領出的新序號放回庫存。`))return;
  arr.splice(index,1);
  save();render();toggleHistoryPanel(true);
  showToast('更換 / 損壞紀錄已刪除；庫存資料未變更','success');
@@ -1204,11 +1230,11 @@ function openSummaryDetail(type){
 function toggleGroup(i){openSet.has(i)?openSet.delete(i):openSet.add(i);render()}
 function expandAll(){['CN','NMS','SSS'].forEach(t=>systemOpenSet.add(t));store.groups.forEach((_,i)=>openSet.add(i));render()}function collapseAll(){systemOpenSet.clear();openSet.clear();render()}
 function setQty(g,i,v){
- showToast('庫存數量不可直接修改，請使用「＋ 新增庫存」或「設備更換」流程','error');
+ showToast('庫存數量不可直接修改，請使用「＋ 新增庫存」或「設備維修更換」流程','error');
  render();
 }
 function changeQty(g,i,d){
- showToast('已停用盤點調整；庫存只能透過正式入庫或設備更換異動','error');
+ showToast('已停用盤點調整；庫存只能透過正式入庫或設備維修更換異動','error');
  render();
 }
 function serialTagEditor(x,g,i){
@@ -1263,7 +1289,7 @@ function openReplace(){
  const current=rGroup.value;
  let opts='';
  ['CN','NMS','SSS'].forEach(type=>{
-   // 登記設備更換時，只顯示至少有 1 件庫存的組件。
+   // 登記設備維修更換時，只顯示至少有 1 件庫存的組件。
    const entries=store.groups.map((g,i)=>({g,i})).filter(({g})=>
      systemType(g)===type && (g.items||[]).some(x=>(Number(x.qty)||0)>0)
    );
@@ -1275,24 +1301,35 @@ function openReplace(){
  rGroup.onchange=refreshDevices;
  rDevice.onchange=refreshReplacementStockSerials;
  rOld.value='';rNote.value='';
+ const at=document.getElementById('rActionType');if(at)at.value='replacement';
+ const pn=document.getElementById('rPersonnelName'),pu=document.getElementById('rPersonnelUnit');if(pn)pn.value='';if(pu)pu.value='';
  updateReplacementMode();
  refreshDevices();modal.classList.add('show');
 }
 function updateReplacementMode(){
- const isPersonnelIssue=String(rCN?.value||'').trim()==='人員領用';
+ const action=document.getElementById('rActionType')?.value||'replacement';
+ const isPersonnelIssue=action==='personnel_issue';
  const required=document.getElementById('rOldRequired'),help=document.getElementById('rOldHelp'),btn=document.getElementById('saveReplaceBtn');
+ const oldLabel=document.getElementById('rOldLabel'),newLabel=document.getElementById('rNewLabelText'),locLabel=document.getElementById('rLocationLabel'),personWrap=document.getElementById('rPersonnelWrap');
+ setReplacementLocationOptions(isPersonnelIssue);
  if(required)required.style.display=isPersonnelIssue?'none':'';
+ if(oldLabel)oldLabel.style.display=isPersonnelIssue?'none':'block';
+ if(personWrap)personWrap.style.display=isPersonnelIssue?'grid':'none';
+ if(locLabel)locLabel.textContent=isPersonnelIssue?'領用位置':'更換位置';
+ if(newLabel)newLabel.textContent=isPersonnelIssue?'領用設備序號':'替換設備序號';
  if(rOld){
   rOld.disabled=isPersonnelIssue;
   rOld.required=!isPersonnelIssue;
-  rOld.placeholder=isPersonnelIssue?'人員領用不需輸入舊序號':'請輸入現場故障設備的舊序號';
+  rOld.placeholder='請輸入故障設備原序號';
   if(isPersonnelIssue)rOld.value='';
  }
  if(help){
-  help.textContent=isPersonnelIssue?'人員領用模式不需要故障舊序號；儲存後仍會從庫存扣除 1 件。':'舊序號屬於現場設備，不會從庫存序號扣除。';
-  help.style.color=isPersonnelIssue?'#176542':'#7a8da4';
+  help.textContent='故障設備原序號屬於現場設備，不會從目前庫存序號扣除。';
+  help.style.color='#7a8da4';
  }
- if(btn)btn.textContent=isPersonnelIssue?'💾 儲存人員領用紀錄':'💾 儲存更換紀錄';
+ const newHelp=document.getElementById('rNewHelp');
+ if(newHelp && !rNew?.disabled)newHelp.textContent=isPersonnelIssue?'領用設備序號必須從目前庫存序號中選擇；儲存後庫存會自動減 1。':'替換設備序號必須從目前庫存序號中選擇；儲存後庫存會自動減 1。';
+ if(btn)btn.textContent=isPersonnelIssue?'💾 儲存領用紀錄':'💾 儲存維修更換紀錄';
 }
 function refreshDevices(){
  const gi=Number(rGroup.value),g=store.groups[gi];
@@ -1315,7 +1352,7 @@ function refreshReplacementStockSerials(){
  const qty=Number(x?.qty)||0,help=document.getElementById('rNewHelp');
  if(qty<=0){
   rNew.innerHTML='<option value="">目前庫存為 0，無法更換</option>';rNew.disabled=true;
-  if(help){help.textContent='此設備目前沒有庫存，無法執行設備更換。';help.style.color='#b42336'}
+  if(help){help.textContent='此設備目前沒有庫存，無法執行設備維修更換。';help.style.color='#b42336'}
  }else if(!serials.length){
   rNew.innerHTML='<option value="">庫存尚未登記序號</option>';rNew.disabled=true;
   if(help){help.textContent=`目前庫存 ${qty} 件，但沒有庫存序號。請先回主畫面登記新設備序號。`;help.style.color='#b42336'}
@@ -1326,21 +1363,24 @@ function refreshReplacementStockSerials(){
 }
 function closeModal(){modal.classList.remove('show')}
 function saveReplace(){
+ const action=document.getElementById('rActionType')?.value||'replacement';
  const cn=rCN.value.trim(),old=String(rOld.value||'').trim(),next=String(rNew.value||'').trim(),gi=Number(rGroup.value),ii=Number(rDevice.value);
- const isPersonnelIssue=cn==='人員領用';
- if(!cn||!next||(!isPersonnelIssue&&!old))return showToast(isPersonnelIssue?'請選擇位置、設備與庫存的新序號':'請完整填寫位置、舊序號，並選擇庫存的新序號','error');
- if(old&&old.toLowerCase()===next.toLowerCase())return showToast('舊序號與換上的新序號不可相同','error');
+ const isPersonnelIssue=action==='personnel_issue';
+ const personnelName=String(document.getElementById('rPersonnelName')?.value||'').trim();
+ const personnelUnit=String(document.getElementById('rPersonnelUnit')?.value||'').trim();
+ if(!cn||!next||(!isPersonnelIssue&&!old)||(isPersonnelIssue&&!personnelName))return showToast(isPersonnelIssue?'請選擇領用位置、設備與庫存序號，並填寫領用人員':'請完整填寫更換位置、故障設備序號，並選擇替換設備序號','error');
+ if(old&&old.toLowerCase()===next.toLowerCase())return showToast('故障設備序號與替換設備序號不可相同','error');
  const g=store.groups[gi],x=g?.items?.[ii];if(!x)return showToast('找不到指定設備','error');
  const qty=Number(x.qty)||0,serials=(x.serials||[]).map(s=>String(s).trim()).filter(Boolean);
- if(qty<=0)return showToast(`目前庫存為 0，無法執行${isPersonnelIssue?'人員領用':'設備更換'}`,'error');
+ if(qty<=0)return showToast(`目前庫存為 0，無法執行${isPersonnelIssue?'人員領用':'設備維修更換'}`,'error');
  const newIndex=serials.findIndex(sn=>sn.toLowerCase()===next.toLowerCase());
- if(newIndex<0)return showToast('選擇的新序號已不在庫存中，請重新確認','error');
- // 不論設備更換或人員領用，領出的新設備都必須從目前庫存扣除 1 件並移除庫存序號。
+ if(newIndex<0)return showToast('選擇的設備序號已不在庫存中，請重新確認','error');
  x.qty=Math.max(0,qty-1);
  x.serials=serials.filter((_,idx)=>idx!==newIndex);
+ const movementNote=isPersonnelIssue?`人員領用；領用人員：${personnelName}${personnelUnit?`；單位：${personnelUnit}`:''}`:`設備維修更換領出；故障設備序號：${old}`;
  addStockMovement(gi,ii,{
   type:isPersonnelIssue?'personnel_issue':'replacement_out',qtyChange:-1,beforeQty:qty,afterQty:x.qty,serials:[next],location:cn,
-  note:isPersonnelIssue?'人員領用':`設備更換領出；損壞舊序號：${old}`
+  note:movementNote
  });
  const changedAt=new Date();
  store.replacements.push({
@@ -1348,16 +1388,21 @@ function saveReplace(){
   date:changedAt.toLocaleDateString('zh-TW'),
   dateTime:changedAt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
   actionType:isPersonnelIssue?'personnel_issue':'replacement',
-  cn,group:g.name,device:x.name,part:x.part||'',old:isPersonnelIssue?'':old,next,note:rNote.value.trim(),
-  damagedStatus:isPersonnelIssue?'不適用（人員領用）':'損壞／已換下',newStatus:isPersonnelIssue?'已領用':'已安裝／使用'
+  cn,personnelName,personnelUnit,group:g.name,device:x.name,part:x.part||'',old:isPersonnelIssue?'':old,next,note:rNote.value.trim(),
+  damagedStatus:isPersonnelIssue?'不適用':'故障／已換下',newStatus:isPersonnelIssue?'已領用':'已安裝／使用'
  });
  save();closeModal();render();
- rCN.value='';rOld.value='';rNew.innerHTML='<option value="">請先選擇設備</option>';rNote.value='';updateReplacementMode();
+ rCN.value='';rOld.value='';rNew.innerHTML='<option value="">請先選擇設備</option>';rNote.value='';
+ const at=document.getElementById('rActionType');if(at)at.value='replacement';
+ const pn=document.getElementById('rPersonnelName'),pu=document.getElementById('rPersonnelUnit');if(pn)pn.value='';if(pu)pu.value='';
+ updateReplacementMode();
  toggleHistoryPanel(true);document.getElementById('historyPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
- showToast(`${isPersonnelIssue?'人員領用':'設備更換'}完成：已領出 ${next}，庫存剩 ${x.qty} 件`,'success');
+ showToast(`${isPersonnelIssue?'人員領用':'設備維修更換'}完成：已領出 ${next}，庫存剩 ${x.qty} 件`,'success');
 }
 
 function normalizeReplacementRecord(r={}){
+ r.personnelName=String(r.personnelName||'').trim();
+ r.personnelUnit=String(r.personnelUnit||'').trim();
  const rawTs=String(r.timestamp||'').trim();
  let dt=null;
  if(rawTs){const d=new Date(rawTs);if(!Number.isNaN(d.getTime()))dt=d}
@@ -1386,16 +1431,16 @@ function exportBackup(){
  normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
  const stats=inventoryStats();
  const payload={
-  schema:'equipment-inventory-v3',version:3,exportedAt:new Date().toISOString(),
-  description:'V3 新設備庫存、庫存序號、庫存異動歷程與目前保留的設備更換/損壞紀錄完整備份',stats,data:store
+  schema:'equipment-inventory-v4',version:4,appVersion:'4.0',exportedAt:new Date().toISOString(),
+  description:'V4 庫存、序號、庫存異動、設備維修更換、人員領用與簽收管理資料完整備份',stats,data:store
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v4_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
  showToast(`完整備份已匯出：庫存 ${stats.qty} 件 / 庫存異動 ${stats.stockMovements} 筆 / 更換紀錄 ${stats.replacements} 筆`,'success');
 }
 function importBackup(ev){
  const f=ev.target.files&&ev.target.files[0];if(!f)return;
- if(!confirm('匯入備份會取代目前畫面中的全部庫存與設備更換/損壞紀錄。備份中沒有的已刪除紀錄不會恢復。\n\n建議先匯出目前備份。確定繼續？')){ev.target.value='';return}
+ if(!confirm('匯入備份會取代目前畫面中的全部庫存與設備維修更換/人員領用紀錄。備份中沒有的已刪除紀錄不會恢復。\n\n建議先匯出目前備份。確定繼續？')){ev.target.value='';return}
  const r=new FileReader();
  r.onload=()=>{try{
   const obj=JSON.parse(r.result),incoming=obj.data||obj;
@@ -1425,12 +1470,12 @@ function openReport(){
  normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
  const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
  let html=`<div style="display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px;margin-bottom:14px">
- <div class="card"><b>${st.groups}</b><span>組件分類</span></div><div class="card"><b>${st.types}</b><span>設備種類</span></div><div class="card"><b>${st.qty}</b><span>新設備庫存</span></div><div class="card"><b>${st.serials}</b><span>庫存序號</span></div><div class="card"><b>${st.replacements}</b><span>損壞 / 更換紀錄</span></div></div>`;
+ <div class="card"><b>${st.groups}</b><span>組件分類</span></div><div class="card"><b>${st.types}</b><span>設備種類</span></div><div class="card"><b>${st.qty}</b><span>新設備庫存</span></div><div class="card"><b>${st.serials}</b><span>庫存序號</span></div><div class="card"><b>${st.replacements}</b><span>維修更換 / 領用紀錄</span></div></div>`;
  html+=`<div style="font-size:12px;color:#61758f;margin-bottom:10px">產生時間：${new Date().toLocaleString('zh-TW')}　｜　<strong>庫存量與庫存序號只代表尚未領出的新設備</strong>；已更換領出的新序號會保留於下方更換紀錄，不再計入庫存。</div>`;
  html+=`<div style="overflow:auto;margin-bottom:12px"><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return `<tr><td><b>${t}</b></td><td>${x.groups}</td><td>${x.types}</td><td>${x.qty}</td><td>${x.serials}</td></tr>`}).join('')}</tbody></table></div>`;
  ['CN','NMS','SSS'].forEach(t=>html+=reportSystemSection(t,rows));
- html+=`<h4 style="margin:20px 0 8px;color:#9c2c38">設備更換 / 損壞裝備紀錄 <span style="font-size:11px;color:#71849c;font-weight:600">${reps.length} 筆</span></h4>`;
- html+=reps.length?`<div style="overflow:auto"><table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>損壞裝備序號</th><th>換上新設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.old||'—')}</td><td class="detail-serial">${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無設備更換 / 損壞裝備紀錄</div>`;
+ html+=`<h4 style="margin:20px 0 8px;color:#9c2c38">設備維修更換 / 人員領用紀錄 <span style="font-size:11px;color:#71849c;font-weight:600">${reps.length} 筆</span></h4>`;
+ html+=reps.length?`<div style="overflow:auto"><table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.old||'—')}</td><td class="detail-serial">${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無設備維修更換 / 人員領用紀錄</div>`;
  reportContent.innerHTML=html;reportModal.classList.add('show');
 }
 function exportReportWord(){
@@ -1443,10 +1488,10 @@ function exportReportWord(){
    if(!data.length)return '';
    return `<h2>${type} 庫存明細</h2><p class="meta">${data.length} 種設備｜${qty} 件庫存｜${sns} 個庫存序號</p><table><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td>${esc(x.name)}</td><td class="num">${x.qty}</td><td>${esc(x.serial||'—')}</td><td>${esc(x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table>`;
  }).join('');
- const replacementTable=reps.length?`<table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>損壞裝備序號</th><th>換上新設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無設備更換／損壞裝備紀錄。</p>';
+ const replacementTable=reps.length?`<table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無設備維修更換／人員領用紀錄。</p>';
  const movementRows=(store.stockMovements||[]).slice().reverse();
  const movementTable=movementRows.length?`<table><thead><tr><th>異動時間</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量異動</th><th>異動前</th><th>異動後</th><th>本次序號</th><th>位置</th><th>來源/單號</th><th>備註</th></tr></thead><tbody>${movementRows.map(m=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.system||'—')}</td><td>${esc(m.group||'—')}</td><td>${esc(m.device||'—')}</td><td>${esc(m.part||'—')}</td><td class="num">${m.qtyChange>0?'+'+m.qtyChange:m.qtyChange}</td><td class="num">${m.beforeQty}</td><td class="num">${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.reference||'')}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無庫存異動紀錄。</p>';
- const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><title>73G裝備庫存管理 Report</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:"Microsoft JhengHei",Arial,sans-serif;color:#17365f;font-size:10pt;line-height:1.45}h1{font-size:20pt;color:#173b70;margin:0 0 5px}h2{font-size:13pt;color:#173b70;margin:18px 0 4px;border-bottom:1px solid #cbd8e6;padding-bottom:4px}.meta{color:#607892;margin:0 0 7px}.notice{background:#eef5fb;border:1px solid #cbddea;padding:8px;margin:9px 0 12px}.summary{width:100%;margin:8px 0 12px}.summary td{border:1px solid #c9d6e5;text-align:center;padding:8px}.summary b{display:block;font-size:17pt;color:#123f76}.summary span{font-size:9pt;color:#607892}table{width:100%;border-collapse:collapse;margin:6px 0 14px;table-layout:auto}th,td{border:1px solid #aebfd1;padding:5px 6px;vertical-align:top;word-break:break-word}th{background:#eaf1f8;color:#173b70;font-weight:bold}.num{text-align:center}.footer{margin-top:16px;color:#71849c;font-size:8.5pt}</style></head><body><h1>73G裝備庫存管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備更換後領出的新設備序號會自庫存移除，並保留於設備更換／損壞裝備紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>損壞／更換紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p><h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備更換領出</p>${movementTable}<h2>設備更換／損壞裝備紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}<div class="footer">73G裝備庫存管理｜本文件由系統自動產生</div></body></html>`;
+ const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><title>73G裝備庫存與維修管理 Report</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:"Microsoft JhengHei",Arial,sans-serif;color:#17365f;font-size:10pt;line-height:1.45}h1{font-size:20pt;color:#173b70;margin:0 0 5px}h2{font-size:13pt;color:#173b70;margin:18px 0 4px;border-bottom:1px solid #cbd8e6;padding-bottom:4px}.meta{color:#607892;margin:0 0 7px}.notice{background:#eef5fb;border:1px solid #cbddea;padding:8px;margin:9px 0 12px}.summary{width:100%;margin:8px 0 12px}.summary td{border:1px solid #c9d6e5;text-align:center;padding:8px}.summary b{display:block;font-size:17pt;color:#123f76}.summary span{font-size:9pt;color:#607892}table{width:100%;border-collapse:collapse;margin:6px 0 14px;table-layout:auto}th,td{border:1px solid #aebfd1;padding:5px 6px;vertical-align:top;word-break:break-word}th{background:#eaf1f8;color:#173b70;font-weight:bold}.num{text-align:center}.footer{margin-top:16px;color:#71849c;font-size:8.5pt}</style></head><body><h1>73G裝備庫存與維修管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p><h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}<div class="footer">73G裝備庫存與維修管理｜本文件由系統自動產生</div></body></html>`;
  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=`73G裝備庫存管理_Report_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Word Report 已匯出','success');
 }
@@ -1465,8 +1510,8 @@ function exportReportCSV(){
  csv+='\n\n'+['庫存異動紀錄'].map(csvCell).join(',')+'\n';
  csv+=['異動時間','類型','系統','組件','設備','料號','數量異動','異動前','異動後','本次序號','位置','來源/單號','備註'].map(csvCell).join(',')+'\n';
  csv+=(store.stockMovements||[]).slice().reverse().map(m=>[m.dateTime||'',stockMovementTypeText(m.type),m.system,m.group,m.device,m.part,m.qtyChange,m.beforeQty,m.afterQty,(m.serials||[]).join('、'),m.location,m.reference,m.note].map(csvCell).join(',')).join('\n');
- csv+='\n\n'+['設備更換 / 損壞裝備紀錄'].map(csvCell).join(',')+'\n';
- csv+=['更換時間','位置','組件','設備','料號','損壞裝備序號','換上新設備序號','損壞狀態','備註'].map(csvCell).join(',')+'\n';
+ csv+='\n\n'+['設備維修更換 / 人員領用紀錄'].map(csvCell).join(',')+'\n';
+ csv+=['更換時間','位置','組件','設備','料號','故障設備序號','替換設備序號','損壞狀態','備註'].map(csvCell).join(',')+'\n';
  csv+=(store.replacements||[]).slice().reverse().map(r=>[r.dateTime||r.date||'',r.cn,r.group,r.device,r.part||'',r.old,r.next,r.damagedStatus||'損壞／已換下',r.note||''].map(csvCell).join(',')).join('\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_report_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('Report CSV 已匯出','success');
 }
