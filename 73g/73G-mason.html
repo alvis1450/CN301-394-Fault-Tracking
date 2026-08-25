@@ -481,6 +481,220 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 @media(max-width:680px){.signature-field{grid-template-columns:1fr auto}.signature-btn{height:42px;font-size:11.5px}.signature-preview img{max-width:145px;max-height:48px}#signaturePadModal{align-items:flex-end!important;padding:0!important}#signaturePadModal .dialog{width:100%!important;max-width:none;border-radius:18px 18px 0 0!important}.signature-canvas-shell{height:220px}.signature-pad-wrap{padding:11px 12px 14px}}
 </style>
 
+<style id="inventory-final-qa-master">
+/* ===== Inventory Final QA — visual-only master ===== */
+:root{
+  --ifq-bg:#f3f6fa;
+  --ifq-panel:#ffffff;
+  --ifq-border:#dbe4ee;
+  --ifq-border-strong:#cbd8e6;
+  --ifq-ink:#17324f;
+  --ifq-muted:#6e8198;
+  --ifq-brand:#173b70;
+  --ifq-brand-2:#2b5b92;
+  --ifq-shadow:0 5px 18px rgba(20,53,92,.055);
+}
+html,body{background:var(--ifq-bg)!important}
+body{color:var(--ifq-ink)!important;font-size:14px!important}
+.topbar{padding:13px 20px!important;background:linear-gradient(115deg,#123263 0%,#1b4279 56%,#315c96 100%)!important;box-shadow:0 4px 16px rgba(14,39,76,.12)!important}
+.topbar .wrap{min-height:46px!important}
+.brand h1{font-size:21px!important;line-height:1.15!important;letter-spacing:.01em!important}
+.brand h1 span{font-size:12px!important;margin-left:7px!important}
+.brand small{font-size:11.5px!important;margin-top:4px!important;color:#d7e2f2!important}
+.today{font-size:11.5px!important}.saved-meta{font-size:10.5px!important}
+.cloud-sync-badge{margin-top:4px!important;padding:3px 7px!important;font-size:9.8px!important}
+main{max-width:1480px!important;padding:14px 14px 36px!important}
+.summary{gap:10px!important;margin-bottom:10px!important}
+.summary-card{min-height:92px!important;padding:14px 16px!important;border-radius:14px!important;border-color:var(--ifq-border)!important;box-shadow:0 2px 8px rgba(22,53,90,.035)!important;background:#fff!important}
+.summary-card::before{width:3px!important;opacity:.65!important}
+.summary-card b{font-size:29px!important;line-height:1!important;color:#153d72!important}
+.summary-card span{font-size:12.5px!important;margin-top:7px!important;color:#315271!important}
+.summary-card .card-sub{font-size:10.5px!important;margin-top:3px!important;color:#8392a5!important;padding-right:74px!important}
+.summary-card::after{right:14px!important;bottom:13px!important;font-size:10px!important;color:#6883a1!important}
+.summary-card:hover{transform:translateY(-1px)!important;box-shadow:0 7px 18px rgba(21,50,89,.075)!important}
+.toolbar.main-actions{top:6px!important;padding:9px 10px!important;border-radius:13px!important;border-color:var(--ifq-border)!important;box-shadow:0 3px 12px rgba(20,53,92,.05)!important;background:rgba(255,255,255,.985)!important}
+.search-wrap{flex:1 1 420px!important}.search{height:40px!important;border-radius:9px!important;font-size:13px!important;border-color:#d2deea!important;background:#fbfdff!important}
+.search-icon{top:8px!important;font-size:18px!important}
+.btn{height:39px!important;border-radius:9px!important;font-size:12px!important;padding:0 12px!important;box-shadow:none!important}
+.btn.primary{background:#173b70!important}.btn.report-btn{background:#eef4fb!important;border-color:#cfdeec!important;color:#214f7c!important}.btn.light{background:#f3f6f9!important;border-color:#dbe4ed!important;color:#46627f!important}.btn.ghost{background:#fff!important;border-color:#dbe4ed!important;color:#60758c!important}
+.filterbar{padding:8px 10px!important;margin-bottom:7px!important;border-radius:12px!important;border-color:var(--ifq-border)!important;box-shadow:none!important}
+.filter-label{font-size:11.5px!important}.filter-select,.filter-check{height:36px!important;border-radius:9px!important;font-size:12px!important}.filter-count{font-size:10.8px!important;padding:6px 9px!important}
+.status-guide{padding:7px 9px!important;margin-bottom:8px!important;border-radius:11px!important;border-color:var(--ifq-border)!important;box-shadow:none!important;background:#fff!important}
+.guide-title{font-size:11.5px!important}.guide-pill{font-size:10.5px!important;padding:4px 8px!important}.guide-help{font-size:10.5px!important;color:#7a8ca1!important}
+.note{margin:1px 1px 10px!important;padding:8px 10px!important;border-radius:9px!important;font-size:11px!important;line-height:1.45!important;background:#f8fafc!important;border-color:#e2e9f0!important;color:#667b92!important}
+.history,.stock-history{margin-bottom:10px!important;border-radius:13px!important;box-shadow:none!important;border-color:var(--ifq-border)!important}
+.history-toggle,.stock-history-toggle{min-height:54px!important;padding:10px 13px!important}.history-arrow,.stock-history-arrow{width:28px!important;height:28px!important}.history-title-wrap h3,.stock-history-title h3{font-size:14px!important}.history-title-wrap p,.stock-history-title p{font-size:10.5px!important}.history-count,.stock-history-count{font-size:10.5px!important;padding:5px 8px!important}
+.system-section{margin-bottom:10px!important;border-radius:14px!important;border-color:#dbe4ed!important;box-shadow:0 2px 8px rgba(20,53,92,.035)!important}
+.system-head{min-height:56px!important;padding:11px 14px!important}.system-title{font-size:16px!important}.system-arrow{width:30px!important;height:30px!important;border-radius:8px!important}.system-meta{font-size:10.5px!important;padding:5px 8px!important}.system-body{padding:8px!important}
+.component{margin-bottom:7px!important;border-radius:11px!important;border-color:#dfe6ee!important;box-shadow:none!important}.comp-head{min-height:54px!important;padding:9px 11px!important}.arrow{width:27px!important;height:27px!important}.comp-name{font-size:13.5px!important}.part{font-size:10px!important;margin-top:3px!important}.comp-count{font-size:10.5px!important;padding:5px 8px!important}.mini-action,.stock-in-btn{min-height:32px!important;height:32px!important;font-size:10.5px!important;border-radius:8px!important}
+.comp-body{border-top-color:#e8edf3!important}
+table{background:#fff!important}th,td{padding:9px 9px!important;font-size:12px!important;line-height:1.35!important}th{font-size:10.5px!important;background:#f7f9fb!important;color:#60758c!important;font-weight:800!important}
+.device-name{font-size:12px!important;font-weight:760!important}.serial-input,.status,.loc,.qty-input{height:34px!important;font-size:12px!important;border-radius:8px!important}.qty-btn{width:30px!important;height:30px!important;border-radius:8px!important}.qty-input{width:60px!important}.status{min-width:100px!important}
+.device-row{border-left-width:3px!important}.device-row.state-stock{background:#f5fafd!important}.device-row.state-issued{background:#fffaf0!important}.device-row.state-installed{background:#f4faf6!important}.device-row.state-broken{background:#fff5f6!important}.device-row.qty-zero{background:#f5f6f8!important}
+.device-row.state-stock:hover{background:#edf7fc!important}.device-row.state-issued:hover{background:#fff6e5!important}.device-row.state-installed:hover{background:#edf8f1!important}.device-row.state-broken:hover{background:#ffedef!important}
+.zero-stock-label{font-size:9.5px!important;padding:3px 6px!important}
+.serial-editor{border-radius:9px!important;padding:7px!important}.serial-editor-head{margin-bottom:6px!important}.serial-tag{font-size:10.5px!important}.serial-entry-row{margin-top:6px!important}.serial-entry,.serial-add-btn,.serial-batch-btn{height:32px!important}
+.dialog{border-radius:15px!important}.dialog h3{font-size:15px!important;padding:13px 16px!important}.form{gap:9px!important}.form label{font-size:11.5px!important}.form input,.form select,.form textarea{border-radius:9px!important}.dialog-actions{gap:7px!important}
+.detail-table-wrap{border-radius:10px!important}.summary-system-block{border-radius:11px!important}.summary-system-head{padding:9px 11px!important}.summary-system-head b{font-size:14px!important}
+.savebar{padding:8px 12px!important}.savebar-inner{min-height:38px!important}.savebar-msg{font-size:12px!important}
+@media(max-width:760px){
+  .topbar{padding:11px 12px!important}.brand h1{font-size:18px!important}.brand small{font-size:10.8px!important}
+  main{padding:10px 8px 28px!important}.summary{gap:7px!important}.summary-card{min-height:82px!important;padding:12px!important}.summary-card b{font-size:24px!important}.summary-card span{font-size:11.5px!important}.summary-card .card-sub{font-size:9.5px!important}
+  .toolbar.main-actions{padding:8px!important}.search{height:42px!important;font-size:16px!important}.btn{height:42px!important;font-size:12px!important}
+  .filter-select{height:42px!important;font-size:16px!important}.filter-check{height:42px!important}.system-head{min-height:52px!important;padding:10px 11px!important}.system-title{font-size:15px!important}.system-body{padding:6px!important}.comp-head{min-height:52px!important;padding:9px!important}.comp-name{font-size:13px!important}.comp-body table{min-width:980px!important}
+  th,td{font-size:12px!important}.serial-input,.status,.loc,.qty-input{height:40px!important;font-size:16px!important}.qty-btn{width:36px!important;height:36px!important}
+}
+@media print{
+  body{background:#fff!important}
+  .topbar,.toolbar,.filterbar,.status-guide,.note,.savebar,.toast{box-shadow:none!important}
+  .summary-card,.system-section,.component{box-shadow:none!important}
+}
+</style>
+
+<style>
+/* ===== Inventory Production Release — final density & correction UI ===== */
+.summary{gap:10px!important;margin-bottom:11px!important}.summary-card{min-height:96px!important;padding:15px 18px!important}.summary-card b{font-size:31px!important}.summary-card span{margin-top:8px!important;font-size:13px!important}.summary-card .card-sub{margin-top:3px!important;font-size:11px!important}.summary-card::after{right:15px!important;bottom:14px!important;font-size:10.5px!important}.history,.stock-history{margin-bottom:10px!important;border-radius:14px!important}.history-toggle,.stock-history-toggle{min-height:60px!important;padding:11px 14px!important}.history-arrow,.stock-history-arrow{width:30px!important;height:30px!important}.history-title-wrap h3,.stock-history-title h3{font-size:14px!important}.history-title-wrap p,.stock-history-title p{font-size:10.5px!important}.main-actions{padding:9px 10px!important;border-radius:14px!important}.search{height:42px!important}.btn{height:42px!important}.filterbar{padding:9px 11px!important}.filter-select,.filter-check{height:38px!important}.status-guide{padding:8px 10px!important}.note{margin-bottom:11px!important;padding:8px 10px!important}.history-item{padding-right:196px!important}.history-edit-btn{position:absolute;right:103px;top:12px;height:34px;border:1px solid #bed2e6;background:#f4f8fc;color:#214f7c;border-radius:9px;padding:0 11px;font-size:11.5px;font-weight:850;cursor:pointer;transition:.15s}.history-edit-btn:hover{background:#eaf2fa;border-color:#9bbbd7}.history-edit-btn:focus-visible{outline:3px solid rgba(62,124,184,.18);outline-offset:2px}.correction-note{margin-top:7px;padding:6px 8px;border-radius:8px;background:#fff8e8;border:1px solid #ecd7a7;color:#7d5b18;font-size:10.5px;font-weight:700}#replacementEditNotice{display:none;padding:9px 10px;border:1px solid #c9dced;border-radius:9px;background:#eef6fd;color:#365f86;font-size:11px;line-height:1.5}#replacementEditNotice.show{display:block}@media(max-width:760px){.summary-card{min-height:90px!important;padding:12px!important}.summary-card b{font-size:26px!important}.history-item{padding-right:12px!important;padding-bottom:94px!important}.history-edit-btn{top:auto;right:102px;bottom:10px;height:36px}.history-delete-btn{top:auto!important;right:12px!important;bottom:10px!important;height:36px!important}}
+</style>
+
+
+<style>
+/* ===== Inventory Final Visual QA — Production master ===== */
+:root{
+  --fvq-bg:#f2f5f9;
+  --fvq-surface:#ffffff;
+  --fvq-surface-soft:#f8fafc;
+  --fvq-ink:#17324f;
+  --fvq-ink-strong:#102f55;
+  --fvq-muted:#6b7f96;
+  --fvq-border:#d9e3ed;
+  --fvq-border-strong:#cad8e6;
+  --fvq-primary:#173f74;
+  --fvq-focus:#4b86c4;
+  --fvq-radius:13px;
+  --fvq-shadow:0 3px 12px rgba(20,53,92,.045);
+}
+html{font-size:16px!important}
+body{
+  font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif!important;
+  background:var(--fvq-bg)!important;color:var(--fvq-ink)!important;
+  font-size:14px!important;line-height:1.5!important;letter-spacing:0!important;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font-family:inherit!important}
+
+/* Header */
+.topbar{padding:13px 20px!important;box-shadow:0 3px 13px rgba(12,39,72,.12)!important}
+.topbar .wrap{min-height:47px!important}
+.brand h1{font-size:21px!important;line-height:1.18!important;font-weight:850!important}
+.brand h1 span{font-size:12.5px!important;font-weight:650!important}
+.brand small{margin-top:4px!important;font-size:12px!important;line-height:1.35!important}
+.today{font-size:11.5px!important;line-height:1.35!important}.saved-meta{font-size:10.8px!important;margin-top:2px!important}
+.cloud-sync-badge{margin-top:4px!important;font-size:10.5px!important;padding:4px 8px!important}
+
+/* Page rhythm */
+main{padding-top:14px!important;padding-bottom:34px!important}
+.summary{gap:10px!important;margin-bottom:10px!important}
+.summary-card{min-height:88px!important;padding:13px 16px!important;border-radius:14px!important;box-shadow:0 2px 8px rgba(20,53,92,.035)!important}
+.summary-card::before{width:3px!important;opacity:.58!important}
+.summary-card b{font-size:29px!important;line-height:1!important;font-weight:900!important}
+.summary-card span{font-size:12.5px!important;line-height:1.2!important;margin-top:7px!important}
+.summary-card .card-sub{font-size:11px!important;line-height:1.3!important;margin-top:3px!important;color:#7e91a7!important;padding-right:72px!important}
+.summary-card::after{font-size:10.5px!important;right:14px!important;bottom:12px!important;color:#6884a2!important}
+
+/* History panels */
+.history,.stock-history{margin-bottom:9px!important;border-radius:13px!important;box-shadow:0 2px 8px rgba(20,53,92,.035)!important}
+.history-toggle,.stock-history-toggle{min-height:56px!important;padding:10px 13px!important}
+.history-arrow,.stock-history-arrow{width:29px!important;height:29px!important;border-radius:8px!important}
+.history-title-wrap h3,.stock-history-title h3{font-size:14px!important;line-height:1.25!important}
+.history-title-wrap p,.stock-history-title p{font-size:11.5px!important;line-height:1.35!important;margin-top:3px!important}
+.history-count,.stock-history-count{font-size:11px!important;padding:6px 9px!important}
+.history-body,.stock-history-body{padding:9px 10px 10px!important}
+.history-item,.stock-move-item{font-size:12px!important;line-height:1.55!important}
+.correction-note{font-size:11.5px!important;line-height:1.45!important}
+
+/* Main toolbar */
+.toolbar.main-actions{top:6px!important;padding:9px!important;border-radius:13px!important;gap:8px!important;box-shadow:0 3px 11px rgba(20,53,92,.045)!important}
+.search{height:42px!important;border-radius:10px!important;font-size:13px!important}
+.search-icon{top:8px!important}
+.btn{height:42px!important;border-radius:9px!important;font-size:12.5px!important;padding:0 13px!important}
+.btn.save-main:disabled{background:#dfe6ee!important;color:#71859b!important;border:1px solid #d4dfe9!important;box-shadow:none!important;opacity:1!important}
+.btn.ghost,.btn.light{background:#f7f9fc!important;border-color:#d8e2ec!important;color:#4f6985!important;box-shadow:none!important}
+.btn.ghost:hover,.btn.light:hover{background:#eef3f8!important}
+.report-select{min-width:170px!important}
+
+/* Secondary filter / guide */
+.filterbar{padding:8px 10px!important;margin-bottom:8px!important;border-radius:13px!important;gap:8px!important;box-shadow:0 2px 8px rgba(20,53,92,.025)!important}
+.filter-label{font-size:12px!important}.filter-select,.filter-check{height:38px!important;border-radius:9px!important;font-size:12px!important}
+.filter-count{font-size:11.5px!important;padding:6px 10px!important}
+.status-guide{padding:7px 9px!important;margin-bottom:8px!important;border-radius:11px!important;box-shadow:none!important}
+.guide-title{font-size:11.5px!important}.guide-pill{font-size:11px!important;padding:4px 8px!important}.guide-help{font-size:11px!important}
+.note{font-size:11.5px!important;line-height:1.45!important;padding:8px 10px!important;margin-bottom:10px!important;background:#f8fafc!important}
+
+/* System / components */
+.system-section{margin-bottom:11px!important;border-radius:14px!important;box-shadow:0 2px 8px rgba(20,53,92,.03)!important}
+.system-head{min-height:58px!important;padding:11px 14px!important}.system-title{font-size:16px!important}.system-arrow{width:31px!important;height:31px!important}.system-meta{font-size:11px!important}
+.system-body{padding:8px!important}.component{margin-bottom:7px!important;border-radius:11px!important}
+.comp-head{min-height:56px!important;padding:10px 12px!important}.arrow{width:28px!important;height:28px!important}.comp-name{font-size:14px!important}.part{font-size:11px!important;line-height:1.35!important}.comp-count{font-size:11px!important}.mini-action{min-height:34px!important;font-size:11.5px!important}
+
+/* Inventory table */
+th,td{padding:9px 10px!important;font-size:13px!important;line-height:1.4!important}
+th{font-size:12px!important;font-weight:800!important;color:#526b85!important;background:#f7f9fc!important}
+.device-name{font-size:13px!important;font-weight:780!important}
+.serial-editor{border-radius:9px!important;padding:7px!important}.serial-editor-count{font-size:11px!important}.serial-tag{font-size:11.5px!important}.serial-help{font-size:11px!important}
+.serial-entry,.serial-input,.status,.loc,.qty-input{height:38px!important;font-size:13px!important;border-radius:9px!important}
+.qty-btn{width:34px!important;height:34px!important;border-radius:8px!important}.stock-qty-readonly{height:36px!important;font-size:13px!important}
+.stock-in-btn{height:32px!important;font-size:11px!important}.zero-stock-label{font-size:10.5px!important}
+/* Lower saturation: keep status identification, reduce visual fatigue */
+.device-row.state-stock{background:#f5f9fc!important}.device-row.state-issued{background:#fffaf1!important}.device-row.state-installed{background:#f3faf6!important}.device-row.state-broken{background:#fff5f6!important}
+.device-row.qty-zero{background:#f4f6f8!important}
+
+/* Dialogs: one visual scale everywhere */
+.modal{backdrop-filter:blur(3px)!important}.dialog{border-radius:16px!important;box-shadow:0 22px 64px rgba(7,28,51,.22)!important}
+.dialog>h3{font-size:16px!important;line-height:1.25!important;font-weight:850!important;padding:14px 17px!important}
+.form{gap:10px!important}.form label{font-size:12px!important;line-height:1.4!important;font-weight:800!important}
+.form input,.form select,.form textarea{font-size:13px!important;border-radius:9px!important;min-height:42px!important}
+.dialog-actions{gap:8px!important}.dialog-actions .btn{height:40px!important;font-size:12px!important}
+#replacementEditNotice{font-size:11.5px!important;line-height:1.5!important}
+.detail-title{font-size:13.5px!important}.detail-count{font-size:11.5px!important}.detail-empty,.empty{font-size:12.5px!important}
+.toast{font-size:12px!important}
+
+/* Accessible focus */
+:where(button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid rgba(75,134,196,.20)!important;outline-offset:2px!important}
+
+@media(max-width:760px){
+  body{font-size:14px!important}
+  .topbar{padding:11px 12px!important}.brand h1{font-size:18px!important}.brand h1 span{font-size:11.5px!important}.brand small{font-size:11px!important}
+  main{padding:10px 8px 28px!important}.summary{gap:7px!important}.summary-card{min-height:82px!important;padding:11px 12px!important}.summary-card b{font-size:25px!important}.summary-card span{font-size:12px!important}.summary-card .card-sub{font-size:10.5px!important;padding-right:0!important}
+  .history-toggle,.stock-history-toggle{min-height:54px!important}.history-title-wrap p,.stock-history-title p{display:none!important}
+  .search,.filter-select,.serial-entry,.serial-input,.status,.loc,.qty-input,.form input,.form select,.form textarea{font-size:16px!important}
+  .search,.btn,.filter-select,.filter-check{height:44px!important}.btn{font-size:12px!important}
+  .status-guide{padding:7px 8px!important}.guide-help{font-size:10.5px!important}
+  .system-head{min-height:56px!important}.system-title{font-size:15px!important}.comp-name{font-size:13.5px!important}
+  .dialog>h3{font-size:15px!important}.dialog-actions .btn{height:46px!important;font-size:13px!important}
+  .history-item,.stock-move-item{font-size:12px!important}
+}
+@media(max-width:390px){.summary-card b{font-size:23px!important}.summary-card span{font-size:11.5px!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{.summary-card,.history,.stock-history,.toolbar,.filterbar,.status-guide,.system-section,.component{box-shadow:none!important}}
+
+
+/* ===== Professional Report UI / Preview ===== */
+#reportModal .dialog{width:min(1180px,96vw)!important;background:#f6f8fb}
+#reportModal .dialog>h3{background:#143a70;color:#fff;border-bottom:0;padding:16px 20px;font-size:17px;letter-spacing:.02em}
+#reportContent{padding:22px!important;background:#fff;margin:0 16px 16px;border:1px solid #dbe4ee;border-radius:12px;box-shadow:0 4px 16px rgba(18,51,89,.05);font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC",Arial,sans-serif;color:#213b58;font-size:13px;line-height:1.55}
+#reportContent>.card,#reportContent .card{min-height:auto;box-shadow:none;border-radius:10px;padding:12px 14px;border:1px solid #d7e1ec;background:#f8fafc}
+#reportContent .card b{font-size:24px;line-height:1;color:#143a70;font-variant-numeric:tabular-nums}
+#reportContent .card span{font-size:11.5px;margin-top:6px;color:#607791}
+#reportContent h4{font-size:15px!important;line-height:1.35!important;margin-top:22px!important;padding:0 0 7px 10px!important;border-bottom:1px solid #d9e3ed!important;border-left:4px solid #2e5f94!important;color:#173f70!important}
+#reportContent table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;border:1px solid #cbd8e5;border-radius:8px;overflow:hidden;background:#fff}
+#reportContent th{background:#e8eff6;color:#173f70;font-size:11.5px;font-weight:850;letter-spacing:.01em;text-align:center;padding:8px 7px;border-right:1px solid #cbd8e5;border-bottom:1px solid #bdccdb}
+#reportContent td{font-size:12px;line-height:1.45;padding:8px 7px;border-right:1px solid #e0e7ef;border-bottom:1px solid #e4eaf1;vertical-align:top;color:#29435f}
+#reportContent tbody tr:nth-child(even) td{background:#fafbfd}
+#reportContent tr:last-child td{border-bottom:0}#reportContent th:last-child,#reportContent td:last-child{border-right:0}
+#reportContent .detail-serial{font-family:Consolas,"Microsoft JhengHei",monospace;font-size:11.5px;letter-spacing:.01em}
+#reportModal .dialog-actions{position:sticky;bottom:0;z-index:3;background:rgba(248,250,252,.96);backdrop-filter:blur(8px);padding:12px 16px}
+@media(max-width:700px){#reportContent{margin:0 8px 10px;padding:14px!important;font-size:12px}#reportModal .dialog>h3{padding:14px 15px;font-size:15px}}
+</style>
 </head>
 <body>
 <header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存與維修管理 <span>Equipment Inventory & Maintenance</span></h1><small>CN / NMS / SSS｜庫存・序號・維修更換・人員領用・簽收管理</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
@@ -548,7 +762,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 <div id="savebar" class="savebar"><div class="savebar-inner"><div class="savebar-msg"><span class="unsaved-dot"></span>有尚未儲存的變更</div><button class="btn light" onclick="discardChanges()">取消變更</button><button class="btn save-main" onclick="saveAll()">💾 儲存變更</button></div></div>
 <datalist id="unitList"></datalist>
-<div class="modal" id="modal"><div class="dialog"><h3>設備維修更換／人員領用</h3><div class="form">
+<div class="modal" id="modal"><div class="dialog"><h3 id="replacementModalTitle">設備維修更換／人員領用</h3><div class="form"><div id="replacementEditNotice"></div>
 <label>作業類型 <span class="required">必填</span><select id="rActionType" onchange="updateReplacementMode()"><option value="replacement">設備維修更換</option><option value="personnel_issue">人員領用</option></select></label>
 <label><span id="rLocationLabel">更換位置</span> <span class="required">必填</span><select id="rCN"><option value="">請選擇作業位置</option></select></label>
 <div id="rPersonnelWrap" style="display:none;grid-template-columns:1fr 1fr;gap:10px">
@@ -1092,7 +1306,7 @@ function render(){
  });
  components.innerHTML=html||'<div class="empty">找不到符合資料</div>';
  const fc=document.getElementById('filterCount');if(fc)fc.textContent=`顯示 ${shownGroups} / ${store.groups.length} 個組件`;
- const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
+ const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-edit-btn" onclick="editReplacementRecord(${sourceIndex})" title="更正此筆紀錄">✏️ 更正</button><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}${Array.isArray(r.corrections)&&r.corrections.length?`<div class="correction-note">✏️ 已更正 ${r.corrections.length} 次｜最後更正：${esc(r.corrections[r.corrections.length-1].correctedAt||'—')}</div>`:''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
  renderStockHistory();
  updateSummary();
 }
@@ -1121,11 +1335,13 @@ function normalizeStockMovements(target=store){
 function addStockMovement(g,i,{type='adjust',qtyChange=0,beforeQty=0,afterQty=0,serials=[],location='',reference='',note=''}={}){
  if(!Array.isArray(store.stockMovements))store.stockMovements=[];
  const group=store.groups[g],x=group?.items?.[i],now=new Date();if(!group||!x)return;
- store.stockMovements.push(normalizeStockMovementRecord({
+ const movement=normalizeStockMovementRecord({
   id:'M'+now.getTime()+Math.random().toString(36).slice(2,6),type,timestamp:now.toISOString(),
   dateTime:now.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
   system:systemType(group),group:group.name,device:x.name,part:x.part||'',qtyChange,beforeQty,afterQty,serials,location:location||x.location||'',reference,note
- }));
+ });
+ store.stockMovements.push(movement);
+ return movement.id;
 }
 function renderStockHistory(){
  normalizeStockMovements();
@@ -1286,7 +1502,39 @@ function confirmAddDevice(){
  if(dup){showToast('此組件已有相同設備與料號','error');return}
  g.items.push({part,name,qty:0,serials:[],state:'stock',location:''});openSet.add(addDeviceGroupIndex);markDirty();closeAddDevice();render();showToast('設備已加入清單，請記得儲存','success')
 }
+let replacementEditIndex=null;
+function findReplacementInventoryItem(r){
+ const gi=(store.groups||[]).findIndex(g=>String(g.name||'').trim()===String(r.group||'').trim());
+ if(gi<0)return null;
+ const items=store.groups[gi].items||[];
+ let ii=items.findIndex(x=>String(x.name||'').trim()===String(r.device||'').trim()&&String(x.part||'').trim()===String(r.part||'').trim());
+ if(ii<0)ii=items.findIndex(x=>String(x.name||'').trim()===String(r.device||'').trim());
+ return ii<0?null:{gi,ii,group:store.groups[gi],item:items[ii]};
+}
+function findMovementForReplacement(r){
+ normalizeStockMovements();
+ const arr=store.stockMovements||[];
+ if(r.movementId){const direct=arr.find(m=>m.id===r.movementId);if(direct)return direct}
+ const expected=r.actionType==='personnel_issue'?'personnel_issue':'replacement_out',rt=Date.parse(r.timestamp||'')||0;
+ const candidates=arr.filter(m=>m.type===expected&&String(m.group||'')===String(r.group||'')&&String(m.device||'')===String(r.device||'')&&(m.serials||[]).some(sn=>String(sn).toLowerCase()===String(r.next||'').toLowerCase()));
+ if(!candidates.length)return null;
+ candidates.sort((a,b)=>Math.abs((Date.parse(a.timestamp||'')||0)-rt)-Math.abs((Date.parse(b.timestamp||'')||0)-rt));return candidates[0];
+}
+function editReplacementRecord(index){
+ normalizeReplacementHistory();const r=(store.replacements||[])[index];if(!r)return;replacementEditIndex=index;
+ const isPersonnel=r.actionType==='personnel_issue',title=document.getElementById('replacementModalTitle'),notice=document.getElementById('replacementEditNotice'),at=document.getElementById('rActionType');
+ if(title)title.textContent=isPersonnel?'更正人員領用紀錄':'更正設備維修更換紀錄';
+ if(notice){notice.className='show';notice.innerHTML='✏️ <b>更正模式：</b>一般欄位可直接修正；若更換「已領出設備序號」，系統會把原序號放回庫存，再從目前庫存扣除新選擇的序號，庫存總數不變。'}
+ if(at){at.value=isPersonnel?'personnel_issue':'replacement';at.disabled=true}
+ rCN.innerHTML=unitIds.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(!unitIds.includes(r.cn||''))rCN.innerHTML=`<option value="${esc(r.cn||'')}">${esc(r.cn||'')}</option>`+rCN.innerHTML;rCN.value=r.cn||'';
+ const found=findReplacementInventoryItem(r);rGroup.innerHTML=`<option value="${found?found.gi:''}">${esc(r.group||'—')}</option>`;rGroup.disabled=true;rDevice.innerHTML=`<option value="${found?found.ii:''}">${esc(r.device||'—')}｜${esc(r.part||'')}</option>`;rDevice.disabled=true;
+ rOld.value=isPersonnel?'':(r.old||'');rNote.value=r.note||'';const pn=document.getElementById('rPersonnelName'),pu=document.getElementById('rPersonnelUnit');if(pn)pn.value=r.personnelName||'';if(pu)pu.value=r.personnelUnit||'';updateReplacementMode();if(r.cn&&!Array.from(rCN.options).some(o=>o.value===r.cn))rCN.insertAdjacentHTML('beforeend',`<option value="${esc(r.cn)}">${esc(r.cn)}</option>`);rCN.value=r.cn||'';
+ const current=String(r.next||'').trim(),stockSerials=found?(found.item.serials||[]).map(v=>String(v).trim()).filter(Boolean):[],choices=[current,...stockSerials.filter(v=>v.toLowerCase()!==current.toLowerCase())];
+ rNew.disabled=false;rNew.innerHTML=choices.map((sn,i)=>`<option value="${esc(sn)}">${i===0?'目前紀錄｜':''}${esc(sn)}</option>`).join('');rNew.value=current;const h=document.getElementById('rNewHelp');if(h){h.textContent=found?'可保留原序號，或改選目前仍在庫存中的其他序號。變更時系統會自動交換庫存序號，庫存總量不變。':'找不到原設備庫存項目，因此目前只能更正其他欄位，不能變更已領出序號。';h.style.color=found?'#58718b':'#b42336'}if(!found)rNew.disabled=true;
+ const btn=document.getElementById('saveReplaceBtn');if(btn)btn.textContent='💾 儲存更正';modal.classList.add('show');
+}
 function openReplace(){
+ replacementEditIndex=null;const title=document.getElementById('replacementModalTitle'),notice=document.getElementById('replacementEditNotice'),at0=document.getElementById('rActionType');if(title)title.textContent='設備維修更換／人員領用';if(notice){notice.className='';notice.textContent=''}if(at0)at0.disabled=false;rGroup.disabled=false;rDevice.disabled=false;
  // 組件依 CN / NMS / SSS 分區顯示，避免混在同一串清單。
  const current=rGroup.value;
  let opts='';
@@ -1363,8 +1611,18 @@ function refreshReplacementStockSerials(){
   if(help){help.textContent=`目前庫存 ${qty} 件 / ${serials.length} 個已登記庫存序號。選定後儲存會扣除 1 件庫存。`;help.style.color='#7a8da4'}
  }
 }
-function closeModal(){modal.classList.remove('show')}
+function closeModal(){modal.classList.remove('show');replacementEditIndex=null;const at=document.getElementById('rActionType');if(at)at.disabled=false;rGroup.disabled=false;rDevice.disabled=false;const title=document.getElementById('replacementModalTitle'),notice=document.getElementById('replacementEditNotice');if(title)title.textContent='設備維修更換／人員領用';if(notice){notice.className='';notice.textContent=''}}
 function saveReplace(){
+ if(replacementEditIndex!==null){
+  normalizeReplacementHistory();const r=(store.replacements||[])[replacementEditIndex];if(!r)return showToast('找不到要更正的紀錄','error');
+  const isPersonnel=r.actionType==='personnel_issue',cn=rCN.value.trim(),old=String(rOld.value||'').trim(),next=String(rNew.value||'').trim(),personnelName=String(document.getElementById('rPersonnelName')?.value||'').trim(),personnelUnit=String(document.getElementById('rPersonnelUnit')?.value||'').trim(),note=rNote.value.trim();
+  if(!cn||!next||(!isPersonnel&&!old)||(isPersonnel&&!personnelName))return showToast(isPersonnel?'請完整填寫領用位置、領用人員與設備序號':'請完整填寫更換位置、故障設備序號與替換設備序號','error');if(old&&old.toLowerCase()===next.toLowerCase())return showToast('故障設備序號與替換設備序號不可相同','error');
+  const original={cn:r.cn||'',old:r.old||'',next:r.next||'',personnelName:r.personnelName||'',personnelUnit:r.personnelUnit||'',note:r.note||''},serialChanged=String(original.next).toLowerCase()!==next.toLowerCase(),found=findReplacementInventoryItem(r);
+  if(serialChanged){if(!found)return showToast('找不到原設備庫存項目，無法安全更正已領出序號','error');const x=found.item,serials=(x.serials||[]).map(v=>String(v).trim()).filter(Boolean),newIdx=serials.findIndex(sn=>sn.toLowerCase()===next.toLowerCase());if(newIdx<0)return showToast('新的設備序號目前不在庫存中，請重新選擇','error');const conflict=findSerialOwner(original.next,found.gi,found.ii);if(conflict)return showToast(`原序號 ${original.next} 已存在其他庫存項目，無法自動放回庫存`,'error');const updated=serials.filter((_,i)=>i!==newIdx);updated.push(original.next);x.serials=sortSerialsNatural([...new Set(updated.filter(Boolean))])}
+  const movement=findMovementForReplacement(r);if(movement){movement.serials=[next];movement.location=cn;movement.note=isPersonnel?`人員領用；領用人員：${personnelName}${personnelUnit?`；單位：${personnelUnit}`:''}`:`設備維修更換領出；故障設備序號：${old}`;if(!r.movementId)r.movementId=movement.id||''}
+  const now=new Date(),correctedAt=now.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});if(!Array.isArray(r.corrections))r.corrections=[];r.corrections.push({correctedAt,from:original,to:{cn,old:isPersonnel?'':old,next,personnelName,personnelUnit,note}});r.cn=cn;r.old=isPersonnel?'':old;r.next=next;r.personnelName=personnelName;r.personnelUnit=personnelUnit;r.note=note;
+  save();closeModal();render();toggleHistoryPanel(true);document.getElementById('historyPanel')?.scrollIntoView({behavior:'smooth',block:'start'});showToast(serialChanged?`更正完成：${original.next} → ${next}，庫存總量不變`:'紀錄更正完成','success');return;
+ }
  const action=document.getElementById('rActionType')?.value||'replacement';
  const cn=rCN.value.trim(),old=String(rOld.value||'').trim(),next=String(rNew.value||'').trim(),gi=Number(rGroup.value),ii=Number(rDevice.value);
  const isPersonnelIssue=action==='personnel_issue';
@@ -1380,7 +1638,7 @@ function saveReplace(){
  x.qty=Math.max(0,qty-1);
  x.serials=serials.filter((_,idx)=>idx!==newIndex);
  const movementNote=isPersonnelIssue?`人員領用；領用人員：${personnelName}${personnelUnit?`；單位：${personnelUnit}`:''}`:`設備維修更換領出；故障設備序號：${old}`;
- addStockMovement(gi,ii,{
+ const movementId=addStockMovement(gi,ii,{
   type:isPersonnelIssue?'personnel_issue':'replacement_out',qtyChange:-1,beforeQty:qty,afterQty:x.qty,serials:[next],location:cn,
   note:movementNote
  });
@@ -1389,7 +1647,7 @@ function saveReplace(){
   timestamp:changedAt.toISOString(),
   date:changedAt.toLocaleDateString('zh-TW'),
   dateTime:changedAt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
-  actionType:isPersonnelIssue?'personnel_issue':'replacement',
+  actionType:isPersonnelIssue?'personnel_issue':'replacement',movementId,corrections:[],
   cn,personnelName,personnelUnit,group:g.name,device:x.name,part:x.part||'',old:isPersonnelIssue?'':old,next,note:rNote.value.trim(),
   damagedStatus:isPersonnelIssue?'不適用':'故障／已換下',newStatus:isPersonnelIssue?'已領用':'已安裝／使用'
  });
@@ -1421,6 +1679,7 @@ function normalizeReplacementRecord(r={}){
   actionType,
   cn:String(r.cn||'').trim(),personnelName,personnelUnit,group:String(r.group||'').trim(),device:String(r.device||'').trim(),part:String(r.part||'').trim(),
   old:legacyPersonnel?'':String(r.old||'').trim(),next:String(r.next||'').trim(),note:String(r.note||'').trim(),
+  movementId:String(r.movementId||'').trim(),corrections:Array.isArray(r.corrections)?r.corrections.map(c=>({...c})):[],
   damagedStatus:legacyPersonnel?'不適用':(String(r.damagedStatus||'故障／已換下').trim()||'故障／已換下'),
   newStatus:legacyPersonnel?'已領用':(String(r.newStatus||'已安裝／使用').trim()||'已安裝／使用')
  };
@@ -1509,22 +1768,30 @@ function exportReportWord(mode='full'){
  const replacementTable=reps.length?`<table class="replacement-table"><colgroup><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:10%"><col style="width:7%"><col style="width:6%"></colgroup><thead><tr><th>作業時間</th><th>作業類型</th><th>位置</th><th>領用人員／單位</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換／領用序號</th><th>狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>{const isPersonnel=r.actionType==='personnel_issue'||!!String(r.personnelName||'').trim()||r.newStatus==='已領用';const who=isPersonnel?[r.personnelName||'',r.personnelUnit||''].filter(Boolean).join('／'):'—';const status=isPersonnel?(r.newStatus||'已領用'):(r.newStatus||'已安裝／使用');return `<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${isPersonnel?'人員領用':'設備維修更換'}</td><td>${esc(r.cn||'—')}</td><td>${esc(who)}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(isPersonnel?'—':(r.old||'—'))}</td><td>${esc(r.next||'—')}</td><td>${esc(status)}</td><td>${esc(r.note||'')}</td></tr>`}).join('')}</tbody></table>`:'<p>尚無設備維修更換／人員領用紀錄。</p>';
  const movementRows=(store.stockMovements||[]).slice().reverse();
  const movementTable=movementRows.length?`<table class="movement-table"><colgroup><col style="width:10%"><col style="width:7%"><col style="width:5%"><col style="width:10%"><col style="width:13%"><col style="width:9%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:14%"><col style="width:7%"><col style="width:6%"><col style="width:4%"></colgroup><thead><tr><th>異動時間</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量異動</th><th>異動前</th><th>異動後</th><th>本次序號</th><th>位置</th><th>來源</th><th>備註</th></tr></thead><tbody>${movementRows.map(m=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.system||'—')}</td><td>${esc(m.group||'—')}</td><td>${esc(m.device||'—')}</td><td>${esc(m.part||'—')}</td><td class="num">${m.qtyChange>0?'+'+m.qtyChange:m.qtyChange}</td><td class="num">${m.beforeQty}</td><td class="num">${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.reference||'')}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無庫存異動紀錄。</p>';
- const wordHead=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><style>@page{size:A4 landscape;margin:9mm}body{font-family:"Microsoft JhengHei","PingFang TC",Arial,sans-serif;color:#1f3652;font-size:9pt;line-height:1.28}h1{font-size:18pt;color:#153f73;margin:0 0 4px;font-weight:700}h2{font-size:12pt;color:#153f73;margin:14px 0 3px;border-bottom:1px solid #b8c9db;padding-bottom:3px;font-weight:700;page-break-after:avoid}.meta{color:#5f738b;font-size:8.5pt;margin:0 0 5px}.notice{background:#f2f6fa;border:1px solid #cbd7e4;color:#425b75;padding:6px 8px;margin:7px 0 9px;font-size:8.5pt}.summary{width:100%;margin:6px 0 9px;table-layout:fixed}.summary td{border:1px solid #b9c8d8;text-align:center;padding:5px 4px;background:#f8fafc}.summary b{display:block;font-size:14pt;color:#123f76}.summary span{font-size:8pt;color:#607892}table{width:100%;border-collapse:collapse;margin:4px 0 10px;table-layout:fixed}th,td{border:1px solid #9fb2c6;padding:3px 4px;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word}th{background:#dfe9f3;color:#173b70;font-size:8.5pt;font-weight:700;text-align:center;line-height:1.15}td{font-size:8.5pt;color:#203a58;line-height:1.25}.instock-table th,.instock-table td{font-size:8.5pt;padding:4px 5px}.instock-table td:nth-child(4){font-weight:600}.instock-table .total-row td{background:#f3f7fb;border-top:2px solid #8fa8c2}.inventory-table td{min-height:20px}.inventory-table .serial-cell{font-size:8pt;line-height:1.2}.part-cell{font-size:8pt}.qty-cell,.center-cell{text-align:center;vertical-align:middle}.location-cell{font-size:8pt}.movement-table th,.movement-table td{font-size:7.2pt;padding:2px 3px;line-height:1.15}.replacement-table th,.replacement-table td{font-size:7.5pt;padding:2px 3px;line-height:1.18}.num{text-align:center;vertical-align:middle}.footer{margin-top:12px;color:#71849c;font-size:7.5pt;text-align:right}tr{page-break-inside:avoid}thead{display:table-header-group}</style></head><body>`;
+ const wordHead=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><style>
+@page{size:A4 landscape;margin:11mm 10mm 12mm}
+body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;color:#233b55;font-size:9.5pt;line-height:1.42;margin:0;background:#fff}
+.report-head{width:100%;border-collapse:collapse;margin:0 0 10px;border:0;table-layout:fixed}.report-head td{border:0;padding:0;vertical-align:bottom}.report-head .title-cell{width:68%;border-left:6px solid #173f70;padding:2px 0 2px 10px}.report-head .meta-cell{width:32%;text-align:right;color:#637990;font-size:8.5pt;line-height:1.5}.report-title{font-size:20pt;line-height:1.1;color:#123b6b;font-weight:700;margin:0}.report-subtitle{font-size:9pt;color:#667d95;margin-top:4px;letter-spacing:.2px}.doc-rule{height:3px;background:#173f70;margin:0 0 10px}
+h1{font-size:18pt;color:#123b6b;margin:0 0 5px;font-weight:700}h2{font-size:12.5pt;color:#173f70;margin:15px 0 6px;padding:5px 8px;border-left:4px solid #2d6299;border-bottom:1px solid #c7d5e3;background:#f7f9fc;font-weight:700;page-break-after:avoid}.meta{color:#60768e;font-size:8.8pt;margin:0 0 7px}.notice{background:#f4f7fa;border:1px solid #cbd7e3;border-left:4px solid #6f8ead;color:#425b74;padding:7px 9px;margin:8px 0 11px;font-size:8.8pt;line-height:1.45}.notice b{color:#173f70}
+.summary{width:100%;margin:8px 0 12px;table-layout:fixed;border-collapse:separate;border-spacing:5px}.summary td{border:1px solid #ccd8e4;text-align:center;padding:8px 5px;background:#f8fafc}.summary b{display:block;font-size:15.5pt;line-height:1;color:#123f76}.summary span{display:block;margin-top:5px;font-size:8.3pt;color:#607892;font-weight:700}
+table{width:100%;border-collapse:collapse;margin:5px 0 12px;table-layout:fixed}th,td{border:1px solid #aebfd0;padding:4.5px 5px;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word}th{background:#dfe8f2;color:#173b70;font-size:8.8pt;font-weight:700;text-align:center;line-height:1.25}td{font-size:8.8pt;color:#263f59;line-height:1.35}tbody tr:nth-child(even) td{background:#fafbfd}.instock-table th,.instock-table td{font-size:9pt;padding:5px 6px}.instock-table td:nth-child(4){font-weight:700}.instock-table .total-row td{background:#eef3f8;border-top:2px solid #7896b5}.inventory-table td{min-height:21px}.inventory-table .serial-cell{font-family:Consolas,"Microsoft JhengHei",monospace;font-size:8.3pt;line-height:1.3}.part-cell{font-size:8.3pt}.qty-cell,.center-cell{text-align:center;vertical-align:middle}.qty-cell{font-size:9.3pt;font-weight:700;color:#123f76}.location-cell{font-size:8.5pt}.movement-table th,.movement-table td{font-size:8pt;padding:3.2px 3.5px;line-height:1.25}.replacement-table th,.replacement-table td{font-size:8.1pt;padding:3.5px 4px;line-height:1.28}.replacement-table td:nth-child(8),.replacement-table td:nth-child(9),.movement-table td:nth-child(10){font-family:Consolas,"Microsoft JhengHei",monospace}.num{text-align:center;vertical-align:middle;font-variant-numeric:tabular-nums}.footer{margin-top:16px;padding-top:6px;border-top:1px solid #ccd7e2;color:#71849c;font-size:7.8pt;text-align:right}.footer strong{color:#496782}tr{page-break-inside:avoid}thead{display:table-header-group}
+</style></head><body>`;
+ const reportHeader=(title,subtitle='正式報告')=>`<table class="report-head"><tr><td class="title-cell"><div class="report-title">${esc(title)}</div><div class="report-subtitle">73G Equipment Inventory & Maintenance｜${esc(subtitle)}</div></td><td class="meta-cell">文件類型：系統匯出報告<br>產生時間：${esc(generated)}</td></tr></table><div class="doc-rule"></div>`;
  let reportTitle='73G裝備庫存與維修管理';
  let reportBody='';
  let fileLabel='Report';
  if(mode==='replacement'){
    reportTitle='設備維修更換／人員領用紀錄';
    fileLabel='維修更換_人員領用紀錄';
-   reportBody=`<h1>${reportTitle}</h1><div class="meta">產生時間：${esc(generated)}｜共 ${reps.length} 筆</div><div class="notice"><b>說明：</b>本報告僅列出設備維修更換與人員領用歷史紀錄。</div>${replacementTable}`;
+   reportBody=`${reportHeader(reportTitle,'設備維修更換／人員領用歷史')}<div class="meta">紀錄筆數：<b>${reps.length}</b> 筆</div><div class="notice"><b>報告說明：</b>本報告僅列出設備維修更換與人員領用歷史紀錄，供設備追溯與管理查核使用。</div>${replacementTable}`;
  }else if(mode==='movement'){
    reportTitle='庫存異動紀錄';
    fileLabel='庫存異動紀錄';
-   reportBody=`<h1>${reportTitle}</h1><div class="meta">產生時間：${esc(generated)}｜共 ${movementRows.length} 筆</div><div class="notice"><b>說明：</b>本報告列出新增庫存、設備維修更換領出及人員領用等庫存異動。</div>${movementTable}`;
+   reportBody=`${reportHeader(reportTitle,'庫存異動明細')}<div class="meta">異動筆數：<b>${movementRows.length}</b> 筆</div><div class="notice"><b>報告說明：</b>本報告列出新增庫存、設備維修更換領出及人員領用等庫存異動，供庫存帳務追溯與查核使用。</div>${movementTable}`;
  }else{
-   reportBody=`<h1>73G裝備庫存與維修管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
+   reportBody=`${reportHeader('73G裝備庫存與維修管理','庫存・序號・維修更換・人員領用綜合報告')}<div class="notice"><b>報告說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
  }
- const html=wordHead+reportBody+`<div class="footer">73G裝備庫存與維修管理｜本文件由系統自動產生</div></body></html>`;
+ const html=wordHead+reportBody+`<div class="footer"><strong>73G裝備庫存與維修管理</strong>｜System Generated Report｜本文件由系統自動產生</div></body></html>`;
  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=`73G_${fileLabel}_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(`${reportTitle} 已匯出`,'success');
 }
@@ -1550,45 +1817,11 @@ function exportReportCSV(){
 }
 function printReport(){
  const w=window.open('','_blank');if(!w)return alert('瀏覽器阻擋了列印視窗');
- w.document.write(`<html><head><meta charset="UTF-8"><title>Equipment Inventory Report</title><style>body{font-family:Arial,"Microsoft JhengHei",sans-serif;color:#17365f;padding:20px}h2{margin:0 0 6px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #cfd9e6;padding:5px;text-align:left;vertical-align:top}th{background:#eef3f8}.card{display:inline-block;border:1px solid #ccd8e5;border-radius:8px;padding:8px 12px;margin:0 6px 10px 0}.card b{font-size:18px;display:block}@media print{body{padding:0}}
-
-/* ===== Production usability refinement ===== */
-:root{
-  --brand:#143a70;--brand-2:#28558f;--canvas:#f2f5f9;--panel:#fff;
-  --text:#17324f;--text-strong:#102f55;--muted:#667c96;--line:#d8e2ed;
-  --focus:#4b86c4;--success:#138553;--danger:#b42336;--warning:#9a6710;
-  --stock-bg:#edf6fc;--stock-line:#b7d7e9;--issued-bg:#fff7e7;--issued-line:#ead39d;
-  --installed-bg:#edf8f2;--installed-line:#b7dec8;--broken-bg:#fff0f2;--broken-line:#edbec4;
+ const generated=new Date().toLocaleString('zh-TW');
+ const printCss=`@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;color:#263f59;background:#fff;margin:0;font-size:10pt;line-height:1.42}.print-head{width:100%;border-collapse:collapse;margin:0 0 10px;border:0}.print-head td{border:0!important;padding:0!important}.print-head .left{border-left:6px solid #173f70!important;padding-left:10px!important}.print-head h1{margin:0;color:#123b6b;font-size:20pt;line-height:1.1}.print-head .sub{margin-top:4px;color:#667d95;font-size:9pt}.print-head .right{text-align:right;color:#687e95;font-size:8.5pt}.rule{height:3px;background:#173f70;margin:0 0 12px}.card{display:inline-block;vertical-align:top;min-width:125px;border:1px solid #ccd8e4;border-radius:6px;padding:8px 11px;margin:0 5px 10px 0;background:#f8fafc}.card b{font-size:16pt;line-height:1;color:#123f76;display:block}.card span{display:block;margin-top:4px;font-size:8.5pt;color:#607892;font-weight:700}h4{font-size:12pt!important;color:#173f70!important;margin:15px 0 6px!important;padding:5px 8px!important;border-left:4px solid #2d6299!important;border-bottom:1px solid #c7d5e3!important;background:#f7f9fc!important}table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:4px 0 11px;table-layout:auto}th,td{border:1px solid #afc0d1;padding:4px 5px;text-align:left;vertical-align:middle;word-break:break-word}th{background:#dfe8f2;color:#173b70;font-weight:700;text-align:center;font-size:8.7pt}tbody tr:nth-child(even) td{background:#fafbfd}.detail-serial{font-family:Consolas,"Microsoft JhengHei",monospace}.empty{padding:14px;border:1px solid #d7e1eb;background:#f8fafc;color:#6c8096}tr{page-break-inside:avoid}thead{display:table-header-group}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
+ w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>73G 裝備庫存與維修管理報告</title><style>${printCss}</style></head><body><table class="print-head"><tr><td class="left"><h1>73G裝備庫存與維修管理</h1><div class="sub">Equipment Inventory & Maintenance｜正式庫存管理報告</div></td><td class="right">文件類型：列印 / PDF<br>產生時間：${esc(generated)}</td></tr></table><div class="rule"></div>${reportContent.innerHTML}<div style="margin-top:14px;padding-top:6px;border-top:1px solid #ccd7e2;text-align:right;color:#71849c;font-size:8pt">73G裝備庫存與維修管理｜System Generated Report</div></body></html>`);
+ w.document.close();w.focus();setTimeout(()=>w.print(),250);
 }
-html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC",Arial,sans-serif;background:var(--canvas);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:74px}
-.wrap,main,.savebar-inner{max-width:1480px}
-.topbar{padding:16px 22px;background:linear-gradient(115deg,#103566 0%,#1b477e 58%,#35679f 100%)}
-.brand h1{font-size:23px;line-height:1.2;font-weight:850;letter-spacing:.1px}.brand h1 span{font-size:13px;font-weight:600;color:#cbd9eb;margin-left:7px}.brand small{font-size:12.5px;font-weight:500}.header-meta{text-align:right}.today{font-size:12px;font-weight:650}.saved-meta{margin-top:3px;color:#c8d8ea;font-size:10.5px}
-main{padding:16px 14px 34px}
-.summary{gap:12px;margin-bottom:12px}.card{min-height:98px;padding:16px 18px;border-radius:15px}.card b{font-size:30px;line-height:1;font-weight:850;color:#153e74;font-variant-numeric:tabular-nums}.card span{display:block;margin-top:8px;font-size:13px;font-weight:800;color:#365778}.summary-card::after{bottom:15px;font-size:10.5px}.summary-card .card-sub{margin-top:3px;font-size:10.5px;color:#7f90a5}
-.main-actions{position:sticky;top:0;z-index:25;padding:10px 11px;box-shadow:0 5px 18px rgba(18,51,89,.07)}
-.search-wrap{position:relative;flex:1 1 390px;min-width:260px}.search-icon{position:absolute;left:11px;top:8px;font-size:18px;color:#6e849d;pointer-events:none}.search{width:100%;min-width:0;height:41px;padding:0 12px 0 34px;font-size:13px;font-weight:550;background:#fbfdff}.search:focus,.filter-select:focus,.serial-input:focus,.status:focus,.loc:focus,.qty-input:focus,.form input:focus,.form select:focus,.form textarea:focus{outline:none;border-color:var(--focus)!important;box-shadow:0 0 0 3px rgba(75,134,196,.13)!important}
-.action-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.btn{height:40px;border-radius:9px;padding:0 13px;font-size:12px;font-weight:800;white-space:nowrap;transition:.15s}.btn:hover:not(:disabled){transform:translateY(-1px)}.btn.report-btn{background:#eaf1fb;color:#194f88;border:1px solid #c6d9ee}.btn.ghost{background:#fff;color:#607993;border:1px solid #d8e2ed}.btn.light{border:1px solid #d9e3ee}.btn.primary{box-shadow:0 2px 8px rgba(23,59,112,.16)}
-.filterbar{padding:10px 12px;margin-bottom:8px}.filter-label{font-size:12px}.filter-select{height:38px;font-size:12.5px}.filter-check{height:38px;font-size:12px}.filter-count{font-size:11px}
-.status-guide{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 8px;padding:9px 11px;background:#fff;border:1px solid var(--line);border-radius:12px}.guide-title{font-size:11.5px;font-weight:850;color:#4f6783;margin-right:2px}.guide-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}.guide-pill i{width:8px;height:8px;border-radius:50%;display:block}.guide-pill.stock{background:var(--stock-bg);border-color:var(--stock-line);color:#286287}.guide-pill.stock i{background:#5a9dc5}.guide-pill.issued{background:var(--issued-bg);border-color:var(--issued-line);color:#835c12}.guide-pill.issued i{background:#d0a144}.guide-pill.installed{background:var(--installed-bg);border-color:var(--installed-line);color:#246c49}.guide-pill.installed i{background:#55a87a}.guide-pill.broken{background:var(--broken-bg);border-color:var(--broken-line);color:#9c2c38}.guide-pill.broken i{background:#d05b67}.guide-help{font-size:10.8px;color:#778ba2;margin-left:auto}.note{padding:0 2px;font-size:11.5px;color:#647a94}
-.system-section{border-radius:16px;margin-bottom:12px;background:#f7f9fc}.system-head{min-height:60px;padding:13px 16px}.system-title{font-size:17px}.system-meta{font-size:10.8px}.system-body{padding:10px}.component{border-radius:12px;margin-bottom:8px;box-shadow:none}.comp-head{min-height:58px;padding:11px 13px}.comp-name{font-size:14px}.part{font-size:10.5px}.mini-action{font-weight:750}.comp-count{font-size:10.8px}
-th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color:#526c88;letter-spacing:.02em}.device-name{font-size:12.3px;font-weight:750;color:#143e70}.qty-input,.serial-input,.status,.loc{height:34px;font-size:12px}.serial-input,.loc{padding:6px 8px}.qty-input{width:62px}.qty-btn{width:30px;height:30px}.status{font-weight:750;min-width:102px}
-.device-row{border-left:4px solid transparent}.device-row.state-stock{background:var(--stock-bg);border-left-color:#76afd0}.device-row.state-issued{background:var(--issued-bg);border-left-color:#d5aa54}.device-row.state-installed{background:var(--installed-bg);border-left-color:#6ab08a}.device-row.state-broken{background:var(--broken-bg);border-left-color:#d86b75}
-.history{margin-top:18px;padding-top:3px}.section-title-row{display:flex;justify-content:space-between;align-items:end;margin-bottom:8px}.history h3{margin:0;font-size:15px;color:#163c6e}.history p{margin:3px 0 0;font-size:10.8px;color:#7a8da4}.history-item{padding:11px 13px;border-radius:11px;line-height:1.55}
-.dialog{border-radius:16px}.dialog h3{font-size:16px;font-weight:850;background:#f8fafc;border-bottom:1px solid #e4ebf3}.form label{font-size:11.5px;font-weight:800;color:#536d8a}.form input,.form select,.form textarea{font-size:13px}.required{margin-left:5px;color:#b42336;font-size:10px}.dialog-actions{background:#f8fafc;border-top:1px solid #e5ecf3}
-.savebar{padding:9px 14px}.savebar-msg{font-size:12.5px}.toast{position:fixed;right:18px;bottom:82px;z-index:120;background:#173b70;color:#fff;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:750;box-shadow:0 8px 28px rgba(10,40,78,.2);opacity:0;transform:translateY(7px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:none}.toast.error{background:#9f2937}.toast.success{background:#13764a}
-@media(max-width:980px){.main-actions{position:static}.search-wrap{flex-basis:100%}.primary-actions,.secondary-actions{flex:1 1 auto}.header-meta{text-align:left}.summary{grid-template-columns:repeat(2,1fr)}.guide-help{width:100%;margin-left:0}.system-meta{display:none}}
-@media(max-width:680px){body{font-size:13px}.topbar{padding:13px 12px}.brand h1{font-size:19px}.brand h1 span{display:block;margin:3px 0 0}.topbar .wrap{align-items:flex-start}.header-meta{width:100%;display:flex;justify-content:space-between;gap:8px}.summary{gap:8px}.card{min-height:86px;padding:13px}.card b{font-size:25px}.card span{font-size:12px}.summary-card::after{display:none}.summary-card .card-sub{padding-right:0}.toolbar{border-radius:12px}.action-group{width:100%}.action-group .btn{flex:1 1 calc(50% - 5px)}.filterbar{align-items:stretch}.filter-label{width:100%}.filter-select{width:100%;flex:auto}.filter-check{flex:1}.filter-count{width:100%}.status-guide{gap:5px}.guide-title{width:100%}.system-head{padding:12px}.system-title{font-size:15px}.system-body{padding:7px}.comp-head{padding:10px}.comp-name{font-size:13px}.comp-body{overflow-x:auto}.comp-body table{min-width:860px}.savebar-inner{gap:7px}.savebar-msg{font-size:11px}.savebar .btn{padding:0 9px}.toast{left:10px;right:10px;bottom:76px;text-align:center}}
-
-
-/* ===== Automatic inventory status ===== */
-.inventory-status{display:inline-flex;align-items:center;justify-content:center;min-width:84px;height:36px;padding:0 12px;border-radius:10px;font-size:12px;font-weight:850;border:1px solid #b7d7e9;background:#edf6fc;color:#286287;white-space:nowrap}
-.inventory-status.empty{background:#f1f3f6;border-color:#c9d1da;color:#66788d}
-.inventory-status::before{content:"";width:7px;height:7px;border-radius:50%;margin-right:7px;background:#5a9dc5}.inventory-status.empty::before{background:#929eaa}
-</style></head><body><h2>Equipment Inventory Report</h2>${reportContent.innerHTML}</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),200);
-}
-
 
 
 // ===== Equipment issue receipt proof (independent; per-unit accumulated records) =====
