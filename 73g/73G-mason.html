@@ -1000,13 +1000,10 @@ function updateSummary(){
 function itemStatus(x){if(!x.state)x.state='stock';return x.state}
 const stateText={stock:'庫存',empty:'無庫存',issued:'已領用',installed:'已安裝',broken:'故障'};
 const unitIds=['CN-D-301',...Array.from({length:77},(_,i)=>`CN-B-${i+302}`),'NMS-381','NMS-382','NMS-383','NMS-384','SSS-391','SSS-392','SSS-393','SSS-394'];
-const commonLocations=['基修中心','FSR Site','1C庫房','2C庫房','3C庫房','4C庫房','HC庫房','STC庫房','HQ庫房'];
+const commonLocations=['73G-FSR Site','74G-FSR Site','75G-FSR Site'];
 function locationOptions(current=''){
- const groups=[['一般位置',commonLocations],['CN 車廂',unitIds.filter(x=>x.startsWith('CN-'))],['NMS',unitIds.filter(x=>x.startsWith('NMS-'))],['SSS',unitIds.filter(x=>x.startsWith('SSS-'))]];
- let found=!current;
- let html='<option value="">請選擇</option>';
- groups.forEach(([label,arr])=>{html+=`<optgroup label="${label}">`+arr.map(v=>{if(v===current)found=true;return `<option value="${esc(v)}" ${v===current?'selected':''}>${esc(v)}</option>`}).join('')+'</optgroup>'});
- if(current&&!found)html+=`<option value="${esc(current)}" selected>${esc(current)}</option>`;
+ let html='<option value="">請選擇位置</option>';
+ html+=commonLocations.map(v=>`<option value="${esc(v)}" ${v===current?'selected':''}>${esc(v)}</option>`).join('');
  return html;
 }
 unitList.innerHTML=unitIds.map(v=>`<option value="${v}"></option>`).join('');
