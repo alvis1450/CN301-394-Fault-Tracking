@@ -142,7 +142,7 @@ main{max-width:1480px;padding:18px 14px 42px}
 .main-actions{top:8px;padding:11px;border-radius:16px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px)}
 .search-wrap{flex:1 1 430px}.search{height:44px;border-radius:11px;font-size:14px;padding-left:38px;border-color:#cdd9e6}.search-icon{left:12px;top:9px;font-size:19px}
 .btn{height:42px;border-radius:10px;padding:0 14px;font-size:13px;font-weight:800;border:1px solid transparent;transition:transform .12s,box-shadow .12s,background .12s}
-.btn.primary{background:#173f74}.btn.primary:hover{background:#123761}.btn.report-btn{background:#edf4fc;border-color:#c9dbee;color:#194d80}.btn.light{background:#f2f6fa;border-color:#d8e2ec;color:#365b80}.btn.ghost{border-color:#d7e2ed;color:#536f8b}.btn.green{border-color:#c9e6d7}.btn:focus-visible,.qty-btn:focus-visible,.mini-action:focus-visible{outline:3px solid rgba(62,124,184,.25);outline-offset:2px}
+.btn.primary{background:#173f74}.btn.primary:hover{background:#123761}.btn.report-btn{background:#edf4fc;border-color:#c9dbee;color:#194d80}.report-select{appearance:auto;-webkit-appearance:menulist;min-width:185px;padding-right:8px;cursor:pointer;text-align:left}.report-select option{background:#fff;color:#173b70;font-weight:700}.btn.light{background:#f2f6fa;border-color:#d8e2ec;color:#365b80}.btn.ghost{border-color:#d7e2ed;color:#536f8b}.btn.green{border-color:#c9e6d7}.btn:focus-visible,.qty-btn:focus-visible,.mini-action:focus-visible{outline:3px solid rgba(62,124,184,.25);outline-offset:2px}
 .filterbar{padding:11px 13px;border-radius:14px;gap:10px}.filter-label{font-size:12.5px;color:#526b85}.filter-select{height:40px;border-radius:10px;font-size:13px;border-color:#d0dce8}.filter-check{height:40px;border-radius:10px;font-size:12.5px;background:#fbfcfe}.filter-count{font-size:12px;padding:7px 11px}
 .status-guide{padding:10px 12px;border-radius:13px;margin-bottom:10px}.guide-title{font-size:12px}.guide-pill{font-size:11.5px;padding:5px 9px}.guide-help{font-size:11.5px}
 .note{margin:2px 2px 14px;padding:10px 12px;border-radius:10px;background:#f8fbfe;border:1px solid #e0e8f1;font-size:12px;line-height:1.5;color:#5f768e}
@@ -329,7 +329,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 </style>
 
 <style>
-/* ===== 裝備領用簽收證明：緊湊版 ===== */
+/* ===== 裝備領用簽收紀錄：緊湊版 ===== */
 #issueReceiptModal .dialog{
   width:min(680px,calc(100vw - 32px))!important;
   max-height:calc(100vh - 32px);
@@ -402,7 +402,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 
 <style>
-/* ===== 裝備領用簽收證明：固定底部操作列 ===== */
+/* ===== 裝備領用簽收紀錄：固定底部操作列 ===== */
 #issueReceiptModal{
   overflow:hidden!important;
 }
@@ -510,8 +510,13 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <div class="action-group primary-actions">
 <button id="saveMainBtn" class="btn save-main" onclick="saveAll()" disabled>💾 已儲存</button>
 <button class="btn primary" onclick="openReplace()">🔄 設備維修更換／人員領用</button>
-<button class="btn report-btn" onclick="exportReportWord()">📄 匯出 Word 報告</button>
-<button class="btn green" type="button" onclick="openIssueReceipt()">✍ 裝備領用簽收證明</button>
+<select id="reportExportSelect" class="btn report-btn report-select" aria-label="選擇匯出報告" onchange="handleReportExportSelect(this)">
+<option value="" selected>📄 匯出報告 ▾</option>
+<option value="full">完整 Word 報告</option>
+<option value="replacement">設備維修更換／人員領用紀錄</option>
+<option value="movement">庫存異動紀錄</option>
+</select>
+<button class="btn green" type="button" onclick="openIssueReceipt()">✍ 裝備領用簽收紀錄</button>
 </div>
 <div class="action-group secondary-actions">
 <button class="btn light" onclick="exportBackup()">⬇ 匯出備份</button>
@@ -560,7 +565,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 
 
-<div class="modal" id="issueReceiptModal"><div class="dialog" style="width:min(760px,100%)"><h3>裝備領用簽收證明</h3><div class="form">
+<div class="modal" id="issueReceiptModal"><div class="dialog" style="width:min(760px,100%)"><h3>裝備領用簽收紀錄</h3><div class="form">
 <div style="font-size:11.5px;line-height:1.55;color:#58718b;background:#eef6fd;border:1px solid #d3e4f2;border-radius:9px;padding:9px 10px"><b>用途：</b>此功能只管理與匯出簽收證明，不會修改庫存數量、庫存序號、設備狀態、設備維修更換紀錄或其他欄位。</div>
 
 <label>送修單位 <span class="required">必填</span>
@@ -702,7 +707,7 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 
 <div class="modal" id="signaturePadModal"><div class="dialog"><h3 id="signaturePadTitle">電子簽名</h3>
 <div class="signature-pad-wrap">
-<div class="signature-pad-help">請直接使用滑鼠、觸控筆或手指在下方白色區域簽名。確認後，簽名會儲存在此筆「裝備領用簽收證明」，並於匯出 Excel 時放入原有的簽名欄位。</div>
+<div class="signature-pad-help">請直接使用滑鼠、觸控筆或手指在下方白色區域簽名。確認後，簽名會儲存在此筆「裝備領用簽收紀錄」，並於匯出 Excel 時放入原有的簽名欄位。</div>
 <div class="signature-canvas-shell"><canvas id="signatureCanvas"></canvas><div class="signature-line"></div><div class="signature-line-label">簽名</div></div>
 </div>
 <div class="dialog-actions"><button class="btn light" type="button" onclick="closeSignaturePad()">取消</button><button class="btn ghost" type="button" onclick="clearSignatureCanvas()">清除重簽</button><button class="btn primary" type="button" onclick="confirmSignaturePad()">✓ 使用此簽名</button></div>
@@ -1405,12 +1410,19 @@ function normalizeReplacementRecord(r={}){
  if(rawTs){const d=new Date(rawTs);if(!Number.isNaN(d.getTime()))dt=d}
  const dateTime=String(r.dateTime||'').trim();
  const date=String(r.date||'').trim();
+ const personnelName=String(r.personnelName||'').trim();
+ const personnelUnit=String(r.personnelUnit||'').trim();
+ const legacyPersonnel=(String(r.actionType||'').trim()==='personnel_issue')||!!personnelName||String(r.newStatus||'').trim()==='已領用';
+ const actionType=legacyPersonnel?'personnel_issue':'replacement';
  return {
   timestamp:dt?dt.toISOString():rawTs,
   date:date||(dt?dt.toLocaleDateString('zh-TW'):''),
   dateTime:dateTime||(dt?dt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):date),
-  cn:String(r.cn||'').trim(),group:String(r.group||'').trim(),device:String(r.device||'').trim(),part:String(r.part||'').trim(),
-  old:String(r.old||'').trim(),next:String(r.next||'').trim(),note:String(r.note||'').trim(),damagedStatus:String(r.damagedStatus||'損壞／已換下').trim()||'損壞／已換下',newStatus:String(r.newStatus||'已安裝／使用').trim()||'已安裝／使用'
+  actionType,
+  cn:String(r.cn||'').trim(),personnelName,personnelUnit,group:String(r.group||'').trim(),device:String(r.device||'').trim(),part:String(r.part||'').trim(),
+  old:legacyPersonnel?'':String(r.old||'').trim(),next:String(r.next||'').trim(),note:String(r.note||'').trim(),
+  damagedStatus:legacyPersonnel?'不適用':(String(r.damagedStatus||'故障／已換下').trim()||'故障／已換下'),
+  newStatus:legacyPersonnel?'已領用':(String(r.newStatus||'已安裝／使用').trim()||'已安裝／使用')
  };
 }
 function normalizeReplacementHistory(target=store){
@@ -1475,7 +1487,13 @@ function openReport(){
  html+=reps.length?`<div style="overflow:auto"><table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.old||'—')}</td><td class="detail-serial">${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無設備維修更換 / 人員領用紀錄</div>`;
  reportContent.innerHTML=html;reportModal.classList.add('show');
 }
-function exportReportWord(){
+function handleReportExportSelect(el){
+ const mode=el?.value||'';
+ if(!mode)return;
+ el.value='';
+ exportReportWord(mode);
+}
+function exportReportWord(mode='full'){
  normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
  const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
  const now=new Date(),generated=now.toLocaleString('zh-TW');
@@ -1488,12 +1506,27 @@ function exportReportWord(){
    if(!data.length)return '';
    return `<h2>${type} 庫存明細</h2><p class="meta">${data.length} 種設備｜${qty} 件庫存｜${sns} 個庫存序號</p><table class="inventory-table"><colgroup><col style="width:14%"><col style="width:14%"><col style="width:23%"><col style="width:7%"><col style="width:25%"><col style="width:7%"><col style="width:10%"></colgroup><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td class="part-cell">${esc(x.part)}</td><td>${esc(x.name)}</td><td class="num qty-cell">${x.qty}</td><td class="serial-cell">${esc(x.serial||'—')}</td><td class="center-cell">${esc(x.state)}</td><td class="center-cell location-cell">${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table>`;
  }).join('');
- const replacementTable=reps.length?`<table class="replacement-table"><colgroup><col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:14%"><col style="width:10%"><col style="width:11%"><col style="width:11%"><col style="width:8%"><col style="width:8%"><col style="width:7%"></colgroup><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無設備維修更換／人員領用紀錄。</p>';
+ const replacementTable=reps.length?`<table class="replacement-table"><colgroup><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:10%"><col style="width:7%"><col style="width:6%"></colgroup><thead><tr><th>作業時間</th><th>作業類型</th><th>位置</th><th>領用人員／單位</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換／領用序號</th><th>狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>{const isPersonnel=r.actionType==='personnel_issue'||!!String(r.personnelName||'').trim()||r.newStatus==='已領用';const who=isPersonnel?[r.personnelName||'',r.personnelUnit||''].filter(Boolean).join('／'):'—';const status=isPersonnel?(r.newStatus||'已領用'):(r.newStatus||'已安裝／使用');return `<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${isPersonnel?'人員領用':'設備維修更換'}</td><td>${esc(r.cn||'—')}</td><td>${esc(who)}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(isPersonnel?'—':(r.old||'—'))}</td><td>${esc(r.next||'—')}</td><td>${esc(status)}</td><td>${esc(r.note||'')}</td></tr>`}).join('')}</tbody></table>`:'<p>尚無設備維修更換／人員領用紀錄。</p>';
  const movementRows=(store.stockMovements||[]).slice().reverse();
  const movementTable=movementRows.length?`<table class="movement-table"><colgroup><col style="width:10%"><col style="width:7%"><col style="width:5%"><col style="width:10%"><col style="width:13%"><col style="width:9%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:14%"><col style="width:7%"><col style="width:6%"><col style="width:4%"></colgroup><thead><tr><th>異動時間</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量異動</th><th>異動前</th><th>異動後</th><th>本次序號</th><th>位置</th><th>來源</th><th>備註</th></tr></thead><tbody>${movementRows.map(m=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.system||'—')}</td><td>${esc(m.group||'—')}</td><td>${esc(m.device||'—')}</td><td>${esc(m.part||'—')}</td><td class="num">${m.qtyChange>0?'+'+m.qtyChange:m.qtyChange}</td><td class="num">${m.beforeQty}</td><td class="num">${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.reference||'')}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無庫存異動紀錄。</p>';
- const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><title>73G裝備庫存與維修管理 Report</title><style>@page{size:A4 landscape;margin:9mm}body{font-family:"Microsoft JhengHei","PingFang TC",Arial,sans-serif;color:#1f3652;font-size:9pt;line-height:1.28}h1{font-size:18pt;color:#153f73;margin:0 0 4px;font-weight:700}h2{font-size:12pt;color:#153f73;margin:14px 0 3px;border-bottom:1px solid #b8c9db;padding-bottom:3px;font-weight:700;page-break-after:avoid}.meta{color:#5f738b;font-size:8.5pt;margin:0 0 5px}.notice{background:#f2f6fa;border:1px solid #cbd7e4;color:#425b75;padding:6px 8px;margin:7px 0 9px;font-size:8.5pt}.summary{width:100%;margin:6px 0 9px;table-layout:fixed}.summary td{border:1px solid #b9c8d8;text-align:center;padding:5px 4px;background:#f8fafc}.summary b{display:block;font-size:14pt;color:#123f76}.summary span{font-size:8pt;color:#607892}table{width:100%;border-collapse:collapse;margin:4px 0 10px;table-layout:fixed}th,td{border:1px solid #9fb2c6;padding:3px 4px;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word}th{background:#dfe9f3;color:#173b70;font-size:8.5pt;font-weight:700;text-align:center;line-height:1.15}td{font-size:8.5pt;color:#203a58;line-height:1.25}.instock-table th,.instock-table td{font-size:8.5pt;padding:4px 5px}.instock-table td:nth-child(4){font-weight:600}.instock-table .total-row td{background:#f3f7fb;border-top:2px solid #8fa8c2}.inventory-table td{min-height:20px}.inventory-table .serial-cell{font-size:8pt;line-height:1.2}.part-cell{font-size:8pt}.qty-cell,.center-cell{text-align:center;vertical-align:middle}.location-cell{font-size:8pt}.movement-table th,.movement-table td{font-size:7.2pt;padding:2px 3px;line-height:1.15}.replacement-table th,.replacement-table td{font-size:7.5pt;padding:2px 3px;line-height:1.18}.num{text-align:center;vertical-align:middle}.footer{margin-top:12px;color:#71849c;font-size:7.5pt;text-align:right}tr{page-break-inside:avoid}thead{display:table-header-group}</style></head><body><h1>73G裝備庫存與維修管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}<div class="footer">73G裝備庫存與維修管理｜本文件由系統自動產生</div></body></html>`;
+ const wordHead=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><style>@page{size:A4 landscape;margin:9mm}body{font-family:"Microsoft JhengHei","PingFang TC",Arial,sans-serif;color:#1f3652;font-size:9pt;line-height:1.28}h1{font-size:18pt;color:#153f73;margin:0 0 4px;font-weight:700}h2{font-size:12pt;color:#153f73;margin:14px 0 3px;border-bottom:1px solid #b8c9db;padding-bottom:3px;font-weight:700;page-break-after:avoid}.meta{color:#5f738b;font-size:8.5pt;margin:0 0 5px}.notice{background:#f2f6fa;border:1px solid #cbd7e4;color:#425b75;padding:6px 8px;margin:7px 0 9px;font-size:8.5pt}.summary{width:100%;margin:6px 0 9px;table-layout:fixed}.summary td{border:1px solid #b9c8d8;text-align:center;padding:5px 4px;background:#f8fafc}.summary b{display:block;font-size:14pt;color:#123f76}.summary span{font-size:8pt;color:#607892}table{width:100%;border-collapse:collapse;margin:4px 0 10px;table-layout:fixed}th,td{border:1px solid #9fb2c6;padding:3px 4px;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word}th{background:#dfe9f3;color:#173b70;font-size:8.5pt;font-weight:700;text-align:center;line-height:1.15}td{font-size:8.5pt;color:#203a58;line-height:1.25}.instock-table th,.instock-table td{font-size:8.5pt;padding:4px 5px}.instock-table td:nth-child(4){font-weight:600}.instock-table .total-row td{background:#f3f7fb;border-top:2px solid #8fa8c2}.inventory-table td{min-height:20px}.inventory-table .serial-cell{font-size:8pt;line-height:1.2}.part-cell{font-size:8pt}.qty-cell,.center-cell{text-align:center;vertical-align:middle}.location-cell{font-size:8pt}.movement-table th,.movement-table td{font-size:7.2pt;padding:2px 3px;line-height:1.15}.replacement-table th,.replacement-table td{font-size:7.5pt;padding:2px 3px;line-height:1.18}.num{text-align:center;vertical-align:middle}.footer{margin-top:12px;color:#71849c;font-size:7.5pt;text-align:right}tr{page-break-inside:avoid}thead{display:table-header-group}</style></head><body>`;
+ let reportTitle='73G裝備庫存與維修管理';
+ let reportBody='';
+ let fileLabel='Report';
+ if(mode==='replacement'){
+   reportTitle='設備維修更換／人員領用紀錄';
+   fileLabel='維修更換_人員領用紀錄';
+   reportBody=`<h1>${reportTitle}</h1><div class="meta">產生時間：${esc(generated)}｜共 ${reps.length} 筆</div><div class="notice"><b>說明：</b>本報告僅列出設備維修更換與人員領用歷史紀錄。</div>${replacementTable}`;
+ }else if(mode==='movement'){
+   reportTitle='庫存異動紀錄';
+   fileLabel='庫存異動紀錄';
+   reportBody=`<h1>${reportTitle}</h1><div class="meta">產生時間：${esc(generated)}｜共 ${movementRows.length} 筆</div><div class="notice"><b>說明：</b>本報告列出新增庫存、設備維修更換領出及人員領用等庫存異動。</div>${movementTable}`;
+ }else{
+   reportBody=`<h1>73G裝備庫存與維修管理</h1><div class="meta">庫存管理 Report｜產生時間：${esc(generated)}</div><div class="notice"><b>說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
+ }
+ const html=wordHead+reportBody+`<div class="footer">73G裝備庫存與維修管理｜本文件由系統自動產生</div></body></html>`;
  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download=`73G裝備庫存管理_Report_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Word Report 已匯出','success');
+ a.href=url;a.download=`73G_${fileLabel}_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(`${reportTitle} 已匯出`,'success');
 }
 function closeReport(){reportModal.classList.remove('show')}
 function csvCell(v){v=String(v??'');return '"'+v.replace(/"/g,'""')+'"'}
@@ -1829,7 +1862,7 @@ function exportIssueReceiptExcel(){
       xmlns:x="urn:schemas-microsoft-com:office:excel"
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8">
-<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>裝備領用簽收證明</x:Name><x:WorksheetOptions><x:Selected/><x:FitToPage/><x:PageSetup><x:Layout x:Orientation="Landscape"/></x:PageSetup></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>裝備領用簽收紀錄</x:Name><x:WorksheetOptions><x:Selected/><x:FitToPage/><x:PageSetup><x:Layout x:Orientation="Landscape"/></x:PageSetup></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
 <style>
 body{font-family:"Microsoft JhengHei","Arial";font-size:10pt}
 table{border-collapse:collapse;width:100%;table-layout:fixed}
@@ -1844,7 +1877,7 @@ th{background:#eaf1f8;font-weight:bold;text-align:center}
 .sign img{display:block;margin:auto;width:72px;height:24px;object-fit:contain;background:transparent}
 </style></head><body>
 <table>
-<tr><td colspan="11" class="title">裝備領用簽收證明</td></tr>
+<tr><td colspan="11" class="title">裝備領用簽收紀錄</td></tr>
 <tr><td colspan="11" class="meta"><b>送修單位：</b>${receiptEsc(unit)}　　<b>累計筆數：</b>${rows.length}　　<b>匯出時間：</b>${receiptEsc(generated)}</td></tr>
 <tr>
 <th style="width:36px">序號</th>
@@ -1889,7 +1922,7 @@ ${bodyRows}
   const a=document.createElement('a');
   const safeUnit=unit.replace(/[\\/:*?"<>|]+/g,'_').slice(0,50);
   a.href=url;
-  a.download=`73G_裝備領用簽收證明_${safeUnit}_${new Date().toISOString().slice(0,10)}.xls`;
+  a.download=`73G_裝備領用簽收紀錄_${safeUnit}_${new Date().toISOString().slice(0,10)}.xls`;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   showToast(`已匯出 ${unit} 共 ${rows.length} 筆簽收資料（電子簽名已內嵌）`,'success');
