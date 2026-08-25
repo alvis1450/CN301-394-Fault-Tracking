@@ -464,6 +464,23 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 }
 </style>
 
+<style>
+/* ===== Electronic signature pad for issue receipt ===== */
+.signature-field{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:end}
+.signature-field>label{min-width:0}
+.signature-btn{height:36px;border:1px solid #c8d8e7;border-radius:8px;background:#f4f8fc;color:#214f7c;padding:0 10px;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+.signature-btn:hover{background:#eaf2fa}.signature-btn.signed{background:#e8f6ee;border-color:#abd4bd;color:#176542}
+.signature-preview{grid-column:1/-1;display:none;align-items:center;gap:8px;padding:6px 8px;border:1px dashed #bfd0df;border-radius:8px;background:#fbfdff}
+.signature-preview.show{display:flex}.signature-preview img{display:block;max-width:180px;max-height:54px;object-fit:contain;background:#fff}
+.signature-preview span{font-size:10.5px;color:#657c93;font-weight:750}.signature-remove{margin-left:auto;border:0;background:transparent;color:#a12b39;font-size:11px;font-weight:800;cursor:pointer}
+#signaturePadModal .dialog{width:min(720px,calc(100vw - 32px))!important}
+.signature-pad-wrap{padding:12px 16px 16px}.signature-pad-help{font-size:11.5px;line-height:1.5;color:#617990;margin-bottom:8px}
+.signature-canvas-shell{position:relative;width:100%;height:260px;border:2px solid #9fb5c9;border-radius:12px;background:#fff;overflow:hidden;touch-action:none;user-select:none}
+#signatureCanvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.signature-line{position:absolute;left:7%;right:7%;bottom:48px;border-top:1px solid #9aa9b8;pointer-events:none}.signature-line-label{position:absolute;right:7%;bottom:25px;font-size:10px;color:#96a3b0;pointer-events:none}
+@media(max-width:680px){.signature-field{grid-template-columns:1fr auto}.signature-btn{height:42px;font-size:11.5px}.signature-preview img{max-width:145px;max-height:48px}#signaturePadModal{align-items:flex-end!important;padding:0!important}#signaturePadModal .dialog{width:100%!important;max-width:none;border-radius:18px 18px 0 0!important}.signature-canvas-shell{height:220px}.signature-pad-wrap{padding:11px 12px 14px}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存管理 <span>Equipment Inventory</span></h1><small>CN / NMS / SSS｜組件、庫存、序號與設備更換紀錄</small></div><div class="header-meta"><div class="today" id="today"></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
@@ -647,13 +664,22 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 <option value="SSS-394">SSS-394</option>
 </select></label>
 <label>裝備號碼 <span class="required">必填</span><input id="receiptEquipmentNo" placeholder="請輸入裝備號碼"></label>
+<label>品名及程式<input id="receiptProductProgram" placeholder="請輸入品名及程式"></label>
 
 <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.65fr);gap:10px">
-<label>接修者<input id="receiptRepairReceiver" placeholder="可先輸入姓名，亦可匯出後手寫簽名"></label>
+<div class="signature-field">
+<label>接修者<input id="receiptRepairReceiver" placeholder="請輸入姓名"></label>
+<button id="receiptRepairSignatureBtn" class="signature-btn" type="button" onclick="openSignaturePad('repair')">✍️ 電子簽名</button>
+<div id="receiptRepairSignaturePreview" class="signature-preview"><img id="receiptRepairSignatureImage" alt="接修者電子簽名預覽"><span>已完成電子簽名</span><button class="signature-remove" type="button" onclick="clearReceiptSignature('repair')">清除</button></div>
+</div>
 <label>接修日期<input id="receiptRepairDate" type="date"></label>
 </div>
 <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.65fr);gap:10px">
-<label>接收者<input id="receiptFinalReceiver" placeholder="可先輸入姓名，亦可匯出後手寫簽名"></label>
+<div class="signature-field">
+<label>接收者<input id="receiptFinalReceiver" placeholder="請輸入姓名"></label>
+<button id="receiptFinalSignatureBtn" class="signature-btn" type="button" onclick="openSignaturePad('final')">✍️ 電子簽名</button>
+<div id="receiptFinalSignaturePreview" class="signature-preview"><img id="receiptFinalSignatureImage" alt="接收者電子簽名預覽"><span>已完成電子簽名</span><button class="signature-remove" type="button" onclick="clearReceiptSignature('final')">清除</button></div>
+</div>
 <label>接收日期<input id="receiptFinalDate" type="date"></label>
 </div>
 
@@ -668,6 +694,14 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
   <button class="btn green" type="button" onclick="saveIssueReceipt()">💾 儲存</button>
   <button class="btn report-btn" type="button" onclick="exportIssueReceiptExcel()">📊 匯出本單位累加 Excel</button>
 </div></div></div>
+
+<div class="modal" id="signaturePadModal"><div class="dialog"><h3 id="signaturePadTitle">電子簽名</h3>
+<div class="signature-pad-wrap">
+<div class="signature-pad-help">請直接使用滑鼠、觸控筆或手指在下方白色區域簽名。確認後，簽名會儲存在此筆「裝備領用簽收證明」，並於匯出 Excel 時放入原有的簽名欄位。</div>
+<div class="signature-canvas-shell"><canvas id="signatureCanvas"></canvas><div class="signature-line"></div><div class="signature-line-label">簽名</div></div>
+</div>
+<div class="dialog-actions"><button class="btn light" type="button" onclick="closeSignaturePad()">取消</button><button class="btn ghost" type="button" onclick="clearSignatureCanvas()">清除重簽</button><button class="btn primary" type="button" onclick="confirmSignaturePad()">✓ 使用此簽名</button></div>
+</div></div>
 
 <div class="modal" id="addDeviceModal"><div class="dialog"><h3>新增設備</h3><div class="form">
 <label>所屬組件<input id="aGroupName" readonly></label>
@@ -1481,7 +1515,120 @@ th,td{padding:10px 10px;font-size:12px}th{font-size:10.8px;font-weight:800;color
 
 // ===== Equipment issue receipt proof (independent; per-unit accumulated records) =====
 const ISSUE_RECEIPT_STORAGE_KEY='73G_issue_receipt_records_v1';
+let receiptSignatureState={repair:'',final:''};
+let activeSignatureRole=null;
+let signaturePadDrawing=false;
+let signaturePadHasInk=false;
+let signaturePadLastPoint=null;
 
+function signatureRoleConfig(role){
+  return role==='repair'
+    ? {label:'接修者',btn:'receiptRepairSignatureBtn',preview:'receiptRepairSignaturePreview',img:'receiptRepairSignatureImage'}
+    : {label:'接收者',btn:'receiptFinalSignatureBtn',preview:'receiptFinalSignaturePreview',img:'receiptFinalSignatureImage'};
+}
+function refreshReceiptSignatureUI(role){
+  const cfg=signatureRoleConfig(role),data=receiptSignatureState[role]||'';
+  const btn=document.getElementById(cfg.btn),preview=document.getElementById(cfg.preview),img=document.getElementById(cfg.img);
+  if(btn){btn.classList.toggle('signed',!!data);btn.textContent=data?'✓ 已電子簽名':'✍️ 電子簽名'}
+  if(preview)preview.classList.toggle('show',!!data);
+  if(img){if(data)img.src=data;else img.removeAttribute('src')}
+}
+function clearReceiptSignature(role){
+  receiptSignatureState[role]='';
+  refreshReceiptSignatureUI(role);
+}
+function prepareSignatureCanvas(existingData=''){
+  const canvas=document.getElementById('signatureCanvas');if(!canvas)return;
+  const shell=canvas.parentElement;
+  const ratio=Math.max(1,window.devicePixelRatio||1);
+  const w=Math.max(300,Math.round(shell.clientWidth)),h=Math.max(180,Math.round(shell.clientHeight));
+  canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);
+  // 簽名畫布保持透明，避免匯出 Excel 後出現白色方塊背景。
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#102f55';ctx.lineWidth=3.6;ctx.lineCap='round';ctx.lineJoin='round';
+  signaturePadHasInk=false;signaturePadDrawing=false;signaturePadLastPoint=null;
+  if(existingData){
+    const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,w,h);signaturePadHasInk=true};img.src=existingData;
+  }
+}
+function signaturePoint(e){
+  const canvas=document.getElementById('signatureCanvas'),r=canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function startSignatureStroke(e){
+  if(!activeSignatureRole)return;
+  e.preventDefault();
+  const canvas=document.getElementById('signatureCanvas');
+  try{canvas.setPointerCapture(e.pointerId)}catch(_){ }
+  signaturePadDrawing=true;signaturePadLastPoint=signaturePoint(e);
+}
+function moveSignatureStroke(e){
+  if(!signaturePadDrawing)return;e.preventDefault();
+  const canvas=document.getElementById('signatureCanvas'),ctx=canvas.getContext('2d'),p=signaturePoint(e),last=signaturePadLastPoint||p;
+  ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();
+  signaturePadLastPoint=p;signaturePadHasInk=true;
+}
+function endSignatureStroke(e){
+  if(!signaturePadDrawing)return;e.preventDefault();signaturePadDrawing=false;signaturePadLastPoint=null;
+}
+function openSignaturePad(role){
+  activeSignatureRole=role;
+  const cfg=signatureRoleConfig(role),modal=document.getElementById('signaturePadModal');
+  document.getElementById('signaturePadTitle').textContent=`${cfg.label}電子簽名`;
+  modal.classList.add('show');
+  requestAnimationFrame(()=>prepareSignatureCanvas(receiptSignatureState[role]||''));
+}
+function closeSignaturePad(){
+  document.getElementById('signaturePadModal')?.classList.remove('show');
+  activeSignatureRole=null;signaturePadDrawing=false;signaturePadLastPoint=null;
+}
+function clearSignatureCanvas(){prepareSignatureCanvas('')}
+function signatureCanvasToTrimmedPng(canvas){
+  const srcCtx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  const img=srcCtx.getImageData(0,0,w,h);
+  const d=img.data;
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const a=d[(y*w+x)*4+3];
+      if(a>18){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}
+    }
+  }
+  if(maxX<minX||maxY<minY)return '';
+  const pad=Math.max(10,Math.round(Math.min(w,h)*0.035));
+  minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);
+  maxX=Math.min(w-1,maxX+pad);maxY=Math.min(h-1,maxY+pad);
+  const cw=maxX-minX+1,ch=maxY-minY+1;
+  const out=document.createElement('canvas');out.width=cw;out.height=ch;
+  const octx=out.getContext('2d');
+  octx.clearRect(0,0,cw,ch);
+  octx.drawImage(canvas,minX,minY,cw,ch,0,0,cw,ch);
+  return out.toDataURL('image/png');
+}
+function confirmSignaturePad(){
+  if(!activeSignatureRole)return;
+  if(!signaturePadHasInk)return showToast('請先完成電子簽名','error');
+  const canvas=document.getElementById('signatureCanvas');
+  receiptSignatureState[activeSignatureRole]=signatureCanvasToTrimmedPng(canvas)||canvas.toDataURL('image/png');
+  refreshReceiptSignatureUI(activeSignatureRole);
+  closeSignaturePad();showToast('電子簽名已套用','success');
+}
+function installSignaturePadEvents(){
+  const canvas=document.getElementById('signatureCanvas');if(!canvas)return;
+  canvas.addEventListener('pointerdown',startSignatureStroke);
+  canvas.addEventListener('pointermove',moveSignatureStroke);
+  canvas.addEventListener('pointerup',endSignatureStroke);
+  canvas.addEventListener('pointercancel',endSignatureStroke);
+  canvas.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')endSignatureStroke(e)});
+}
+function receiptSignatureHtml(data,label){
+  const src=String(data||'');
+  if(!/^data:image\/png;base64,/i.test(src))return '';
+  return `<img src="${src}" alt="${receiptEsc(label||'電子簽名')}" style="display:block;margin:auto;max-width:120px;max-height:48px;width:auto;height:auto">`;
+}
 function receiptEsc(v){
   return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -1507,10 +1654,13 @@ function getReceiptFormData(){
     workOrder:document.getElementById('receiptWorkOrder')?.value.trim()||'',
     carNo:document.getElementById('receiptCarNo')?.value.trim()||'',
     equipmentNo:document.getElementById('receiptEquipmentNo')?.value.trim()||'',
+    productProgram:document.getElementById('receiptProductProgram')?.value.trim()||'',
     repairReceiver:document.getElementById('receiptRepairReceiver')?.value.trim()||'',
     repairDate:document.getElementById('receiptRepairDate')?.value||'',
+    repairSignature:receiptSignatureState.repair||'',
     finalReceiver:document.getElementById('receiptFinalReceiver')?.value.trim()||'',
-    finalDate:document.getElementById('receiptFinalDate')?.value||''
+    finalDate:document.getElementById('receiptFinalDate')?.value||'',
+    finalSignature:receiptSignatureState.final||''
   };
 }
 function validateReceiptData(d){
@@ -1523,13 +1673,15 @@ function validateReceiptData(d){
 function clearIssueReceiptForm(keepUnit=true){
   const unit=document.getElementById('receiptUnit');
   const keep=keepUnit?unit?.value:'';
-  ['receiptWorkOrder','receiptCarNo','receiptEquipmentNo','receiptRepairReceiver','receiptFinalReceiver'].forEach(id=>{
+  ['receiptWorkOrder','receiptCarNo','receiptEquipmentNo','receiptProductProgram','receiptRepairReceiver','receiptFinalReceiver'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
   });
   const today=new Date();
   const localDate=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const rd=document.getElementById('receiptRepairDate'),fd=document.getElementById('receiptFinalDate');
   if(rd)rd.value=localDate;if(fd)fd.value=localDate;
+  receiptSignatureState={repair:'',final:''};
+  refreshReceiptSignatureUI('repair');refreshReceiptSignatureUI('final');
   if(unit)unit.value=keep||'';
   updateReceiptUnitSummary();
 }
@@ -1579,7 +1731,7 @@ function updateReceiptUnitSummary(){
   if(list){
     list.innerHTML=unitRows.length?unitRows.slice().reverse().map(r=>`
       <div style="padding:7px 9px;border-bottom:1px solid #edf2f6;font-size:11px;line-height:1.45;position:relative;padding-right:62px">
-        <b>${receiptEsc(r.workOrder)}</b>｜車廂 ${receiptEsc(r.carNo)}｜裝備 ${receiptEsc(r.equipmentNo)}
+        <b>${receiptEsc(r.workOrder)}</b>｜車廂 ${receiptEsc(r.carNo)}｜裝備 ${receiptEsc(r.equipmentNo)}${r.productProgram?`｜品名及程式 ${receiptEsc(r.productProgram)}`:''}
         <div style="color:#7a8da4;margin-top:2px">${receiptEsc(r.createdText||'')}</div>
         <button type="button" onclick="deleteIssueReceiptRecord('${receiptEsc(r.id)}')" style="position:absolute;right:7px;top:7px;border:1px solid #e2b6bc;background:#fff5f6;color:#a12b39;border-radius:6px;padding:3px 6px;font-size:9.5px;font-weight:800;cursor:pointer">刪除</button>
       </div>`).join(''):'';
@@ -1602,18 +1754,29 @@ function exportIssueReceiptExcel(){
   if(!rows.length)return showToast('此送修單位目前沒有已儲存的簽收資料','error');
 
   const generated=new Date().toLocaleString('zh-TW');
+  const imageParts=[];
+  function signatureImageRef(data,role,index){
+    const src=String(data||'');
+    const m=src.match(/^data:image\/png;base64,(.+)$/i);
+    if(!m)return '';
+    const filename=`signature_${role}_${index+1}.png`;
+    imageParts.push({filename,base64:m[1].replace(/\s+/g,'')});
+    return `<img src="${filename}" alt="電子簽名" width="72" height="24" style="display:block;margin:auto;width:72px;height:24px;object-fit:contain;background:transparent">`;
+  }
+
   const bodyRows=rows.map((r,i)=>`
-    <tr>
+    <tr class="receipt-data-row">
       <td class="center">${i+1}</td>
       <td>${receiptEsc(r.workOrder)}</td>
       <td>${receiptEsc(r.carNo)}</td>
       <td>${receiptEsc(r.equipmentNo)}</td>
-      <td>${receiptEsc(r.repairReceiver||'')}</td>
+      <td>${receiptEsc(r.productProgram||'')}</td>
+      <td style="font-weight:700">${receiptEsc(r.repairReceiver||'')}</td>
       <td>${receiptDateText(r.repairDate)}</td>
-      <td class="sign"></td>
-      <td>${receiptEsc(r.finalReceiver||'')}</td>
+      <td class="sign">${signatureImageRef(r.repairSignature,'repair',i)}</td>
+      <td style="font-weight:700">${receiptEsc(r.finalReceiver||'')}</td>
       <td>${receiptDateText(r.finalDate)}</td>
-      <td class="sign"></td>
+      <td class="sign">${signatureImageRef(r.finalSignature,'final',i)}</td>
     </tr>`).join('');
 
   const sheet=`<!DOCTYPE html>
@@ -1630,16 +1793,20 @@ th{background:#eaf1f8;font-weight:bold;text-align:center}
 .title{font-size:18pt;font-weight:bold;text-align:center;border:0;height:38px}
 .meta{border:0;font-size:10pt}
 .center{text-align:center}
-.sign{height:42px;min-width:90px}
+.receipt-data-row{height:23pt;mso-height-source:userset}
+.receipt-data-row td{height:23pt;padding-top:1px;padding-bottom:1px}
+.sign{height:23pt;min-width:72px;text-align:center;overflow:hidden;padding:1px 4px;background:transparent}
+.sign img{display:block;margin:auto;width:72px;height:24px;object-fit:contain;background:transparent}
 </style></head><body>
 <table>
-<tr><td colspan="10" class="title">裝備領用簽收證明</td></tr>
-<tr><td colspan="10" class="meta"><b>送修單位：</b>${receiptEsc(unit)}　　<b>累計筆數：</b>${rows.length}　　<b>匯出時間：</b>${receiptEsc(generated)}</td></tr>
+<tr><td colspan="11" class="title">裝備領用簽收證明</td></tr>
+<tr><td colspan="11" class="meta"><b>送修單位：</b>${receiptEsc(unit)}　　<b>累計筆數：</b>${rows.length}　　<b>匯出時間：</b>${receiptEsc(generated)}</td></tr>
 <tr>
 <th style="width:36px">序號</th>
 <th>工作命令號碼</th>
 <th>車廂號碼</th>
 <th>裝備號碼</th>
+<th>品名及程式</th>
 <th>接修者</th>
 <th>接修日期</th>
 <th>接修者簽名</th>
@@ -1651,7 +1818,28 @@ ${bodyRows}
 </table>
 </body></html>`;
 
-  const blob=new Blob(['\ufeff',sheet],{type:'application/vnd.ms-excel;charset=utf-8'});
+  // Excel 對 HTML .xls 裡的 data:image URI 支援不完整，會顯示「無法顯示連結的影像」。
+  // 改用 MHTML multipart/related，把 PNG 簽名真正封裝在同一個 .xls 檔案內。
+  const boundary='----=_73G_SIGNATURE_'+Date.now();
+  const crlf='\r\n';
+  const wrap76=s=>String(s||'').match(/.{1,76}/g)?.join(crlf)||'';
+  let mhtml='MIME-Version: 1.0'+crlf+
+    `Content-Type: multipart/related; boundary="${boundary}"`+crlf+crlf+
+    `--${boundary}`+crlf+
+    'Content-Type: text/html; charset="utf-8"'+crlf+
+    'Content-Transfer-Encoding: 8bit'+crlf+
+    'Content-Location: receipt.htm'+crlf+crlf+
+    sheet+crlf;
+  imageParts.forEach(img=>{
+    mhtml+=`--${boundary}`+crlf+
+      'Content-Type: image/png'+crlf+
+      'Content-Transfer-Encoding: base64'+crlf+
+      `Content-Location: ${img.filename}`+crlf+crlf+
+      wrap76(img.base64)+crlf;
+  });
+  mhtml+=`--${boundary}--`+crlf;
+
+  const blob=new Blob(['\ufeff',mhtml],{type:'application/vnd.ms-excel;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   const safeUnit=unit.replace(/[\\/:*?"<>|]+/g,'_').slice(0,50);
@@ -1659,7 +1847,7 @@ ${bodyRows}
   a.download=`73G_裝備領用簽收證明_${safeUnit}_${new Date().toISOString().slice(0,10)}.xls`;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  showToast(`已匯出 ${unit} 共 ${rows.length} 筆簽收資料`,'success');
+  showToast(`已匯出 ${unit} 共 ${rows.length} 筆簽收資料（電子簽名已內嵌）`,'success');
 }
 
 // ===== Safe modal backdrop close =====
@@ -1674,7 +1862,8 @@ function installSafeModalBackdropClose(){
     reportModal:()=>closeReport(),
     stockInModal:()=>closeStockIn(),
     serialBatchModal:()=>closeSerialBatch(),
-    issueReceiptModal:()=>closeIssueReceipt()
+    issueReceiptModal:()=>closeIssueReceipt(),
+    signaturePadModal:()=>closeSignaturePad()
   };
   Object.entries(closers).forEach(([id,closeFn])=>{
     const overlay=document.getElementById(id);if(!overlay)return;
@@ -1696,6 +1885,8 @@ function installSafeModalBackdropClose(){
   });
 }
 installSafeModalBackdropClose();
+installSignaturePadEvents();
+refreshReceiptSignatureUI('repair');refreshReceiptSignatureUI('final');
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn();closeIssueReceipt()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
