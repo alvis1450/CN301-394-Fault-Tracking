@@ -939,7 +939,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 
 /* ===== IMPORT / EXPORT MENU ===== */
 .io-wrap{position:relative;display:inline-flex}
-.io-menu{position:absolute;right:0;top:50px;z-index:120;width:248px;padding:8px;background:#fff;border:1px solid #d7e2ef;border-radius:14px;box-shadow:0 16px 38px rgba(8,45,99,.20);display:none;color:#17345f}
+.io-menu{position:absolute;right:0;top:50px;z-index:120;width:270px;max-height:min(76vh,620px);overflow-y:auto;padding:8px;background:#fff;border:1px solid #d7e2ef;border-radius:14px;box-shadow:0 16px 38px rgba(8,45,99,.20);display:none;color:#17345f}
 .io-menu.show{display:block}
 .io-menu-title{padding:7px 10px 8px;font-size:12px;font-weight:800;color:#6d819c;border-bottom:1px solid #edf2f7;margin-bottom:5px}
 .io-item{width:100%;border:0;background:transparent;border-radius:9px;padding:10px 11px;display:flex;align-items:center;gap:10px;text-align:left;font-family:inherit;font-size:13.5px;font-weight:700;color:#17345f;cursor:pointer}
@@ -1216,7 +1216,149 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
     overflow:visible !important;
   }
 }
+
+/* ===== V2.5 Simple equipment + damage date ===== */
+.equipment-controls-simple{display:block!important;margin:0 0 6px!important}
+.equipment-controls-simple .equipment-picker{width:100%!important}
+.equipment-controls-simple .equipment-search{width:100%!important;height:36px!important;min-height:36px!important;font-size:13px!important}
+@media(max-width:680px){.equipment-controls-simple .equipment-search{height:42px!important;min-height:42px!important;font-size:15px!important}}
+
+/* ===== V2.5 Damage date + status export ===== */
+.damage-date-wrap{display:flex!important;flex-direction:column;gap:3px;margin-top:4px}
+.damage-date-label{font-size:9.5px;font-weight:750;color:#6c819d;line-height:1.05}
+.damage-date-label small{font-size:8px;font-weight:550;margin-left:3px;color:#94a3b5}
+.damage-date-input{width:100%!important;height:32px!important;min-height:32px!important;padding:0 6px!important;border:1px solid #cfdbea!important;border-radius:8px!important;background:#fff!important;color:#23476e!important;font-size:11px!important;font-weight:700!important}
+.io-subtitle{margin-top:1px;padding-top:4px!important;padding-bottom:4px!important;border-bottom:0!important;color:#45688f!important}
+@media(max-width:680px){.damage-date-label{font-size:11px}.damage-date-input{height:40px!important;min-height:40px!important;font-size:14px!important}}
 </style>
+
+<style id="v2-core-styles">
+/* ===== V2.1 Core UX ===== */
+.fault-meta-controls{display:grid;grid-template-columns:58px minmax(0,1fr);gap:5px;margin-top:4px}
+.category-select,.equipment-category-select,.equipment-type-select{height:30px;min-width:0;border:1px solid #cfdbea;border-radius:8px;background:#fff;color:#274668;font-size:11px;font-weight:750;padding:0 6px;outline:none}
+.equipment-controls{display:grid;grid-template-columns:118px 120px minmax(190px,1fr);gap:5px;margin:0 0 6px}
+.equipment-picker{margin-top:0;position:relative}
+.equipment-search{width:100%;height:34px!important;min-height:34px!important;border:1px solid #cfdbea!important;border-radius:8px!important;background:#fff!important;padding:0 9px!important;font-size:12px!important;font-weight:650!important;color:#17365f!important}
+.equipment-search::placeholder{color:#8292a7!important;font-weight:500!important}
+.equipment-summary{margin-top:4px;font-size:10px;color:#6d819c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.equipment-summary b{color:#234d7c}
+
+.fault-desc-cell{min-width:0;width:100%}.fault-desc-cell textarea{width:100%}
+.fault-timeline{margin-top:4px;border-top:1px dashed #dce6f1;padding-top:4px}.fault-timeline summary{cursor:pointer;color:#617995;font-size:10.5px;font-weight:700;list-style:none}.fault-timeline summary::-webkit-details-marker{display:none}.fault-timeline summary:before{content:'▸';margin-right:5px}.fault-timeline[open] summary:before{content:'▾'}
+.timeline-item{display:grid;grid-template-columns:auto auto;justify-content:start;column-gap:8px;row-gap:1px;padding:4px 6px;border-radius:7px;background:#f7f9fc;font-size:10.5px;color:#315271}.timeline-item time{color:#7d8fa5;font-variant-numeric:tabular-nums}.timeline-item small{grid-column:1/-1;color:#8291a4}.timeline-empty{font-size:10.5px;color:#8b9aae;padding:4px 0}
+.status-select option:disabled{color:#aeb8c5;background:#f4f6f8}
+@media(max-width:680px){.fault-meta-controls{grid-template-columns:1fr}.category-select,.equipment-category-select,.equipment-type-select{height:40px;font-size:14px}.equipment-controls{grid-template-columns:86px 1fr;gap:7px}.equipment-type-select{grid-column:2}.equipment-picker{grid-column:1/-1;margin-top:0}.equipment-search{height:42px!important;min-height:42px!important;font-size:14px!important}.equipment-summary{font-size:11px;white-space:normal}.fault-timeline summary{font-size:12px}.timeline-item{font-size:12px}.fault-desc-cell{width:100%!important}}
+</style>
+
+
+<style id="quick-operation-v27">
+.today-filter-btn{font-weight:750!important}.today-filter-btn.active-filter{background:#173b70!important;color:#fff!important;border-color:#173b70!important;box-shadow:0 0 0 2px #dce8f6!important}
+.delete-btn{font-size:16px!important;line-height:1!important}
+@media(max-width:680px){.today-filter-btn{min-height:40px}}
+</style>
+
+<style id="status-unit-breakdown-style">
+.status-unit-breakdown{grid-column:1 / -1;margin-top:2px;background:#fff;border:1px solid #d8e3ef;border-radius:14px;padding:11px 12px 12px;box-shadow:0 5px 16px rgba(20,55,100,.06)}
+.status-unit-breakdown[hidden]{display:none!important}
+.status-unit-breakdown-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.status-unit-breakdown-head>div{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.status-unit-breakdown-head b{font-size:14px;color:#173b70}.status-unit-breakdown-head small{font-size:10.5px;color:#788aa1}
+.status-unit-close{border:0;background:#f3f6fa;color:#6c7f98;width:28px;height:28px;border-radius:8px;font-size:20px;line-height:1;cursor:pointer}.status-unit-close:hover{background:#e8eef5;color:#244b78}
+.status-unit-grid{display:grid;grid-template-columns:repeat(7,minmax(86px,1fr));gap:7px}
+.status-unit-item{min-width:0;height:46px;border:1px solid #d8e3ef;border-radius:10px;background:#f9fbfd;color:#355372;padding:0 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font-weight:700}.status-unit-item:hover{background:#f0f5fb;border-color:#afc5dd}.status-unit-item span{font-size:12px;white-space:nowrap}.status-unit-item b{font-size:18px;color:#153b72;font-variant-numeric:tabular-nums}.status-unit-item.zero{opacity:.48}.status-unit-item.active{background:#eaf2fb;border-color:#6f99c8;box-shadow:0 0 0 1px #6f99c8 inset}.status-unit-item:disabled{cursor:default}
+.dashboard-status-card.breakdown-open{box-shadow:0 0 0 2px #315d91 inset,0 5px 14px rgba(20,55,100,.09)!important}
+@media(max-width:1100px){.status-unit-grid{grid-template-columns:repeat(4,minmax(82px,1fr))}}
+@media(max-width:680px){.status-unit-breakdown{margin-top:7px;padding:10px}.status-unit-grid{display:flex;overflow-x:auto;gap:7px;padding-bottom:2px}.status-unit-item{flex:0 0 92px;height:44px}.status-unit-breakdown-head b{font-size:13px}.status-unit-breakdown-head small{display:none}}
+
+/* ===== Status detail modal ===== */
+.status-detail-backdrop{position:fixed;inset:0;z-index:500;background:rgba(13,35,66,.58);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px}
+.status-detail-backdrop[hidden]{display:none!important}
+.status-detail-modal{width:min(1540px,96vw);height:min(760px,90vh);background:#fff;border-radius:20px;box-shadow:0 28px 80px rgba(5,24,50,.28);overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.65)}
+.status-detail-head{min-height:78px;padding:18px 26px;border-bottom:1px solid #dbe5ef;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.status-detail-title{min-width:0}.status-detail-title h2{margin:0;color:#163c71;font-size:23px;line-height:1.2;font-weight:850}.status-detail-title p{margin:5px 0 0;color:#7488a2;font-size:12.5px;font-weight:600}
+.status-detail-close{width:40px;height:40px;border:1px solid #d4dfeb;border-radius:12px;background:#fff;color:#58708f;font-size:23px;line-height:1;cursor:pointer;flex:0 0 auto}.status-detail-close:hover{background:#eef4fb;color:#173b70}
+.status-detail-summary{display:flex;align-items:center;gap:7px;padding:9px 24px;border-bottom:1px solid #e8eef5;background:#fff;overflow-x:auto;min-height:52px}
+.status-detail-unit-chip{flex:0 0 auto;border:1px solid #d6e2ef;border-radius:10px;background:#f7fafe;color:#496887;min-width:70px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;font-weight:750;cursor:pointer}.status-detail-unit-chip b{font-size:14px;color:#173b70}.status-detail-unit-chip.active{background:#173b70;color:#fff;border-color:#173b70}.status-detail-unit-chip.active b{color:#fff}.status-detail-unit-chip.zero{opacity:.5}
+.status-detail-table-wrap{flex:1;min-height:0;overflow:auto;background:#fff}
+.status-detail-table{width:100%;min-width:1250px;border-collapse:separate;border-spacing:0;color:#19395f;font-size:13px}
+.status-detail-table thead th{position:sticky;top:0;z-index:2;background:#eef3f8;color:#315276;text-align:left;font-size:11.5px;font-weight:850;padding:11px 12px;border-bottom:1px solid #cedae7;white-space:nowrap}
+.status-detail-table tbody td{padding:13px 12px;border-bottom:1px solid #e8eef4;vertical-align:top;background:#fff;line-height:1.45}.status-detail-table tbody tr:hover td{background:#f8fbff}
+.status-detail-table .cell-unit{font-weight:850;color:#173b70;white-space:nowrap}.status-detail-table .cell-car{font-weight:800;color:#17457d;white-space:nowrap}.status-detail-table .cell-date{white-space:nowrap;font-variant-numeric:tabular-nums}.status-detail-table .cell-equipment{font-weight:750;color:#183f70}.status-detail-table .cell-person{white-space:nowrap}.status-detail-table .cell-location{white-space:nowrap}.status-detail-table .cell-desc{min-width:260px;max-width:420px;white-space:pre-wrap;overflow-wrap:anywhere}
+.status-detail-status{display:inline-flex;align-items:center;justify-content:center;min-width:76px;min-height:29px;border-radius:9px;padding:4px 9px;font-weight:850;font-size:11.5px;border:1px solid}.status-detail-status.fault{background:#fff0f2;border-color:#efb1b8;color:#a91d2b}.status-detail-status.repair{background:#fff7e7;border-color:#e5c57d;color:#815500}.status-detail-status.fixed{background:#edf8f1;border-color:#9ed5b4;color:#176942}.status-detail-status.clear{background:#edf6fc;border-color:#add1e7;color:#256487}
+.status-detail-empty{padding:70px 20px;text-align:center;color:#8395aa;font-size:14px}.status-detail-empty b{display:block;color:#496684;font-size:18px;margin-bottom:6px}
+.status-detail-foot{min-height:48px;padding:9px 22px;border-top:1px solid #e3eaf2;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#71849b;font-size:11.5px}.status-detail-foot button{border:1px solid #cad8e7;background:#fff;color:#31567f;border-radius:9px;padding:7px 12px;font-weight:750;cursor:pointer}.status-detail-foot button:hover{background:#eef4fb}
+@media(max-width:680px){.status-detail-backdrop{padding:7px;align-items:stretch}.status-detail-modal{width:100%;height:calc(100dvh - 14px);max-height:none;border-radius:15px}.status-detail-head{min-height:66px;padding:13px 14px}.status-detail-title h2{font-size:17px}.status-detail-title p{font-size:10.5px}.status-detail-summary{padding:7px 10px}.status-detail-table{min-width:1040px;font-size:12px}.status-detail-table thead th{padding:9px 8px}.status-detail-table tbody td{padding:10px 8px}.status-detail-foot{padding:8px 10px}}
+</style>
+
+<style id="v216-professional-palette">
+/* ===== V2.16 Professional palette refinement ===== */
+:root{
+  --v216-brand-950:#12324f;
+  --v216-brand-900:#173a5e;
+  --v216-brand-800:#1f4e79;
+  --v216-brand-700:#2b5f90;
+  --v216-canvas:#f5f7fa;
+  --v216-panel:#ffffff;
+  --v216-soft:#f8fafc;
+  --v216-line:#d9e2ec;
+  --v216-line-strong:#c7d3e0;
+  --v216-text:#17324d;
+  --v216-muted:#6b7f95;
+  --v216-fault-bg:#fff3f4;
+  --v216-fault-line:#efb8be;
+  --v216-fault-text:#a52a35;
+  --v216-repair-bg:#fff8eb;
+  --v216-repair-line:#e7cf9a;
+  --v216-repair-text:#845b10;
+  --v216-fixed-bg:#eef8f2;
+  --v216-fixed-line:#b9dec8;
+  --v216-fixed-text:#17643d;
+  --v216-shadow:0 8px 24px rgba(18,50,79,.07);
+}
+html,body{background:var(--v216-canvas)!important;color:var(--v216-text)!important}
+body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif!important}
+.topbar{background:linear-gradient(120deg,var(--v216-brand-950) 0%,var(--v216-brand-900) 58%,var(--v216-brand-800) 100%)!important;border-bottom:1px solid rgba(255,255,255,.12)!important;box-shadow:0 5px 18px rgba(18,50,79,.16)!important}
+.brand-icon{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.14)!important;box-shadow:none!important}
+.header-pill,.header-btn{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.18)!important;color:#fff!important;box-shadow:none!important}
+.header-btn:hover{background:rgba(255,255,255,.14)!important}
+.header-btn.primary{background:#fff!important;color:var(--v216-brand-900)!important;border-color:#fff!important;box-shadow:0 2px 8px rgba(0,0,0,.08)!important}
+.dashboard-total-card,.dashboard-status-card{background:var(--v216-panel)!important;border-color:var(--v216-line)!important;box-shadow:0 3px 10px rgba(18,50,79,.045)!important}
+.dashboard-total-card{border-left:4px solid var(--v216-brand-800)!important}
+.dashboard-total-number{color:var(--v216-brand-900)!important}
+.dashboard-total-title{color:#365a7d!important}.dashboard-total-subtitle{color:var(--v216-muted)!important}
+.dashboard-status-card.stat-all{background:#fff!important;border-color:#c9d7e6!important;color:#44627f!important}
+.dashboard-status-card.stat-all b{color:var(--v216-brand-900)!important}
+.dashboard-status-card.stat-fault{background:var(--v216-fault-bg)!important;border-color:var(--v216-fault-line)!important;color:var(--v216-fault-text)!important}.dashboard-status-card.stat-fault b{color:#b22331!important}
+.dashboard-status-card.stat-repair{background:var(--v216-repair-bg)!important;border-color:var(--v216-repair-line)!important;color:var(--v216-repair-text)!important}.dashboard-status-card.stat-repair b{color:#7d5200!important}
+.dashboard-status-card.stat-fixed{background:var(--v216-fixed-bg)!important;border-color:var(--v216-fixed-line)!important;color:var(--v216-fixed-text)!important}.dashboard-status-card.stat-fixed b{color:#145f38!important}
+.toolbar{background:var(--v216-panel)!important;border-color:var(--v216-line)!important;box-shadow:0 2px 10px rgba(18,50,79,.04)!important}
+#search,.quick-filter,.damage-date-filter,.toolbar input,.toolbar select{background:#fbfcfe!important;border-color:#d3dee9!important;color:var(--v216-text)!important;box-shadow:none!important}
+#search:focus,.quick-filter:focus,.damage-date-filter:focus,.toolbar input:focus,.toolbar select:focus{border-color:#7fa5c8!important;box-shadow:0 0 0 3px rgba(43,95,144,.10)!important}
+.clear-filter-btn,.today-filter-btn{background:#fff!important;border:1px solid #d4dee8!important;color:#3f5f7f!important;box-shadow:none!important}
+.clear-filter-btn:hover,.today-filter-btn:hover{background:#f4f7fb!important;border-color:#aac0d5!important;color:var(--v216-brand-900)!important}
+.toolbar-note{color:var(--v216-muted)!important}
+.table-panel{background:#fff!important;border-color:var(--v216-line)!important;box-shadow:var(--v216-shadow)!important}
+.column-head{background:linear-gradient(105deg,var(--v216-brand-900),var(--v216-brand-800))!important;border-bottom-color:#315f88!important}
+.car{background:#fff!important;border-bottom-color:#e7edf4!important}.car:hover{background:#fbfcfe!important}
+.head{background:#fafcfe!important;border-right-color:#edf1f5!important}.carno{color:#173f6e!important}
+.row{background:#fbfcfe!important;border-color:#dfe7ef!important;box-shadow:none!important}.row:hover{background:#fff!important;border-color:#c9d6e3!important;box-shadow:0 3px 10px rgba(18,50,79,.045)!important}
+.row.unsaved{background:#fff9ec!important;border-color:#dfba64!important;box-shadow:inset 3px 0 0 #d6a83f!important}
+.status-select.status-fault{background:var(--v216-fault-bg)!important;border-color:var(--v216-fault-line)!important;color:var(--v216-fault-text)!important}
+.status-select.status-repair{background:var(--v216-repair-bg)!important;border-color:var(--v216-repair-line)!important;color:var(--v216-repair-text)!important}
+.status-select.status-fixed{background:var(--v216-fixed-bg)!important;border-color:var(--v216-fixed-line)!important;color:var(--v216-fixed-text)!important}
+.unit-select,.vehicle-no-select,.vehicle-no-custom,.tech,.wit,.location-select,.location-detail,.equipment-input,.damage-date-input,textarea{background:#fff!important;border-color:#d5e0ea!important;color:var(--v216-text)!important}
+.unit-select:focus,.vehicle-no-select:focus,.vehicle-no-custom:focus,.tech:focus,.wit:focus,.location-select:focus,.location-detail:focus,.equipment-input:focus,.damage-date-input:focus,textarea:focus{border-color:#7fa5c8!important;box-shadow:0 0 0 3px rgba(43,95,144,.09)!important}
+.add-btn{background:#fff!important;border-color:#b7c9dc!important;color:#456b91!important}.add-btn:hover{background:#f2f6fb!important;border-color:#87a8c7!important;color:var(--v216-brand-900)!important}
+.car-location{background:#fafcfe!important;border-left-color:#e2e9f1!important}
+.savebar{background:rgba(18,50,79,.98)!important;box-shadow:0 -5px 18px rgba(18,50,79,.15)!important}.discard{background:#2c5278!important;border-color:#6f8ca8!important}.save-submit{background:#178a4d!important}
+.io-menu{border-color:var(--v216-line)!important;box-shadow:0 16px 34px rgba(18,50,79,.16)!important}.io-item:hover{background:#f2f6fa!important}.io-icon{background:#edf3f8!important}
+.status-detail-modal,.modal-panel,.detail-modal-card{background:#fff!important;border-color:var(--v216-line)!important;box-shadow:0 24px 60px rgba(18,50,79,.22)!important}
+@media(max-width:680px){
+  .dashboard-status-card{box-shadow:none!important}
+  .toolbar{box-shadow:none!important}
+  .row{background:#fff!important}
+}
+</style>
+
 </head>
 <body>
 <div class="topbar">
@@ -1224,7 +1366,7 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
     <div class="brand-wrap">
       <div class="brand-icon">🚆</div>
       <div class="brand-text">
-        <h1>73G-3 故障追蹤系統 <span>Fault Tracking System</span></h1>
+        <h1>73G-3 故障追蹤系統 <span>Fault Tracking System · Final QA</span></h1>
         <div class="brand-meta">
           <span>作業單位 Unit：<b>3C</b></span><span class="meta-sep">|</span>
           <span>車廂總數 Total：<b id="vehicleTotal">--</b> carriages</span><span class="meta-sep">|</span>
@@ -1240,10 +1382,16 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <button class="header-btn" id="ioMenuBtn" onclick="toggleIOMenu(event)">⇄ 匯入 / 匯出 <span style="font-size:10px">▼</span></button>
         <div class="io-menu" id="ioMenu">
           <div class="io-menu-title">資料交換 Import / Export</div>
-          <button class="io-item" onclick="chooseImportFile()"><span class="io-icon">📤</span><span>匯入資料<small>Import CSV / JSON</small></span></button>
-          <button class="io-item" onclick="exportCsvData()"><span class="io-icon">📊</span><span>匯出 CSV<small>可用 Excel 開啟與編輯</small></span></button>
-          <button class="io-item" onclick="backupData()"><span class="io-icon">💾</span><span>匯出 JSON<small>完整系統備份</small></span></button>
+          <button class="io-item" onclick="chooseImportFile()"><span class="io-icon">📤</span><span>匯入資料<small>Import CSV / JSON（可含各種狀態）</small></span></button>
           <div class="io-sep"></div>
+          <div class="io-menu-title io-subtitle">依狀態匯出 CSV</div>
+          <button class="io-item" onclick="exportCsvData()"><span class="io-icon">📊</span><span>全部紀錄<small>All records</small></span></button>
+          <button class="io-item" onclick="exportCsvData('unfinished')"><span class="io-icon">⚠️</span><span>未完成<small>故障＋維修中</small></span></button>
+          <button class="io-item" onclick="exportCsvData('fault')"><span class="io-icon">🚨</span><span>故障<small>Fault</small></span></button>
+          <button class="io-item" onclick="exportCsvData('repair')"><span class="io-icon">🛠️</span><span>維修中<small>Under Repair</small></span></button>
+          <button class="io-item" onclick="exportCsvData('fixed')"><span class="io-icon">✅</span><span>已修復<small>Fixed</small></span></button>
+          <div class="io-sep"></div>
+          <button class="io-item" onclick="backupData()"><span class="io-icon">💾</span><span>匯出 JSON<small>完整系統備份</small></span></button>
           <button class="io-item" onclick="downloadCsvTemplate()"><span class="io-icon">📋</span><span>下載匯入範本<small>CSV Import Template</small></span></button>
         </div>
       </div>
@@ -1271,33 +1419,39 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
     </div>
   </div>
   <div class="dashboard-status-cards">
-    <div class="dashboard-status-card stat-all" data-filter="all" role="button" tabindex="0" onclick="setQuickFilter('all')"><span class="stat-name">全部紀錄</span><b id="statAll">0</b></div>
-    <div class="dashboard-status-card stat-fault" data-filter="fault" role="button" tabindex="0" onclick="setQuickFilter('fault')"><span class="stat-name">🚨 故障</span><b id="statFault">0</b></div>
-    <div class="dashboard-status-card stat-repair" data-filter="repair" role="button" tabindex="0" onclick="setQuickFilter('repair')"><span class="stat-name">🛠️ 維修中</span><b id="statRepair">0</b></div>
-    <div class="dashboard-status-card stat-pending" data-filter="pending" role="button" tabindex="0" onclick="setQuickFilter('pending')"><span class="stat-name">⏳ 待確認</span><b id="statPending">0</b></div>
-    <div class="dashboard-status-card stat-fixed" data-filter="fixed" role="button" tabindex="0" onclick="setQuickFilter('fixed')"><span class="stat-name">✅ 已修復</span><b id="statFixed">0</b></div>
-    <div class="dashboard-status-card stat-clear" data-filter="clear" role="button" tabindex="0" onclick="setQuickFilter('clear')"><span class="stat-name">🟢 均完成</span><b id="statClear">0</b></div>
+    <div class="dashboard-status-card stat-all" data-filter="all" role="button" tabindex="0" onclick="handleDashboardStatusClick('all')"><span class="stat-name">全部紀錄</span><b id="statAll">0</b></div>
+    <div class="dashboard-status-card stat-fault" data-filter="fault" role="button" tabindex="0" onclick="handleDashboardStatusClick('fault')"><span class="stat-name">🚨 故障</span><b id="statFault">0</b></div>
+    <div class="dashboard-status-card stat-repair" data-filter="repair" role="button" tabindex="0" onclick="handleDashboardStatusClick('repair')"><span class="stat-name">🛠️ 維修中</span><b id="statRepair">0</b></div>
+    <div class="dashboard-status-card stat-fixed" data-filter="fixed" role="button" tabindex="0" onclick="handleDashboardStatusClick('fixed')"><span class="stat-name">✅ 已修復</span><b id="statFixed">0</b></div>
+  </div>
+  <div class="status-unit-breakdown" id="statusUnitBreakdown" hidden>
+    <div class="status-unit-breakdown-head">
+      <div><b id="statusUnitBreakdownTitle">各單位紀錄數</b><small id="statusUnitBreakdownSub">Unit Breakdown</small></div>
+      <button type="button" class="status-unit-close" onclick="closeStatusUnitBreakdown()" aria-label="關閉單位統計">×</button>
+    </div>
+    <div class="status-unit-grid" id="statusUnitGrid"></div>
   </div>
 </section>
 <main>
   <div class="toolbar optimized-toolbar">
     <div class="toolbar-controls">
       <div class="search-wrap">
-        <input id="search" placeholder="🔎 搜尋單位 / 車號 / 車廂號碼 / 地點 / Search" oninput="render()">
+        <input id="search" placeholder="🔎 搜尋車號 / 車廂 / 設備 / 故障 / 人員" oninput="render()">
       </div>
       <select id="quickStatusFilter" class="quick-filter" aria-label="狀態篩選" onchange="setQuickFilter(this.value)">
         <option value="all">全部狀態 / All Status</option>
         <option value="fault">🚨 故障 / Fault</option>
         <option value="repair">🛠️ 維修中 / Repair</option>
-        <option value="pending">⏳ 待確認 / Pending</option>
         <option value="fixed">✅ 已修復 / Fixed</option>
-        <option value="clear">🟢 均完成 / All Clear</option>
       </select>
       <select id="quickUnitFilter" class="quick-filter" aria-label="單位篩選" onchange="setUnitFilter(this.value)">
         <option value="">全部單位 / All Units</option>
-        <option value="1C">1C</option><option value="2C">2C</option><option value="3C">3C</option><option value="4C">4C</option><option value="73G-HC">73G-HC</option><option value="HQ">HQ</option><option value="STC">STC</option>
+        <option value="3C">3C</option>
       </select>
-      <label class="unfinished-toggle"><input id="unfinishedOnly" type="checkbox" onchange="setUnfinishedOnly(this.checked)"><span>只顯示未完成</span></label>
+      <select id="quickDamageDate" class="quick-filter damage-date-select" aria-label="故障日期篩選" onchange="setDamageDateFilter(this.value)">
+        <option value="">全部故障日期 / All Dates</option>
+      </select>
+      <button type="button" id="todayFaultBtn" class="clear-filter-btn today-filter-btn" onclick="toggleTodayFaults()">今日故障</button>
       <button type="button" class="clear-filter-btn" onclick="clearQuickFilters()">清除篩選</button>
     </div>
     <div class="toolbar-note"><span id="visibleCountNote">顯示全部車廂</span><span class="toolbar-note-sep">｜</span>修改後請按「儲存並送出」</div>
@@ -1315,13 +1469,33 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
         <div class="col-title">故障描述<small>Fault Description</small></div>
         <div class="col-title">維修人員<small>Repair Technician</small></div>
         <div class="col-title h-wit">見證人<small>Witness</small></div>
-        <div class="col-title">地點<small>Location</small></div>
         <div class="col-title action-spacer"></div>
       </div>
     </div>
     <div id="app"></div>
+    <datalist id="equipmentSuggestions"></datalist>
+    <datalist id="techSuggestions"></datalist>
+    <datalist id="witnessSuggestions"></datalist>
   </div>
 </main>
+
+<div class="status-detail-backdrop" id="statusDetailBackdrop" hidden onclick="statusDetailBackdropClick(event)">
+  <section class="status-detail-modal" role="dialog" aria-modal="true" aria-labelledby="statusDetailTitle">
+    <header class="status-detail-head">
+      <div class="status-detail-title"><h2 id="statusDetailTitle">故障明細</h2><p id="statusDetailSubtitle">依單位顯示目前紀錄</p></div>
+      <button type="button" class="status-detail-close" aria-label="關閉" onclick="closeStatusDetailModal()">×</button>
+    </header>
+    <div class="status-detail-summary" id="statusDetailUnitSummary"></div>
+    <div class="status-detail-table-wrap" id="statusDetailTableWrap">
+      <table class="status-detail-table">
+        <thead><tr><th>單位<br>Unit</th><th>車號<br>Vehicle</th><th>車廂 / 設備<br>Asset</th><th>損壞日期<br>Damage Date</th><th>狀態<br>Status</th><th>設備名稱<br>Equipment</th><th>故障描述<br>Description</th><th>維修人員<br>Technician</th><th>見證人<br>Witness</th><th>地點<br>Location</th></tr></thead>
+        <tbody id="statusDetailTableBody"></tbody>
+      </table>
+      <div class="status-detail-empty" id="statusDetailEmpty" hidden><b>目前沒有符合的紀錄</b>請切換其他狀態或單位</div>
+    </div>
+    <footer class="status-detail-foot"><span id="statusDetailCount">0 筆紀錄</span><button type="button" onclick="closeStatusDetailModal()">關閉 Close</button></footer>
+  </section>
+</div>
 
 <div id="savebar" class="savebar">
   <div class="inside">
@@ -1335,8 +1509,6 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SYSTEM_ID="73G-3";
-const PAGE_ID="73G-3";
-const PAGE_UNIT="3C";
 const SUPABASE_URL="https://jyjgbduvmfmzlhhciylc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_TKfm5-U3zR5Qj2uQ5itMBQ_JUKGopEg";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -1359,6 +1531,117 @@ const VEHICLE_OPTIONS=[
 ];
 const VEHICLE_OPTION_SET=new Set(VEHICLE_OPTIONS);
 const LOCATION_OPTIONS=["外臺","演訓","營區","其他"];
+const FAULT_CATEGORIES=["電源","網路","通訊","冷氣","顯示設備","線路","機械","軟體","其他"];
+const EQUIPMENT_CATALOG={
+  "網路設備":{
+    "路由器":["CN 紅區路由器 CISCO C8300-1N1S-6T"],
+    "交換器":["CN 紅區交換器 CISCO C9200L-24P-4G-E","CN 紅區交換器 CISCO C9200L-48P-4G-E","CN 黑區路由器/交換器 CISCO C9200CX-8P-2X2G-A"],
+    "無線網路":["ARUBA AP-565 無線存取點","ARUBA 無線存取點安裝基座"],
+    "PoE":["8埠 PoE 中跨供電器","POE 單埠供電器 30W 56V (CISCO PHONE)","ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT"],
+    "網路介面":["RF-7800W IU310 網路介面單元(NIU)","4埠 RS-232 序列裝置伺服器(MOXA)"],
+    "SFP":["1.25Gbps SFP光纖收發器 1000MB 10KM 1310NM","SFP銅纜收發器 1000MB 100M RJ45","FIBER SFP TRANSCEIVER 1000MB 10KM 1310NM"]
+  },
+  "無線電／RF":{
+    "無線電機":["TFE 無線電","RF-9850W無線電機（1.35-2.7GHZ）","RF-9850W無線電機（4.4-5.9GHZ）"],
+    "RoIP":["REDCOM SIGMA XRI-400 ROIP 伺服器","TOCNET XPHUB RoIP 閘道器"],
+    "RF配套":["雙工器2744-雙通道","UHF1359P09-MI 導波管","RF-7800W卡","雷擊保護器"]
+  },
+  "電話／語音":{
+    "網路電話":["CISCO 7841 網路電話","CISCO 8865 視訊電話"],
+    "話機／語音":["H-250手持話機","TOCNET XPHUB RoIP 閘道器"]
+  },
+  "伺服器／運算":{
+    "伺服器":["CN 運算伺服器 HPE PROLIANT DL20 第11代","TM2000 GPS 網路時間協定伺服器"],
+    "筆電":["筆電(1)","筆電(2)","GETAC S410G5 RUGGED laptop / GETAC S510 COMPUTER"],
+    "保密器":["TFE 保密器"]
+  },
+  "電源／UPS":{
+    "UPS":["3kVA 不斷電系統","1.5kVA 不斷電系統"],
+    "PDU":["機架電力分配單元","5 路輸出 PDU 組件"],
+    "電源供應器":["100–240VAC 轉 65W 19VDC 電源供應器","TOCNET XPHUB POWER SUPPLY KIT AC TO 24VDC","RF-5051電源線"],
+    "發電／斷路":["15Kw 發電機","低電壓斷路器 車輛電池","NO FUSE BREAKER VEHICLE DC BATTERY","車輛直流電源入口面板"],
+    "電源轉接":["轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","NEMA 5-15轉歐規Schuko轉接頭","英國區交流電插頭轉換器","市電轉換接頭（澳洲）"]
+  },
+  "線材／纜線":{
+    "網路線":["CAT6網路線 屏蔽型 RJ45-RJ45 3呎","CAT6網路線 屏蔽型 RJ45-RJ45 5呎","15英呎網路線","TOCNET 乙太網路線"],
+    "光纖":["光纖線纜組件 4芯扇出型 0.3公尺","單模光纖線纜 LC至ST 黃色 7公尺","光纖線纜組件 ST至LC 單模 5公尺 黃色","300公尺 單模4芯光纖線纜 捲盤式"],
+    "同軸線":["同軸線纜 SMA公頭至TNC公頭 LMR-240 600吋 GPS天線纜線","LMR400-UF RA TNC/M 轉 N/M 全向性天線電纜","RG223 BNC-BNC 30吋 TFE Radio","LMR-240-UF 同軸電纜 無線電-雙工器","CABLE-025-2XTNC 同軸電纜 雙工器-導波管"],
+    "控制／序列線":["RJ11 4路組合轉接線纜","RS-232線","RF-7800W DB9 RS422 NIU序列控制連接線","NIU序列線","15公尺資料與控制線纜組","30公尺資料與控制線纜組","TOCNET 序列線組件","CABLE ASSY TOCNET AUDIO TO RJ45","Dual Radio 6-pin Generic Cable Assemblies"],
+    "電源／接地線":["電源線(筆電)","電源線 IEC C13至NEMA 5-15P 14AWG 6呎","100呎戶外型延長線","線纜組件 接地線 四部無線電","16英寸接地編織線"]
+  },
+  "連接器／轉接器":{
+    "RJ45／耦合器":["配線面板 迷你型","面板式耦合器 CAT6屏蔽型RJ45"],
+    "光纖轉接":["ST光纖面板轉接器 多模/單模 穿板式"],
+    "轉接器":["電纜接頭套件","轉接器 支撐導軌 EATON UPS"]
+  },
+  "天線":{
+    "GPS天線":["L1/L2 車載 GPS 天線","GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式"],
+    "全向天線":["全向性天線","OMNI ANT HORZ(N)"],
+    "碟形天線":["碟形天線 3英尺 MIMO 綠色"],
+    "其他天線":["Band III / IV 天線組件","車載無線電天線安裝套件","Wi-Fi 與 GPS 天線安裝支架","TFE天線安裝支架"]
+  },
+  "桅桿／定位":{
+    "TVAM":["10M 伸縮式車輛天線桅杆（TVAM）系統 TM210/10-2.0","TVAM底座-滾珠螺桿","10M 天線桅杆馬達","TVAM底座-直流馬達皮帶","天線桅杆感測器線纜 DB3999"],
+    "MAP":["手動天線定位器（MAP）","MAP 延伸桿","25M 天線桅杆手動天線定位器(MAP)套件","手動旋轉俯仰器"],
+    "桅桿配件":["天線桅杆遙控器 5米電纜 DB3999 上/下/緊急停止","天線桅桿手動升降搖桿","折疊式T型桿（綠色）","天線桿鎖定掛鉤","電纜導引環","控制盒（24V）軍綠色 383","10M 天線桅杆T型桿控繩套件","25M 天線桅桿T型桿套件","25M 天線桅杆T型桿控繩套件"]
+  },
+  "機架／箱體":{
+    "機架":["CN 網路機架組件","CN 無線電機架組件","空機架組件"],
+    "攜行箱":["旅級指揮所攜行箱","PELICAN Supermac 3U","PELICAN Supermac 5U","DWBK 攜行箱組件","CN 電話攜行箱組件","PELICAN PHONE CASE","TOCNET P-case","碟型天線攜行袋"],
+    "儲物／結構":["CN 工作站儲物櫃","CN 工作站抽屜","車頂儲物箱","雙無線電安裝支架","全向性天線安裝支架"]
+  },
+  "介面面板／I/O":{
+    "CN I/O":["CN 車廂信號輸入輸出面板","CN 車廂WiFi信號輸入輸出面板","CN 車廂RF信號輸入輸出面板組件"],
+    "DWBK／指揮所":["指揮所攜行箱介面面板組件","組件 面板 介面 DWBK"]
+  },
+  "工具／維修":{
+    "量測工具":["數位三用電表","KESTREL 2000 氣象儀"],
+    "手工具":["內六角板手組","螺絲起子組","鐵槌","帆布機械工具袋"],
+    "耗材／固定":["LB8023潤滑膏","黑色尼龍魔鬼氈束帶 36吋","魔鬼氈帶 單圈式 0.75 x 8 英寸","固定夾及接地編織線","螺絲包"]
+  },
+  "安全／附屬":{
+    "安全":["急救包","緊急照明組件","手電筒","火斧"],
+    "附屬":["鉤環","彈力鉤繩","活動綁帶","折疊椅"]
+  },
+  "車廂／環境":{
+    "車廂":["CN-B 旅級通信節點車廂 內部","CN-B 旅級通信節點車廂 外部","門梯","門梯腳","積時表","車廂突波保護裝置"],
+    "環境":["冷氣","冷氣帆布蓋"]
+  },
+  "TOCNET":{
+    "系統組件":["CN TOCNET 組件","TOCNET XPHUB RoIP 閘道器","TOCNET P-case"],
+    "線材／電源":["XPHUB 電源纜線組件","TOCNET 乙太網路線","TOCNET 序列線組件","TOCNET XPHUB POWER SUPPLY KIT AC TO 24VDC"]
+  },
+  "其他":{"其他":["其他／手動輸入"]}
+};
+const EQUIPMENT_CATEGORIES=Object.keys(EQUIPMENT_CATALOG);
+function equipmentTypes(category){return Object.keys(EQUIPMENT_CATALOG[category]||{});}
+function equipmentNames(category,type){return (EQUIPMENT_CATALOG[category]?.[type]||[]).slice();}
+
+const STATUS_VALUE={fault:"Fault / 故障",repair:"Under Repair / 維修中",fixed:"Fixed / 已修復"};
+const STATUS_LABEL={fault:"🚨 故障",repair:"🛠️ 維修中",fixed:"🟢 已修復"};
+const META_MARKER="\n[[FTMETA_V2:";
+function encodeMeta(meta){try{return btoa(unescape(encodeURIComponent(JSON.stringify(meta))));}catch(e){return "";}}
+function decodeMeta(v){try{return JSON.parse(decodeURIComponent(escape(atob(v))));}catch(e){return {};}}
+function unpackDescription(raw){
+  const text=String(raw||"");
+  const i=text.lastIndexOf(META_MARKER);
+  if(i<0||!text.endsWith("]]")) return {desc:text,meta:{}};
+  const enc=text.slice(i+META_MARKER.length,-2);
+  return {desc:text.slice(0,i),meta:decodeMeta(enc)};
+}
+function packDescription(r){
+  const meta={category:r.category||"其他",damageDate:r.damageDate||dateInputValue(r.createdAt),equipmentCategory:r.equipmentCategory||"",equipmentType:r.equipmentType||"",equipmentName:r.equipmentName||"",history:Array.isArray(r.history)?r.history:[]};
+  return String(r.desc||"")+META_MARKER+encodeMeta(meta)+"]]";
+}
+function makeHistoryEvent(status,note=""){
+  return {status,at:nowISO(),note:String(note||"")};
+}
+function dateInputValue(v){
+  const d=v?new Date(v):new Date();
+  if(Number.isNaN(d.getTime())) return new Date().toLocaleDateString("en-CA");
+  return d.toLocaleDateString("en-CA");
+}
+
 let savedData=readSaved();
 let data=clone(savedData);
 let savedUnits=readUnits();
@@ -1382,14 +1665,17 @@ function setCloudStatus(text,state=""){
 function parentCarFromDkCode(code){
   const m=String(code||"").toUpperCase().match(/^DK(\d{3})$/);
   if(!m) return "";
-  const suffix=m[1];
-  return cars.find(c=>/^CN-[A-Z]-\d{3}$/i.test(c) && c.slice(-3)===suffix)||"";
+  const n=Number(m[1]);
+  if(n===301) return "CN-D-301";
+  if(n>=302 && n<=378) return `CN-B-${n}`;
+  return "";
 }
 function dbRowToRecord(row){
   const rawCar=String(row.carriage_no||"");
   const dkParent=parentCarFromDkCode(rawCar);
   const assetType=dkParent?"DK":"CN";
   const car=dkParent||normalizeCarId(rawCar);
+  const packed=unpackDescription(row.description||"");
   return {
     id:"db_"+row.id,
     dbId:row.id,
@@ -1398,9 +1684,15 @@ function dbRowToRecord(row){
     unit:row.unit||"",
     vehicleNo:row.vehicle_no||"",
     status:row.status||"Fault / 故障",
-    desc:row.description||"",
+    desc:packed.desc,
     tech:row.repair_technician||"",
     cat:"",
+    category:packed.meta.category||"其他",
+    damageDate:packed.meta.damageDate||dateInputValue(row.created_at),
+    equipmentCategory:packed.meta.equipmentCategory||"",
+    equipmentType:packed.meta.equipmentType||"",
+    equipmentName:packed.meta.equipmentName||"",
+    history:Array.isArray(packed.meta.history)?packed.meta.history:[],
     wit:row.witness||"",
     locationType:row.location_type||"",
     locationDetail:row.location_detail||"",
@@ -1419,7 +1711,7 @@ function faultToDbRow(r){
     location_type:r.locationType||assetLoc.type||"",
     location_detail:r.locationDetail||assetLoc.detail||"",
     status:r.status||"Fault / 故障",
-    description:r.desc||"",
+    description:packDescription(r),
     repair_technician:r.tech||"",
     witness:r.wit||"",
     created_at:r.createdAt||new Date().toISOString(),
@@ -1630,29 +1922,30 @@ function readDkLocations(){
   catch(e){return {};}
 }
 function normalizeCarId(car){
-  const value=String(car||"").trim();
-  if(cars.includes(value)) return value;
-  const cn=value.toUpperCase().match(/^CN-?(\d{3})$/);
-  if(cn){
-    const suffix=cn[1];
-    const hit=cars.find(c=>/^CN-[A-Z]-\d{3}$/i.test(c) && c.slice(-3)===suffix);
-    if(hit) return hit;
+  const value=String(car||"");
+  if(value==="CN301") return "CN-D-301";
+  const m=value.match(/^CN(\d{3})$/);
+  if(m){
+    const n=Number(m[1]);
+    if(n>=302 && n<=378) return `CN-B-${n}`;
   }
-  const compact=value.toUpperCase().replace(/\s+/g,"");
-  const hit=cars.find(c=>c.replace(/-/g,"").toUpperCase()===compact.replace(/-/g,""));
-  return hit||value;
+  const nms=value.match(/^NMS-?(38[1-4])$/);
+  if(nms) return `NMS-${nms[1]}`;
+  const sss=value.match(/^SSS-?(39[1-4])$/);
+  if(sss) return `SSS-${sss[1]}`;
+  return value;
 }
 function migrateLegacyData(){
   let changed=false;
   savedData.forEach(r=>{
     const nextCar=normalizeCarId(r.car);
     if(nextCar!==r.car){r.car=nextCar;changed=true;}
-    
+    if(r.unit==="73G-HQ"){r.unit="73G-HC";changed=true;}
     if(!r.assetType) r.assetType=assetTypeForCar(nextCar);
   });
   const migratedUnits={};
   Object.entries(savedUnits||{}).forEach(([car,unit])=>{
-    const nextCar=normalizeCarId(car),nextUnit=unit;
+    const nextCar=normalizeCarId(car),nextUnit=unit==="73G-HQ"?"73G-HC":unit;
     migratedUnits[nextCar]=nextUnit;if(nextCar!==car||nextUnit!==unit)changed=true;
   });
   savedUnits=migratedUnits;
@@ -1692,6 +1985,12 @@ function ensureIds(arr){
     if(!r.statusAt){r.statusAt=r.createdAt;changed=true;}
     if(typeof r.locationType!=="string"){r.locationType="";changed=true;}
     if(typeof r.locationDetail!=="string"){r.locationDetail="";changed=true;}
+    if(!r.category){r.category="其他";changed=true;}
+    if(!r.damageDate){r.damageDate=dateInputValue(r.createdAt);changed=true;}
+    if(typeof r.equipmentCategory!=="string"){r.equipmentCategory="";changed=true;}
+    if(typeof r.equipmentType!=="string"){r.equipmentType="";changed=true;}
+    if(typeof r.equipmentName!=="string"){r.equipmentName="";changed=true;}
+    if(!Array.isArray(r.history)){r.history=[];changed=true;}
     if(r.assetType!=="DK" && r.assetType!=="CN"){r.assetType="CN";changed=true;}
   });
   return changed;
@@ -1711,11 +2010,11 @@ data.forEach(r=>{
 });
 
 function color(s){
-  if((s||"").includes("Fault")||(s||"").includes("故障"))return"fault";
-  if((s||"").includes("Repair")||(s||"").includes("維修"))return"repair";
-  if((s||"").includes("Fixed")||(s||"").includes("修復"))return"fixed";
-  if((s||"").includes("Pending")||(s||"").includes("待確認"))return"pending";
-  return"clear";
+  const t=String(s||"");
+  if(t.includes("Fault")||t.includes("故障")) return "fault";
+  if(t.includes("Repair")||t.includes("維修")) return "repair";
+  // 舊版 Fixed / Pending / All Clear / Closed 全部統一視為「已修復」
+  return "fixed";
 }
 function markDirty(id){
   dirtyIds.add(id);
@@ -1785,11 +2084,11 @@ function add(car,assetType="CN"){
   const stamp=nowISO();
   const isDk=assetType==="DK";
   const assetLoc=isDk?(dkLocations[car]||{}):(locations[car]||{});
-  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",category:"其他",damageDate:dateInputValue(stamp),equipmentCategory:"",equipmentType:"",equipmentName:"",history:[{status:"Fault / 故障",at:stamp,note:"建立故障紀錄"}],wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
   render();
-  setTimeout(()=>document.querySelector(`[data-id="${r.id}"] textarea`)?.focus(),0);
+  setTimeout(()=>document.querySelector(`[data-id="${r.id}"] .equipment-search`)?.focus(),0);
 }
 function beginEditDesc(id){
   const r=data.find(x=>x.id===id);
@@ -1801,12 +2100,40 @@ function beginEditDesc(id){
     if(el){el.focus(); const n=el.value.length; el.setSelectionRange(n,n);}
   },0);
 }
+function updateEquipmentCategory(id,value){
+  const r=data.find(x=>x.id===id); if(!r)return;
+  r.equipmentCategory=value; r.equipmentType=""; r.equipmentName="";
+  markDirty(id); render();
+}
+function updateEquipmentType(id,value){
+  const r=data.find(x=>x.id===id); if(!r)return;
+  r.equipmentType=value; r.equipmentName="";
+  markDirty(id); render();
+}
+function updateEquipmentName(id,value){
+  const r=data.find(x=>x.id===id); if(!r)return;
+  r.equipmentName=value;
+  markDirty(id);
+  document.querySelector(`[data-id="${id}"]`)?.classList.add("unsaved");
+}
+function equipmentSelectorHtml(r){
+  return `<div class="equipment-controls equipment-controls-simple">
+    <div class="equipment-picker">
+      <input class="equipment-search" list="equipmentSuggestions" value="${esc(r.equipmentName||'')}" placeholder="輸入設備名稱 / Equipment" oninput="updateEquipmentName('${r.id}',this.value)">
+    </div>
+  </div>`;
+}
 function updateField(id,field,value,rerender=false){
   const r=data.find(x=>x.id===id);
   if(!r)return;
   const previous=r[field];
+  if(field==="status" && previous!==value){
+    const stamp=nowISO();
+    r.statusAt=stamp;
+    if(!Array.isArray(r.history))r.history=[];
+    r.history.push({status:value,at:stamp,note:"狀態變更"});
+  }
   r[field]=value;
-  if(field==="status" && previous!==value) r.statusAt=nowISO();
   markDirty(id);
   if(rerender) render();
   else document.querySelector(`[data-id="${id}"]`)?.classList.add("unsaved");
@@ -1821,6 +2148,9 @@ function updateLocationType(id,value){
   if(value) setTimeout(()=>document.querySelector(`[data-location-detail="${id}"]`)?.focus(),0);
 }
 function removeRow(id){
+  const r=data.find(x=>x.id===id);
+  if(!r)return;
+  if(!confirm(`確定刪除此故障紀錄？\n\n${assetLabelForRecord(r)} · ${r.desc||"未填寫故障描述"}\n\n刪除後需按「儲存並送出」才會同步到雲端。`))return;
   const existed=savedData.some(x=>x.id===id);
   data=data.filter(x=>x.id!==id);
   dirtyIds.delete(id);
@@ -1912,7 +2242,7 @@ function updateDashboard(){
   const scopedCars=updateVehicleBreakdown();
   const scopedRecords=getDashboardScopeRecords(scopedCars);
   const all=scopedRecords.length;
-  const counts={fault:0,repair:0,pending:0,fixed:0,clear:0};
+  const counts={fault:0,repair:0,fixed:0};
   scopedRecords.forEach(r=>{ const key=color(r.status); if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++; });
   const vehicleTotal=document.getElementById("vehicleTotal");
   if(vehicleTotal)vehicleTotal.textContent=scopedCars.length;
@@ -1921,9 +2251,7 @@ function updateDashboard(){
   document.getElementById("statAll").textContent=all;
   document.getElementById("statFault").textContent=counts.fault;
   document.getElementById("statRepair").textContent=counts.repair;
-  document.getElementById("statPending").textContent=counts.pending;
   document.getElementById("statFixed").textContent=counts.fixed;
-  document.getElementById("statClear").textContent=counts.clear;
   document.getElementById("lastUpdated").textContent=formatTime(cloudUpdatedAt||localStorage.getItem(UPDATED_KEY));
 }
 function downloadBlob(content,type,filename){
@@ -1951,15 +2279,15 @@ function csvEscape(v){
 }
 function statusToImportText(status){
   const c=color(status);
-  return c==="fault"?"故障":c==="repair"?"維修中":c==="fixed"?"已修復":c==="pending"?"待確認":"均完成";
+  return c==="fault"?"故障":c==="repair"?"維修中":"已修復";
 }
 function normalizeImportedStatus(v){
   const t=String(v||"").trim().toLowerCase();
   if(!t) return "Fault / 故障";
   if(t.includes("repair")||t.includes("維修")) return "Under Repair / 維修中";
   if(t.includes("fixed")||t.includes("修復")) return "Fixed / 已修復";
-  if(t.includes("pending")||t.includes("待確認")) return "Pending / 待確認";
-  if(t.includes("clear")||t.includes("均完成")||t.includes("完成")) return "All Clear / 均完成";
+  if(t.includes("pending")||t.includes("待確認")) return "Fixed / 已修復";
+  if(t.includes("clear")||t.includes("closed")||t.includes("已結案")||t.includes("均完成")||t.includes("完成")) return "Fixed / 已修復";
   return "Fault / 故障";
 }
 function assetTypeForCar(car){
@@ -1972,20 +2300,22 @@ function assetTypeForCar(car){
 function assetLabelForRecord(r){
   return r?.assetType==="DK" ? getDkCode(r.car) : r?.car||"";
 }
-function exportCsvData(){
+function exportCsvData(statusFilter=""){
   document.getElementById("ioMenu")?.classList.remove("show");
-  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const rows=[];
   const scopedCars=getDashboardScopeCars();
   const pushAsset=(car,assetType)=>{
     const isDk=assetType==="DK";
     const assetNo=isDk?getDkCode(car):car;
-    const loc=isDk?(dkLocations[car]||{}):(locations[car]||{});
-    const rr=data.filter(r=>r.car===car && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+    // 地點只以 CN / 主設備位置輸出；故障列本身不另設地點。
+    const loc=isDk?{type:"",detail:""}:(locations[car]||{});
+    let rr=data.filter(r=>r.car===car && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+    if(statusFilter==='unfinished') rr=rr.filter(r=>['fault','repair'].includes(color(r.status)));
+    else if(statusFilter) rr=rr.filter(r=>color(r.status)===statusFilter);
     const base=[units[car]||"",vehicleNos[car]||"",assetType,assetNo,car,loc.type||"",loc.detail||""];
-    if(rr.length){
-      rr.forEach(r=>rows.push([...base,statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
-    }else rows.push([...base,"","","","","",""]);
+    rr.forEach(r=>rows.push([...base,r.damageDate||dateInputValue(r.createdAt),r.equipmentName||"",statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
+    if(!statusFilter && !rr.length) rows.push([...base,"","","","","","","",""]);
   };
   scopedCars.forEach(car=>{
     pushAsset(car,assetTypeForCar(car));
@@ -1993,14 +2323,15 @@ function exportCsvData(){
   });
   const csv='\ufeff'+[headers,...rows].map(row=>row.map(csvEscape).join(",")).join("\r\n");
   const unitSuffix=quickUnitFilter?`_${quickUnitFilter}`:"";
-  downloadBlob(csv,"text/csv;charset=utf-8",`73G-3_Data${unitSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
+  const statusNames={unfinished:"Unfinished_未完成",fault:"Fault_故障",repair:"Repair_維修中",fixed:"Fixed_已修復"};
+  const statusSuffix=statusFilter?`_${statusNames[statusFilter]||statusFilter}`:"_All";
+  downloadBlob(csv,"text/csv;charset=utf-8",`73G-3_Data${unitSuffix}${statusSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
 }
 function csvTemplateText(){
-  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const examples=[
-    ["4C","軍2-24467","CN","CN-B-336","CN-B-336","營區","A區","故障","冷氣異常","Mason","王先生","2026-08-24 09:20","2026-08-24 09:20"],
-    ["4C","軍2-24467","DK","DK336","CN-B-336","外臺","B區","維修中","電源異常","Emma","林先生","2026-08-24 09:25","2026-08-24 09:40"],
-    ["1C","軍2-24586","NMS","NMS-381","NMS-381","演訓","北側","已修復","網路線接頭鬆脫","Alex","陳先生","2026-08-24 08:30","2026-08-24 09:10"]
+    ["3C","軍2-24467","CN","CN-B-336","CN-B-336","營區","A區","2026-08-24","CN 紅區路由器 CISCO C8300-1N1S-6T","故障","無法連線","Mason","王先生","2026-08-24 09:20","2026-08-24 09:20"],
+    ["3C","軍2-24467","DK","DK336","CN-B-336","","","2026-08-24","RF-9850W 無線電機","維修中","電源異常","Emma","林先生","2026-08-24 09:25","2026-08-24 09:40"]
   ];
   return '\ufeff'+[headers,...examples].map(row=>row.map(csvEscape).join(",")).join("\r\n");
 }
@@ -2056,6 +2387,8 @@ function importCsvText(text){
     car:findColumn(h,["車廂號碼 carriage no.","車廂號碼","carriage no","carriage"]),
     loc:findColumn(h,["地點 location","地點","location"]),
     detail:findColumn(h,["詳細地點 location detail","詳細地點","location detail"]),
+    damageDate:findColumn(h,["損壞日期 damage date","損壞日期","damage date"]),
+    equipmentName:findColumn(h,["設備名稱 equipment name","設備名稱","equipment name"]),
     status:findColumn(h,["狀態 status","狀態","status"]),
     desc:findColumn(h,["故障描述 fault description","故障描述","fault description"]),
     tech:findColumn(h,["維修人員 repair technician","維修人員","repair technician"]),
@@ -2086,11 +2419,11 @@ function importCsvText(text){
     if(vehicle){vehicleNos[car]=vehicle;metaCount++;}
     const targetLoc=assetType==="DK"?dkLocations:locations;
     if(loc||detail){targetLoc[car]={type:loc,detail};metaCount++;}
-    const desc=get("desc"),statusRaw=get("status"),tech=get("tech"),wit=get("wit");
+    const packedDesc=unpackDescription(get("desc")),desc=packedDesc.desc,statusRaw=get("status"),tech=get("tech"),wit=get("wit"),damageDate=get("damageDate")||packedDesc.meta.damageDate||"",equipmentName=get("equipmentName")||packedDesc.meta.equipmentName||"";
     if(desc||statusRaw||tech||wit){
       const created=idx.created>=0&&get("created")?parseImportDate(get("created")):nowISO();
       const updated=idx.updated>=0&&get("updated")?parseImportDate(get("updated")):created;
-      data.push({id:newId(),car,assetType:assetType==="DK"?"DK":assetTypeForCar(car),unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",wit,locationType:loc||targetLoc[car]?.type||"",locationDetail:detail||targetLoc[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
+      data.push({id:newId(),car,assetType:assetType==="DK"?"DK":assetTypeForCar(car),unit:unit||units[car]||"",vehicleNo:vehicle||vehicleNos[car]||"",status:normalizeImportedStatus(statusRaw),desc,tech,cat:"",category:"其他",damageDate:damageDate||dateInputValue(created),equipmentCategory:"",equipmentType:"",equipmentName,history:Array.isArray(packedDesc.meta.history)?packedDesc.meta.history:[],wit,locationType:loc||targetLoc[car]?.type||"",locationDetail:detail||targetLoc[car]?.detail||"",createdAt:created,statusAt:updated,date:new Date(created).toLocaleString()});
       count++;
     }
   });
@@ -2103,6 +2436,7 @@ function importJsonText(text){
     if(String(r.assetType||r.assetNo||"").toUpperCase().startsWith("DK")) x.assetType="DK";
     else if(!x.assetType) x.assetType=assetTypeForCar(x.car);
     x.id=x.id||newId();x.createdAt=x.createdAt||nowISO();x.statusAt=x.statusAt||x.createdAt;x.status=normalizeImportedStatus(x.status);
+    x.category=x.category||"其他";x.damageDate=x.damageDate||dateInputValue(x.createdAt);x.equipmentCategory=x.equipmentCategory||"";x.equipmentType=x.equipmentType||"";x.equipmentName=x.equipmentName||"";x.history=Array.isArray(x.history)?x.history:[];
     return x;
   };
   if(Array.isArray(obj)){
@@ -2162,15 +2496,19 @@ function wordEsc(v){
   return String(v??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])).replace(/\n/g,"<br>");
 }
 function reportStatusClass(s){
-  const c=color(s);
-  return c==="fault"?"fault":c==="repair"?"repair":c==="fixed"?"fixed":c==="pending"?"pending":"clear";
+  return color(s);
 }
 function reportStatusText(s){
-  if((s||"").includes("Fixed")||(s||"").includes("修復")) return "已修復完成<br><span>Fixed</span>";
-  if((s||"").includes("Repair")||(s||"").includes("維修")) return "維修中<br><span>Under Repair</span>";
-  if((s||"").includes("Pending")||(s||"").includes("待確認")) return "待確認<br><span>Pending</span>";
-  if((s||"").includes("Clear")||(s||"").includes("均完成")) return "均完成<br><span>All Clear</span>";
-  return "故障<br><span>Fault</span>";
+  const c=color(s);
+  if(c==="repair") return '<span class="status-cn">維修中</span><span class="status-en">Under Repair</span>';
+  if(c==="fixed") return '<span class="status-cn">已修復</span><span class="status-en">Fixed</span>';
+  return '<span class="status-cn">故障</span><span class="status-en">Fault</span>';
+}
+function formatReportStatusTime(v){
+  const d=v?new Date(v):null;
+  if(!d||Number.isNaN(d.getTime())) return "—";
+  const p=n=>String(n).padStart(2,"0");
+  return `${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 function exportWordReport(){
   const today=new Date();
@@ -2186,18 +2524,14 @@ function exportWordReport(){
   const countSSS=scopedCars.filter(c=>String(c).toUpperCase().startsWith("SSS")).length;
   const fault=records.filter(r=>color(r.status)==="fault").length;
   const fixed=records.filter(r=>color(r.status)==="fixed").length;
-  const clear=records.filter(r=>color(r.status)==="clear").length;
   const repair=records.filter(r=>color(r.status)==="repair").length;
-  const pending=records.filter(r=>color(r.status)==="pending").length;
   const carsWithRecords=new Set(records.map(r=>r.car)).size;
   const unitOrder=activeUnit?[activeUnit]:[...UNIT_OPTIONS,"未指定"];
   const carUnit=c=>units[c]||records.find(r=>r.car===c)?.unit||"未指定";
   const palMap={
-    fault:{rowBg:"#FDE9EB",statusBg:"#F8CDD2",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
-    repair:{rowBg:"#FFF3D9",statusBg:"#FBE1A8",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
-    pending:{rowBg:"#F0EBFA",statusBg:"#DED3F4",text:"#5A3EA1",sub:"#6A5A90",bar:"#7C5CC4"},
-    fixed:{rowBg:"#E7F5ED",statusBg:"#CDEAD9",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"},
-    clear:{rowBg:"#E8F4FA",statusBg:"#D0E9F4",text:"#1F6587",sub:"#4D7488",bar:"#3A91B7"}
+    fault:{rowBg:"#FFF1F2",statusBg:"#FBE0E3",text:"#B4232F",sub:"#8E4A52",bar:"#E5484D"},
+    repair:{rowBg:"#FFF8E9",statusBg:"#F8E7BE",text:"#8A5600",sub:"#7B6338",bar:"#D98900"},
+    fixed:{rowBg:"#F0F9F4",statusBg:"#DCEFE4",text:"#0F6B42",sub:"#3F765F",bar:"#22A06B"}
   };
   const assetBlock=(c,assetType)=>{
     const isDk=assetType==="DK";
@@ -2207,14 +2541,18 @@ function exportWordReport(){
     const rr=records.filter(r=>r.car===c&&(isDk?r.assetType==="DK":r.assetType!=="DK"));
     const rows=rr.length?rr.map((r,i)=>{
       const st=reportStatusClass(r.status),pal=palMap[st];
-      const statusHtml=reportStatusText(r.status).replace('<span>','<span style="color:'+pal.sub+';font-weight:600">');
-      const timeHtml=wordEsc(formatRecordTime(r.statusAt||r.createdAt));
+      const statusHtml=reportStatusText(r.status);
+      const timeHtml=wordEsc(formatReportStatusTime(r.statusAt||r.createdAt));
       const place=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"—";
-      return `<tr><td class="num" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="background:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">${timeHtml}</div></td><td bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.desc)||"&nbsp;"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.wit)||"—"}</td><td class="place" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${place}</td></tr>`;
-    }).join(""):`<tr><td colspan="6" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
+      const damageHtml=r.damageDate?`<div class="damage-line"><span>損壞日期</span><b>${wordEsc(r.damageDate)}</b></div>`:"";
+      const equipmentHtml=r.equipmentName?`<div class="equipment-name">${wordEsc(r.equipmentName)}</div>`:"";
+      const descHtml=`<div class="fault-desc">${wordEsc(r.desc)||"—"}</div>`;
+      return `<tr><td class="num" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="background:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">更新 ${timeHtml}</div></td><td class="fault-content" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${damageHtml}${equipmentHtml}${descHtml}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.wit)||"—"}</td></tr>`;
+    }).join(""):`<tr><td colspan="5" class="none">無故障紀錄 <span>No fault record</span></td></tr>`;
     const placeText=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"未設定";
     const assetClass=isDk?'dk-block':assetType==='NMS'?'nms-block':assetType==='SSS'?'sss-block':'cn-block';
-    return `<div class="asset-block ${assetClass}"><table class="asset-head-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="asset-name-cell">${wordEsc(assetName)}</td><td class="asset-location-cell">地點 Location：${placeText}</td></tr></table><table class="fault-table" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:4%"><col style="width:17%"><col style="width:33%"><col style="width:14%"><col style="width:13%"><col style="width:19%"></colgroup><thead><tr><th>#</th><th>狀態<br><small>Status</small></th><th>故障描述<br><small>Fault Description</small></th><th>維修人員<br><small>Repair Technician</small></th><th>見證人<br><small>Witness</small></th><th>地點<br><small>Location</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    const locationCell=isDk?`<td class="asset-location-cell muted-location">DK Equipment</td>`:`<td class="asset-location-cell"><span class="location-label">地點 Location</span><b>${placeText}</b></td>`;
+    return `<div class="asset-block ${assetClass}"><table class="asset-head-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="asset-name-cell">${wordEsc(assetName)}</td>${locationCell}</tr></table><table class="fault-table" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:5%"><col style="width:19%"><col style="width:52%"><col style="width:13%"><col style="width:11%"></colgroup><thead><tr><th>#</th><th><span class="th-cn">狀態</span><small>Status</small></th><th><span class="th-cn">設備 / 故障內容</span><small>Equipment / Fault Description</small></th><th><span class="th-cn">維修人員</span><small>Repair Technician</small></th><th><span class="th-cn">見證人</span><small>Witness</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
   };
   const sections=unitOrder.map(unit=>{
     const unitCars=scopedCars.filter(c=>carUnit(c)===unit);
@@ -2228,22 +2566,23 @@ function exportWordReport(){
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><style>
 @page{size:A4;margin:12mm 11mm 13mm}
 body{
-  font-family:"Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif;
-  color:#1e2f45;font-size:9.5pt;line-height:1.4;margin:0;background:#fff;
+  font-family:"Microsoft JhengHei","Microsoft JhengHei UI","PingFang TC","Noto Sans CJK TC","Aptos",Arial,sans-serif;
+  color:#20344d;font-size:10pt;line-height:1.45;margin:0;background:#fff;
+  -webkit-font-smoothing:antialiased;
 }
 *{box-sizing:border-box}
 .report-head{
   text-align:center;border-top:6pt solid #173b70;border-bottom:1pt solid #bfcfe1;
   padding:10pt 6pt 9pt;margin-bottom:12pt
 }
-h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.2pt}
+h1{font-size:18pt;line-height:1.2;margin:0 0 5pt;color:#173b70;letter-spacing:.3pt;font-weight:850}
 .en{display:inline;font-size:9.5pt;color:#6a7f9b;font-weight:600;margin-left:4pt}
-.meta{font-size:9pt;color:#5d7087}.meta b{color:#203b5d}
+.meta{font-size:8.8pt;color:#64758a;letter-spacing:.05pt}.meta b{color:#24415f;font-weight:750}
 
 /* section headings */
 .summary-title{
-  width:100%;font-size:11pt;color:#173b70;font-weight:800;
-  margin:11pt 0 5pt;padding:5pt 8pt;
+  width:100%;font-size:10.5pt;color:#173b70;font-weight:800;
+  margin:11pt 0 5pt;padding:4.5pt 8pt;
   border-left:4pt solid #356ba6;background:#edf3f9
 }
 
@@ -2292,22 +2631,22 @@ h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.
 /* unit + carriage */
 .unit-section{margin-top:13pt;page-break-before:auto}
 .unit-title{
-  background:#173f75;color:#fff;font-size:10.5pt;font-weight:800;
-  padding:6pt 8pt;border:1pt solid #173f75
+  background:#204a7e;color:#fff;font-size:10.4pt;font-weight:800;
+  padding:6pt 9pt;border:1pt solid #173f75;line-height:1.2
 }
-.unit-count{float:right;font-size:8.3pt;font-weight:600;color:#d9e5f2}
+.unit-count{float:right;font-size:8.5pt;font-weight:650;color:#d9e5f2;padding-top:1pt}
 .car-block{
   page-break-inside:avoid;margin:7pt 0 12pt;border:1pt solid #cbd8e5;
   padding:0;background:#fff
 }
 .car-title{
-  margin:0;padding:6pt 8pt;background:#f7f9fc;
+  margin:0;padding:7pt 9pt;background:#f7f9fc;
   border-bottom:1pt solid #cbd8e5
 }
-.vehicle-badge{font-size:9.5pt;font-weight:800;color:#334e6e}
+.vehicle-badge{font-size:10.2pt;font-weight:800;color:#274766;letter-spacing:.05pt}
 
 /* asset heading uses a real table so Word keeps left/right alignment */
-.asset-block{margin:0;padding:7pt 8pt 8pt;page-break-inside:avoid}
+.asset-block{margin:0;padding:7pt 8pt 9pt;page-break-inside:avoid}
 .asset-block + .asset-block{border-top:1pt solid #d7e0ea}
 .asset-head-table{
   width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 4pt;
@@ -2315,13 +2654,16 @@ h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.
 }
 .asset-head-table td{border:0!important;background:#f2f6fa!important}
 .asset-name-cell{
-  width:48%;padding:5pt 7pt;font-size:12.5pt;font-weight:850;color:#173b70;
-  white-space:nowrap
+  width:48%;padding:5.5pt 8pt;font-size:12.2pt;font-weight:800;color:#173b70;
+  white-space:nowrap;vertical-align:middle
 }
 .asset-location-cell{
-  width:52%;padding:5pt 7pt;text-align:right;font-size:8.7pt;
-  color:#50657f;font-weight:700
+  width:52%;padding:5.5pt 8pt;text-align:right;font-size:8.8pt;
+  color:#50657f;font-weight:600;vertical-align:middle
 }
+.asset-location-cell .location-label{color:#71849b;margin-right:4pt;font-size:8pt;font-weight:650}
+.asset-location-cell b{color:#334f70;font-size:9.2pt;font-weight:800}
+.muted-location{color:#9aa8b8!important;font-size:7.8pt!important;font-weight:600!important}
 .cn-block .asset-head-table{border-left-color:#245d99}
 .dk-block .asset-head-table{border-left-color:#6278a0}
 .nms-block .asset-head-table{border-left-color:#4b7880}
@@ -2333,19 +2675,27 @@ h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.
   border:1pt solid #bfcddd
 }
 .fault-table th{
-  background:#dfe9f3;color:#294866;border:1pt solid #bfcddd;
-  padding:5pt 3pt;font-size:8.2pt;font-weight:800;line-height:1.2;
+  background:#e6edf5;color:#274664;border:1pt solid #c4d1df;
+  padding:5.5pt 3pt;font-size:9pt;font-weight:800;line-height:1.15;
   vertical-align:middle;text-align:center
 }
-.fault-table th small{font-size:6.9pt;color:#6c8099;font-weight:600}
+.fault-table th .th-cn{display:block;font-size:9pt;font-weight:800}.fault-table th small{display:block;margin-top:2pt;font-size:6.9pt;color:#71849a;font-weight:600;letter-spacing:.05pt}
 .fault-table td{
-  border:1pt solid #cfd9e5;padding:5.5pt 4pt;vertical-align:middle;
-  font-size:8.8pt;color:#26394f
+  border:1pt solid #d0dae5;padding:6.5pt 5pt;vertical-align:middle;
+  font-size:9.5pt;color:#26394f;line-height:1.42
 }
-.num,.person{text-align:center}.num{font-weight:700;color:#6e8096}
-.status{text-align:center;font-size:8.5pt!important}
-.report-time{font-size:7.2pt;color:#6f8093;margin-top:2.5pt;font-weight:500}
-.place{font-size:8.3pt}
+.num,.person{text-align:center}.num{font-weight:750;color:#61748b;font-size:9pt!important}
+.status{text-align:center;font-size:9.5pt!important;line-height:1.15!important;padding-left:4pt!important;padding-right:4pt!important}
+.status .status-cn{display:block;font-size:10.3pt!important;font-weight:850!important;letter-spacing:.1pt}
+.status .status-en{display:block;font-size:7.1pt!important;margin-top:2pt;font-weight:600!important;opacity:.78}
+.report-time{font-size:7.1pt;color:#718297;margin-top:4pt;font-weight:550;white-space:nowrap;letter-spacing:.05pt}
+.fault-content{padding-left:8pt!important;padding-right:8pt!important;vertical-align:top!important}
+.damage-line{margin:0 0 4.5pt;padding-bottom:3.5pt;border-bottom:.5pt solid #d7e0e9;color:#6d8096;font-size:7.7pt}
+.damage-line span{margin-right:5pt;color:#7a8ea6;font-weight:650}
+.damage-line b{color:#4e6988;font-size:8.1pt;font-weight:750}
+.equipment-name{font-size:10pt;font-weight:800;color:#173f75;margin:0 0 3.5pt;line-height:1.35;letter-spacing:.03pt}
+.fault-desc{font-size:9.8pt;color:#263a53;font-weight:500;line-height:1.55;word-break:break-word;letter-spacing:.02pt}
+.person{font-size:9.1pt!important;font-weight:600;color:#36516f!important;word-break:break-word;line-height:1.35!important}
 .none{
   text-align:center;font-style:italic;color:#7f8fa2;background:#fff!important;
   padding:8pt!important
@@ -2355,15 +2705,15 @@ h1{font-size:19pt;line-height:1.15;margin:0 0 5pt;color:#173b70;letter-spacing:.
   margin-top:14pt;border-top:.7pt solid #d3dbe5;padding-top:5pt;
   text-align:right;color:#8996a6;font-size:7.2pt
 }
-</style></head><body><div class="report-head"><h1>73G-3 故障日報 <span class="en">DAILY FAULT REPORT</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b>　｜　範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要　Asset Summary</div><table class="summary type-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:31%"><col style="width:8.5%"><col style="width:8.5%"><col style="width:13%"><col style="width:10%"><col style="width:29%"></colgroup><tr><th class="total-h" bgcolor="#dce8f5">總車廂數<br><small>Total Carriages</small></th><th class="cn-h" bgcolor="#e8f1fb">CN</th><th class="dk-h" bgcolor="#edf0f8">DK</th><th class="nms-h" bgcolor="#e8f1f3">NMS</th><th class="sss-h" bgcolor="#eef0f2">SSS</th><th class="records-h" bgcolor="#e3eaf3">有紀錄車廂<br><small>With Records</small></th></tr><tr><td class="total-v" bgcolor="#f0f5fb">${scopedCars.length}</td><td class="cn-v" bgcolor="#f3f7fc">${countCN}</td><td class="dk-v" bgcolor="#f5f6fb">${countDK}</td><td class="nms-v" bgcolor="#f2f7f8">${countNMS}</td><td class="sss-v" bgcolor="#f5f6f7">${countSSS}</td><td class="records-v" bgcolor="#f2f5f9">${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要　Status Summary</div><table class="summary status-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><tr><th class="fault-h" bgcolor="#f6dadd">故障<br><small>Fault</small></th><th class="repair-h" bgcolor="#f6e9c9">維修中<br><small>Under Repair</small></th><th class="pending-h" bgcolor="#e8e2f4">待確認<br><small>Pending</small></th><th class="fixed-h" bgcolor="#dcefe4">已修復<br><small>Fixed</small></th><th class="clear-h" bgcolor="#dcebf5">均完成<br><small>All Clear</small></th></tr><tr><td class="fault-cell" bgcolor="#fff0f1">${fault}</td><td class="repair-cell" bgcolor="#fff7e8">${repair}</td><td class="pending-cell" bgcolor="#f5f2fb">${pending}</td><td class="fixed-cell" bgcolor="#eef8f2">${fixed}</td><td class="clear-cell" bgcolor="#eef6fb">${clear}</td></tr></table>${sections}<div class="footer">73G-3 Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div></body></html>`;
+</style></head><body><div class="report-head"><h1>73G-3 故障日報 <span class="en">DAILY FAULT REPORT</span></h1><div class="meta">報告日期 Report Date：<b>${dateText}</b>　｜　範圍 Scope：<b>${wordEsc(scopeLabel)}</b></div></div><div class="summary-title">車廂 / 設備摘要　Asset Summary</div><table class="summary type-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:31%"><col style="width:8.5%"><col style="width:8.5%"><col style="width:13%"><col style="width:10%"><col style="width:29%"></colgroup><tr><th class="total-h" bgcolor="#dce8f5">總車廂數<br><small>Total Carriages</small></th><th class="cn-h" bgcolor="#e8f1fb">CN</th><th class="dk-h" bgcolor="#edf0f8">DK</th><th class="nms-h" bgcolor="#e8f1f3">NMS</th><th class="sss-h" bgcolor="#eef0f2">SSS</th><th class="records-h" bgcolor="#e3eaf3">有紀錄車廂<br><small>With Records</small></th></tr><tr><td class="total-v" bgcolor="#f0f5fb">${scopedCars.length}</td><td class="cn-v" bgcolor="#f3f7fc">${countCN}</td><td class="dk-v" bgcolor="#f5f6fb">${countDK}</td><td class="nms-v" bgcolor="#f2f7f8">${countNMS}</td><td class="sss-v" bgcolor="#f5f6f7">${countSSS}</td><td class="records-v" bgcolor="#f2f5f9">${carsWithRecords}</td></tr></table><div class="summary-title">故障狀態摘要　Status Summary</div><table class="summary status-summary" border="1" cellspacing="0" cellpadding="0"><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.34%"></colgroup><tr><th class="fault-h" bgcolor="#f6dadd">故障<br><small>Fault</small></th><th class="repair-h" bgcolor="#f6e9c9">維修中<br><small>Under Repair</small></th><th class="fixed-h" bgcolor="#dcefe4">已修復<br><small>Fixed</small></th></tr><tr><td class="fault-cell" bgcolor="#fff0f1">${fault}</td><td class="repair-cell" bgcolor="#fff7e8">${repair}</td><td class="fixed-cell" bgcolor="#eef8f2">${fixed}</td></tr></table>${sections}<div class="footer">73G Fault Tracking System ｜ Report generated：${today.toLocaleString("zh-TW")}</div>
+</body></html>`;
   const unitSuffix=activeUnit?`_${activeUnit}`:"";
   downloadBlob("\ufeff"+html,"application/msword;charset=utf-8",`73G-3_Daily_Fault_Report${unitSuffix}_${dateText}.doc`);
 }
 function statusText(s){
-  if((s||"").includes("Fixed")||(s||"").includes("修復")) return "✅  已修復完成 Fixed";
-  if((s||"").includes("Repair")||(s||"").includes("維修")) return "🛠️  維修中 Repair";
-  if((s||"").includes("Pending")||(s||"").includes("待確認")) return "⏳  待確認 Pending";
-  if((s||"").includes("Clear")||(s||"").includes("均完成")) return "🟢  均完成 All Clear";
+  const c=color(s);
+  if(c==="fixed") return "🟢  已修復 Fixed";
+  if(c==="repair") return "🛠️  維修中 Repair";
   return "🚨  故障 Fault";
 }
 function isCnCar(car){
@@ -2374,24 +2724,29 @@ function getDkCode(car){
   const m=String(car).match(/(\d+)$/);
   return m ? `DK${m[1]}` : "DK";
 }
+function statusOptionHtml(r){
+  const current=color(r.status);
+  return ["fault","repair","fixed"].map(k=>`<option value="${STATUS_VALUE[k]}" ${current===k?'selected':''}>${STATUS_LABEL[k]}</option>`).join("");
+}
+function historyHtml(r){ return ""; }
 function faultRowHtml(r){
   const isDirty=dirtyIds.has(r.id);
   return `<div class="row asset-fault-row ${isDirty?'unsaved':''}" data-id="${r.id}">
     <div class="status-wrap">
-      <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">
-        <option value="Fault / 故障" ${r.status==='Fault / 故障'?'selected':''}>🚨  故障 Fault</option>
-        <option value="Under Repair / 維修中" ${r.status==='Under Repair / 維修中'?'selected':''}>🛠️  維修中 Repair</option>
-        <option value="Fixed / 已修復" ${r.status==='Fixed / 已修復'?'selected':''}>✅  已修復完成 Fixed</option>
-        <option value="Pending / 待確認" ${r.status==='Pending / 待確認'?'selected':''}>⏳  待確認 Pending</option>
-        <option value="All Clear / 均完成" ${r.status==='All Clear / 均完成'?'selected':''}>🟢  均完成 All Clear</option>
-      </select>
+      <select class="status-select status-${color(r.status)}" onchange="updateField('${r.id}','status',this.value,true)">${statusOptionHtml(r)}</select>
       <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
+      <div class="fault-meta-controls damage-date-wrap">
+        <label class="damage-date-label">損壞日期<small>Damage Date</small></label>
+        <input class="damage-date-input" type="date" value="${esc(r.damageDate||dateInputValue(r.createdAt))}" onchange="updateField('${r.id}','damageDate',this.value)">
+      </div>
     </div>
-    ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障描述 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障描述 / Fault description'}</div>`}
-    <input class="tech" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
-    <input class="wit" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
-    <div class="fault-location-display">${esc(r.locationType||'—')}${r.locationDetail?`<small>${esc(r.locationDetail)}</small>`:''}</div>
-    <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">×</button>
+    <div class="fault-desc-cell">
+      ${equipmentSelectorHtml(r)}
+      ${isDirty?`<textarea oninput="updateField('${r.id}','desc',this.value)" placeholder="故障描述 / Fault description">${esc(r.desc)}</textarea>`:`<div class="desc-display ${r.desc?'':'empty'}" title="點一下可編輯 / Click to edit" onclick="beginEditDesc('${r.id}')">${r.desc?esc(r.desc):'故障描述 / Fault description'}</div>`}
+    </div>
+    <input class="tech" list="techSuggestions" value="${esc(r.tech)}" placeholder="維修人員" oninput="updateField('${r.id}','tech',this.value)">
+    <input class="wit" list="witnessSuggestions" value="${esc(r.wit)}" placeholder="見證人 Witness" oninput="updateField('${r.id}','wit',this.value)">
+    <button class="delete-btn" title="刪除 / Delete" onclick="removeRow('${r.id}')">🗑</button>
   </div>`;
 }
 function assetSectionHtml(c,assetType){
@@ -2407,13 +2762,13 @@ function assetSectionHtml(c,assetType){
   return `<section class="asset-section ${isDk?'dk-asset':'cn-asset'}">
     <div class="asset-header ${dirtyIds.has(dirtyKey)?'head-unsaved':''}" ${isDk?`data-dk-location="${c}"`:`data-car-location="${c}"`}>
       <div class="asset-name-wrap"><span class="asset-name">${assetName}</span><button class="asset-add-btn" onclick="add('${c}','${assetType}')">＋ Add Fault / 新增</button></div>
-      <div class="asset-location-controls">
+      ${!isDk?`<div class="asset-location-controls">
         <select class="location-select" onchange="${typeHandler}('${c}',this.value)" aria-label="${assetName} 地點">
           <option value="">📍 選擇地點</option>
           ${LOCATION_OPTIONS.map(v=>`<option value="${v}" ${loc.type===v?'selected':''}>${v==="外臺"?"📡 外臺":v==="演訓"?"🎯 演訓":v==="營區"?"🏢 營區":v==="其他"?"📌 其他":v}</option>`).join("")}
         </select>
         ${loc.type?`<input class="location-detail" ${detailData}="${c}" value="${esc(loc.detail)}" placeholder="${assetName} 詳細位置" oninput="${detailHandler}('${c}',this.value)">`:''}
-      </div>
+      </div>`:''}
     </div>
     <div class="asset-rows">${rows.length?rows.map(faultRowHtml).join(""):`<div class="asset-empty">尚無故障紀錄 / No fault records</div>`}</div>
   </section>`;
@@ -2421,7 +2776,7 @@ function assetSectionHtml(c,assetType){
 function render(){
   const k=(document.getElementById("search").value||"").toUpperCase();
   let h="";
-  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
+  cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit,r.category,r.damageDate,r.equipmentCategory,r.equipmentType,r.equipmentName].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
     const vehicleValue=vehicleNos[c]||"";
     const isCustomVehicle=customVehicleMode[c] || (!!vehicleValue && !VEHICLE_OPTION_SET.has(vehicleValue));
     const vehicleSelectValue=isCustomVehicle?"__custom__":vehicleValue;
@@ -2773,6 +3128,7 @@ initCloud();
 .optimized-toolbar{position:sticky;top:0;z-index:18;gap:12px;align-items:center;padding:10px 12px!important;box-shadow:0 6px 18px rgba(18,55,105,.07)!important}
 .toolbar-controls{display:flex;align-items:center;gap:8px;min-width:0;flex:1}.search-wrap{flex:1 1 340px;min-width:220px}.search-wrap #search{width:100%!important;max-width:none!important}
 .quick-filter{height:38px;border:1px solid #d3dfec;border-radius:10px;background:#fff;color:#173b70;padding:0 30px 0 10px;font-size:12.5px;font-weight:700;outline:none;cursor:pointer}.quick-filter:focus{border-color:#78a5d5;box-shadow:0 0 0 3px #e9f2fb}
+.damage-filter-wrap{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 8px 0 10px;border:1px solid #d3dfec;border-radius:10px;background:#fff;color:#36536f;font-size:11px;font-weight:750;white-space:nowrap}.damage-filter-input{width:132px!important;height:30px!important;min-width:0;border:0!important;background:transparent!important;padding:0 3px!important;color:#173b70!important;font-size:12px!important;font-weight:750!important;box-shadow:none!important}.damage-filter-input:focus{outline:none!important}.damage-filter-wrap:focus-within{border-color:#78a5d5;box-shadow:0 0 0 3px #e9f2fb}
 .unfinished-toggle{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 11px;border:1px solid #d3dfec;border-radius:10px;background:#fff;color:#36536f;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer}.unfinished-toggle input{width:16px;height:16px;accent-color:#173b70}
 .clear-filter-btn{height:38px;border:1px solid #d7e1ec;border-radius:10px;background:#f8fafc;color:#60758f;padding:0 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}.clear-filter-btn:hover{background:#eef4fb;color:#173b70}.toolbar-note{white-space:nowrap}.toolbar-note-sep{opacity:.45}
 .dashboard-status-card{cursor:pointer;user-select:none;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}.dashboard-status-card:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(20,55,100,.09)!important}.dashboard-status-card:focus-visible{outline:3px solid #91b8e2;outline-offset:2px}.dashboard-status-card.active-filter{box-shadow:0 0 0 2px #234f86 inset,0 5px 14px rgba(20,55,100,.09)!important;border-color:#315d91!important}
@@ -2780,17 +3136,17 @@ initCloud();
 /* Laptop: stronger identity/work separation */
 @media(min-width:951px){.car{border-left:3px solid transparent}.car:hover{border-left-color:#9db9d9}.head{background:linear-gradient(90deg,#f8fbff,#fff)!important}.rows{background:#fff}.row{transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}.row:hover{transform:translateY(-1px)}.add-btn{border-style:solid!important;background:#edf5ff!important;color:#194d87!important;border-color:#a9c4e2!important;font-weight:800!important}.add-btn:hover{background:#dcecff!important}}
 /* Tablet */
-@media(max-width:1100px){.optimized-toolbar{position:relative;top:auto}.toolbar-controls{flex-wrap:wrap}.search-wrap{flex:1 1 100%;min-width:100%}.quick-filter{flex:1 1 180px}.unfinished-toggle{flex:0 0 auto}.toolbar-note{width:100%;white-space:normal}}
+@media(max-width:1100px){.optimized-toolbar{position:relative;top:auto}.toolbar-controls{flex-wrap:wrap}.search-wrap{flex:1 1 100%;min-width:100%}.quick-filter{flex:1 1 180px}.damage-filter-wrap{flex:1 1 210px;justify-content:space-between}.toolbar-note{width:100%;white-space:normal}}
 /* Mobile: true app-like cards, touch targets and compact save bar */
 @media(max-width:680px){
   body{padding-bottom:78px!important;background:#eef3f8!important}.topbar{padding:12px 10px!important}.topbar-inner{gap:10px!important}.brand-text h1{font-size:17px!important;line-height:1.25!important}.brand-meta{display:none!important}.header-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:7px!important}.header-pill,.header-btn{width:100%;min-width:0!important;justify-content:center;height:40px!important;padding:0 8px!important;font-size:11.5px!important}.io-wrap{width:100%}.io-wrap>.header-btn{width:100%}.io-menu{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:80px!important;width:auto!important}
   .dashboard-summary{width:calc(100% - 16px)!important;margin:8px auto!important;display:block!important}.dashboard-total-card{display:grid!important;grid-template-columns:auto 1fr!important;grid-template-rows:auto auto!important;column-gap:10px!important;min-height:62px!important;padding:8px 12px!important;text-align:left!important}.dashboard-total-number{grid-row:1 / span 2;font-size:26px!important;align-self:center}.dashboard-total-title,.dashboard-total-subtitle{text-align:left!important}.dashboard-status-cards{display:flex!important;overflow-x:auto!important;flex-wrap:nowrap!important;gap:7px!important;padding:2px 1px 6px!important;scroll-snap-type:x proximity}.dashboard-status-card{flex:0 0 auto!important;min-width:112px!important;min-height:44px!important;scroll-snap-align:start!important;padding:0 11px!important}
-  main{padding:0 8px 18px!important}.optimized-toolbar{position:sticky!important;top:0!important;z-index:25!important;margin-bottom:8px!important;padding:8px!important;border-radius:12px!important}.toolbar-controls{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}.search-wrap{grid-column:1/-1;min-width:0!important}.search-wrap #search{height:42px!important;font-size:14px!important}.quick-filter{width:100%!important;height:40px!important;font-size:12px!important}.unfinished-toggle{height:40px!important;justify-content:center!important}.clear-filter-btn{height:40px!important}.toolbar-note{grid-column:1/-1;font-size:10.5px!important;text-align:center!important}.toolbar-note-sep{display:none}.toolbar-note #visibleCountNote{display:block;color:#3e5f86;font-weight:750;margin-bottom:2px}
+  main{padding:0 8px 18px!important}.optimized-toolbar{position:sticky!important;top:0!important;z-index:25!important;margin-bottom:8px!important;padding:8px!important;border-radius:12px!important}.toolbar-controls{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}.search-wrap{grid-column:1/-1;min-width:0!important}.search-wrap #search{height:42px!important;font-size:14px!important}.quick-filter{width:100%!important;height:40px!important;font-size:12px!important}.damage-filter-wrap{height:40px!important;width:100%!important;justify-content:space-between}.damage-filter-input{width:145px!important;height:32px!important}.clear-filter-btn{height:40px!important}.toolbar-note{grid-column:1/-1;font-size:10.5px!important;text-align:center!important}.toolbar-note-sep{display:none}.toolbar-note #visibleCountNote{display:block;color:#3e5f86;font-weight:750;margin-bottom:2px}
   .table-panel{border:0!important;box-shadow:none!important;background:transparent!important;overflow:visible!important}.car{margin-bottom:12px!important;padding:0!important;border:1px solid #d8e3ef!important;border-radius:16px!important;box-shadow:0 3px 12px rgba(18,55,105,.06)!important;background:#fff!important;overflow:hidden!important}.head{min-height:auto!important;height:auto!important;padding:11px!important;gap:8px!important;background:linear-gradient(180deg,#f5f9fe,#fff)!important}.head .unit-select,.vehicle-no-select{height:42px!important;font-size:13px!important}.vehicle-no-custom{height:38px!important;font-size:13px!important}.head .carno{font-size:17px!important;padding:5px 9px!important;width:max-content!important;max-width:100%;border-radius:8px!important}.head .add-btn{width:100%!important;height:40px!important;justify-self:stretch!important;margin-top:2px!important;border-radius:10px!important;background:#eaf3ff!important;color:#164d89!important;border:1px solid #a9c6e6!important;font-size:13px!important;font-weight:800!important}
   .rows{padding:9px!important;background:#f7faff!important}.row{display:grid!important;grid-template-columns:1fr 34px!important;gap:8px!important;margin-bottom:9px!important;padding:10px!important;padding-right:10px!important;border:1px solid #dce7f2!important;border-radius:13px!important;background:#fff!important;box-shadow:0 2px 7px rgba(20,55,100,.035)!important}.row>*:not(.delete-btn){grid-column:1!important;width:100%!important}.status-wrap{grid-row:1!important;padding-right:0}.status-select{height:42px!important;font-size:14px!important;border-radius:10px!important}.status-time{font-size:10px!important;margin-top:4px!important;padding-left:3px!important}.desc-display,.row textarea{min-height:64px!important;height:auto!important;padding:11px!important;border:1px solid #d6e2ef!important;border-radius:10px!important;background:#fbfdff!important;font-size:14px!important;line-height:1.45!important}.desc-display:before{content:"故障描述  ";display:block;color:#71859d;font-size:10px;font-weight:750;margin-bottom:4px}.tech,.wit{height:42px!important;font-size:14px!important;border-radius:10px!important}.delete-btn{position:static!important;grid-column:2!important;grid-row:1!important;width:34px!important;height:34px!important;align-self:start!important;background:#fff3f4!important;color:#b64a55!important;border-radius:9px!important;font-size:22px!important}.car-location{display:grid!important;grid-template-columns:110px minmax(0,1fr)!important;gap:7px!important;padding:10px!important;border-top:1px solid #d6e5f3!important;background:#eef6ff!important}.location-select,.location-detail{height:42px!important;font-size:13px!important}.location-detail:only-child{grid-column:1/-1!important}.empty{margin:0!important;min-height:54px!important;background:#fff!important;border:1px dashed #cfdeed!important;justify-content:center!important;padding:0 12px!important}
   .savebar{min-height:64px!important;padding:8px!important;background:rgba(14,48,94,.98)!important}.savebar .inside{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}.savebar .msg{display:block!important;grid-column:1!important;font-size:11px!important;line-height:1.25!important}.savebar .msg span{display:none}.discard{display:none!important}.save-submit{grid-column:2!important;min-width:132px!important;height:44px!important;padding:0 13px!important;font-size:13px!important;border-radius:11px!important}
 }
-@media(max-width:390px){.toolbar-controls{grid-template-columns:1fr!important}.search-wrap{grid-column:1!important}.quick-filter,.unfinished-toggle,.clear-filter-btn{grid-column:1!important}.header-actions{grid-template-columns:1fr!important}.car-location{grid-template-columns:1fr!important}}
+@media(max-width:390px){.toolbar-controls{grid-template-columns:1fr!important}.search-wrap{grid-column:1!important}.quick-filter,.damage-date-select,.clear-filter-btn{grid-column:1!important}.header-actions{grid-template-columns:1fr!important}.car-location{grid-template-columns:1fr!important}}
 </style>
 
 <style id="vehicle-breakdown-2026">
@@ -2811,7 +3167,8 @@ initCloud();
 <script id="ux-optimization-2026-js">
 let quickStatusFilter="all";
 let quickUnitFilter="";
-let quickUnfinishedOnly=false;
+let quickTodayFaults=false;
+let quickDamageDate="";
 
 function rowStatusKey(rowEl){
   const sel=rowEl.querySelector(".status-select");
@@ -2830,44 +3187,167 @@ function applyQuickFilters(){
     rows.forEach(row=>{
       const key=rowStatusKey(row);
       const statusMatch=quickStatusFilter==="all" || key===quickStatusFilter;
-      const unfinishedMatch=!quickUnfinishedOnly || !["fixed","clear"].includes(key);
-      const show=statusMatch && unfinishedMatch;
+      const rid=row.dataset.id;
+      const rec=rid?data.find(r=>r.id===rid):null;
+      const today=dateInputValue(nowISO());
+      const recordDamageDate=rec ? (rec.damageDate||dateInputValue(rec.createdAt)) : "";
+      const todayMatch=!quickTodayFaults || (!!rec && recordDamageDate===today);
+      const damageDateMatch=!quickDamageDate || (!!rec && recordDamageDate===quickDamageDate);
+      const show=statusMatch && todayMatch && damageDateMatch;
       row.classList.toggle("filtered-out",!show);
       if(show){rowMatchCount++;visibleRows++;}
     });
-    const filterRequiresRecord=quickStatusFilter!=="all" || quickUnfinishedOnly;
+    const filterRequiresRecord=quickStatusFilter!=="all" || quickTodayFaults || !!quickDamageDate;
     const showCar=unitMatch && (!filterRequiresRecord || rowMatchCount>0);
     carEl.classList.toggle("filtered-out",!showCar);
     carEl.classList.toggle("filter-match",showCar && filterRequiresRecord);
     if(showCar)visibleCars++;
   });
   document.querySelectorAll(".dashboard-status-card").forEach(card=>card.classList.toggle("active-filter",card.dataset.filter===quickStatusFilter));
+  document.getElementById("todayFaultBtn")?.classList.toggle("active-filter",quickTodayFaults);
   const note=document.getElementById("visibleCountNote");
-  if(note)note.textContent=`目前顯示 ${visibleCars} 個車廂${(quickStatusFilter!=="all"||quickUnitFilter||quickUnfinishedOnly)?`・${visibleRows} 筆符合紀錄`:""}`;
+  if(note)note.textContent=`目前顯示 ${visibleCars} 個車廂${(quickStatusFilter!=="all"||quickUnitFilter||quickTodayFaults||quickDamageDate)?`・${visibleRows} 筆符合紀錄`:""}`;
   const app=document.getElementById("app");
   let empty=document.getElementById("filterEmptyState");
   if(visibleCars===0){
     if(!empty){empty=document.createElement("div");empty.id="filterEmptyState";empty.className="filter-empty-state";empty.innerHTML="<b>沒有符合目前篩選條件的資料</b>請調整狀態、單位或搜尋條件";app.appendChild(empty);}
   }else if(empty) empty.remove();
 }
+let openStatusUnitKey="";
+const STATUS_UNIT_LABELS={all:"全部紀錄",fault:"故障",repair:"維修中",fixed:"已修復"};
+const STATUS_UNIT_ICONS={all:"📋",fault:"🚨",repair:"🛠️",fixed:"🟢"};
+
+function getRecordUnit(r){
+  return (r && (r.unit||units[r.car])) || "未指定";
+}
+function renderStatusUnitBreakdown(key){
+  const panel=document.getElementById("statusUnitBreakdown");
+  const grid=document.getElementById("statusUnitGrid");
+  const title=document.getElementById("statusUnitBreakdownTitle");
+  const sub=document.getElementById("statusUnitBreakdownSub");
+  if(!panel||!grid||!title)return;
+  const normalized=key||"all";
+  const records=data.filter(r=>normalized==="all" || color(r.status)===normalized);
+  const unitOrder=[...UNIT_OPTIONS,"未指定"];
+  const counts=Object.fromEntries(unitOrder.map(u=>[u,0]));
+  records.forEach(r=>{const u=getRecordUnit(r);counts[u]=(counts[u]||0)+1;});
+  const label=STATUS_UNIT_LABELS[normalized]||"紀錄";
+  const icon=STATUS_UNIT_ICONS[normalized]||"📊";
+  title.textContent=`${icon} ${label}－各單位數量`;
+  if(sub)sub.textContent=`共 ${records.length} 筆 · 點單位可直接篩選`;
+  grid.innerHTML=unitOrder.map(unit=>{
+    const n=counts[unit]||0;
+    const active=quickUnitFilter===unit;
+    const disabled=unit==="未指定";
+    return `<button type="button" class="status-unit-item${active?' active':''}${n===0?' zero':''}" ${disabled?'disabled':''} onclick="setUnitFromBreakdown('${esc(unit)}')"><span>${esc(unit)}</span><b>${n}</b></button>`;
+  }).join("");
+  panel.hidden=false;
+  panel.dataset.status=normalized;
+}
+function setUnitFromBreakdown(unit){
+  if(unit==="未指定")return;
+  const next=quickUnitFilter===unit?"":unit;
+  const sel=document.getElementById("quickUnitFilter");
+  if(sel)sel.value=next;
+  setUnitFilter(next);
+  if(openStatusUnitKey)renderStatusUnitBreakdown(openStatusUnitKey);
+}
+function closeStatusUnitBreakdown(){
+  const panel=document.getElementById("statusUnitBreakdown");
+  if(panel)panel.hidden=true;
+  openStatusUnitKey="";
+  document.querySelectorAll(".dashboard-status-card").forEach(card=>card.classList.remove("breakdown-open"));
+}
+let statusDetailKey="all";
+let statusDetailUnit="";
+function statusDetailRecords(){
+  return data.filter(r=>{
+    const statusOk=statusDetailKey==="all" || color(r.status)===statusDetailKey;
+    const unit=getRecordUnit(r);
+    const unitOk=!statusDetailUnit || unit===statusDetailUnit;
+    return statusOk&&unitOk;
+  });
+}
+function renderStatusDetailModal(){
+  const title=document.getElementById("statusDetailTitle"),sub=document.getElementById("statusDetailSubtitle"),summary=document.getElementById("statusDetailUnitSummary"),body=document.getElementById("statusDetailTableBody"),empty=document.getElementById("statusDetailEmpty"),count=document.getElementById("statusDetailCount");
+  if(!title||!summary||!body)return;
+  const allForStatus=data.filter(r=>statusDetailKey==="all"||color(r.status)===statusDetailKey);
+  const label=STATUS_UNIT_LABELS[statusDetailKey]||"紀錄",icon=STATUS_UNIT_ICONS[statusDetailKey]||"📋";
+  title.textContent=`${icon} ${label}明細`;
+  if(sub)sub.textContent=statusDetailUnit?`${statusDetailUnit} · ${label}`:`依單位顯示 · 點上方單位可縮小範圍`;
+  const order=[...UNIT_OPTIONS,"未指定"];
+  const counts=Object.fromEntries(order.map(u=>[u,0]));
+  allForStatus.forEach(r=>{const u=getRecordUnit(r);counts[u]=(counts[u]||0)+1;});
+  summary.innerHTML=`<button type="button" class="status-detail-unit-chip${statusDetailUnit?'':' active'}" onclick="setStatusDetailUnit('')"><span>全部</span><b>${allForStatus.length}</b></button>`+order.map(u=>`<button type="button" class="status-detail-unit-chip${statusDetailUnit===u?' active':''}${(counts[u]||0)===0?' zero':''}" onclick="setStatusDetailUnit('${esc(u)}')"><span>${esc(u)}</span><b>${counts[u]||0}</b></button>`).join("");
+  const recs=statusDetailRecords().slice().sort((a,b)=>{const ua=getRecordUnit(a),ub=getRecordUnit(b);const ui=(UNIT_OPTIONS.indexOf(ua)<0?99:UNIT_OPTIONS.indexOf(ua))-(UNIT_OPTIONS.indexOf(ub)<0?99:UNIT_OPTIONS.indexOf(ub));if(ui)return ui;return String(a.car).localeCompare(String(b.car),'en',{numeric:true});});
+  body.innerHTML=recs.map(r=>{
+    const unit=getRecordUnit(r),vehicle=r.vehicleNo||vehicleNos[r.car]||"—",asset=r.assetType==="DK"?getDkCode(r.car):r.car,locMap=r.assetType==="DK"?(dkLocations[r.car]||{}):(locations[r.car]||{}),loc=[locMap.type||r.locationType,locMap.detail||r.locationDetail].filter(Boolean).join("｜")||"—",st=color(r.status);
+    return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(r.damageDate||dateInputValue(r.createdAt)||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
+  }).join("");
+  if(empty)empty.hidden=recs.length>0;
+  const table=body.closest('table');if(table)table.style.display=recs.length?'table':'none';
+  if(count)count.textContent=`${recs.length} 筆紀錄${statusDetailUnit?` · ${statusDetailUnit}`:''}`;
+}
+function setStatusDetailUnit(unit){statusDetailUnit=unit||"";renderStatusDetailModal();document.getElementById('statusDetailTableWrap')?.scrollTo({top:0,behavior:'smooth'});}
+function openStatusDetailModal(key){
+  statusDetailKey=key||"all";statusDetailUnit="";
+  const modal=document.getElementById("statusDetailBackdrop");if(!modal)return;
+  modal.hidden=false;document.body.style.overflow="hidden";renderStatusDetailModal();
+}
+function closeStatusDetailModal(){const modal=document.getElementById("statusDetailBackdrop");if(modal)modal.hidden=true;document.body.style.overflow="";}
+function statusDetailBackdropClick(e){if(e.target?.id==="statusDetailBackdrop")closeStatusDetailModal();}
+function handleDashboardStatusClick(v){openStatusDetailModal(v||"all");}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!document.getElementById("statusDetailBackdrop")?.hidden)closeStatusDetailModal();});
+
 function setQuickFilter(v){
   quickStatusFilter=v||"all";
   const sel=document.getElementById("quickStatusFilter");if(sel)sel.value=quickStatusFilter;
   applyQuickFilters();
+  if(openStatusUnitKey)renderStatusUnitBreakdown(openStatusUnitKey);
 }
 function setUnitFilter(v){quickUnitFilter=v||"";updateDashboard();applyQuickFilters();}
-function setUnfinishedOnly(v){quickUnfinishedOnly=!!v;applyQuickFilters();}
+function updateDamageDateOptions(){
+  const sel=document.getElementById("quickDamageDate");
+  if(!sel)return;
+  const current=quickDamageDate||sel.value||"";
+  const dates=[...new Set(data.map(r=>r.damageDate||dateInputValue(r.createdAt)).filter(Boolean))]
+    .sort((a,b)=>String(b).localeCompare(String(a)));
+  sel.innerHTML='<option value="">全部故障日期 / All Dates</option>'+dates.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  if(current && dates.includes(current)){sel.value=current;quickDamageDate=current;}
+  else {sel.value="";if(quickDamageDate && !dates.includes(quickDamageDate))quickDamageDate="";}
+}
+function setDamageDateFilter(v){
+  quickDamageDate=v||"";
+  quickTodayFaults=false;
+  document.getElementById("todayFaultBtn")?.classList.remove("active-filter");
+  applyQuickFilters();
+}
+function toggleTodayFaults(){
+  quickTodayFaults=!quickTodayFaults;
+  if(quickTodayFaults){
+    quickDamageDate="";
+    const d=document.getElementById("quickDamageDate");if(d)d.value="";
+  }
+  applyQuickFilters();
+}
 function clearQuickFilters(){
-  quickStatusFilter="all";quickUnitFilter="";quickUnfinishedOnly=false;
-  const s=document.getElementById("quickStatusFilter"),u=document.getElementById("quickUnitFilter"),ch=document.getElementById("unfinishedOnly"),q=document.getElementById("search");
-  if(s)s.value="all";if(u)u.value="";if(ch)ch.checked=false;if(q)q.value="";
+  quickStatusFilter="all";quickUnitFilter="";quickTodayFaults=false;quickDamageDate="";
+  const s=document.getElementById("quickStatusFilter"),u=document.getElementById("quickUnitFilter"),d=document.getElementById("quickDamageDate"),q=document.getElementById("search");
+  if(s)s.value="all";if(u)u.value="";if(d)d.value="";if(q)q.value="";
   render();
+}
+function updateSuggestionLists(){
+  const fill=(id,values)=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=[...new Set(values.filter(Boolean).map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-Hant')).map(v=>`<option value="${esc(v)}"></option>`).join('');};
+  fill('equipmentSuggestions',data.map(r=>r.equipmentName));
+  fill('techSuggestions',data.map(r=>r.tech));
+  fill('witnessSuggestions',data.map(r=>r.wit));
 }
 // Preserve the original rendering/data logic and add UX filtering afterward.
 const __coreRender=render;
-render=function(){__coreRender();requestAnimationFrame(applyQuickFilters);};
+render=function(){__coreRender();updateSuggestionLists();updateDamageDateOptions();requestAnimationFrame(applyQuickFilters);};
 // Keyboard access for dashboard filters.
-document.querySelectorAll(".dashboard-status-card[data-filter]").forEach(card=>card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setQuickFilter(card.dataset.filter);}}));
+document.querySelectorAll(".dashboard-status-card[data-filter]").forEach(card=>card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();handleDashboardStatusClick(card.dataset.filter);}}));
+updateDamageDateOptions();
 requestAnimationFrame(applyQuickFilters);
 document.addEventListener("click",e=>{
   const wrap=e.target.closest?.(".dashboard-total-wrap");
@@ -2910,7 +3390,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleVehicleBreakdo
   .optimized-toolbar{position:relative!important;top:auto!important;padding:7px!important}
   .toolbar-controls{gap:6px!important}
   .search-wrap #search{height:44px!important;font-size:13.5px!important}
-  .quick-filter,.unfinished-toggle,.clear-filter-btn{height:42px!important}
+  .quick-filter,.clear-filter-btn{height:42px!important}
   .toolbar-note{padding-top:1px!important}
   .car{margin-bottom:14px!important;border-radius:15px!important}
   .head{grid-template-columns:1fr 1fr!important;grid-template-rows:auto auto auto!important;padding:10px!important;gap:7px!important}
@@ -2939,7 +3419,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleVehicleBreakdo
   .optimized-toolbar{position:relative!important;top:auto!important;margin-bottom:6px!important;padding:6px!important;border-radius:10px!important}
   .toolbar-controls{display:grid!important;grid-template-columns:minmax(260px,1.5fr) 150px 150px auto auto!important;gap:5px!important;width:100%!important}
   .search-wrap{grid-column:1!important;min-width:0!important}.search-wrap #search{height:36px!important;font-size:11px!important}
-  .quick-filter,.unfinished-toggle,.clear-filter-btn{height:36px!important;font-size:10.5px!important;min-width:0!important}
+  .quick-filter,.clear-filter-btn{height:36px!important;font-size:10.5px!important;min-width:0!important}
   .unfinished-toggle{padding:0 8px!important}.toolbar-note{grid-column:1/-1!important;font-size:9.5px!important;text-align:left!important;margin-top:0!important}
   .table-panel{overflow:visible!important;border:0!important;box-shadow:none!important;background:transparent!important}.column-head{display:none!important}
   .car{display:grid!important;grid-template-columns:minmax(250px,34%) minmax(0,1fr)!important;grid-template-rows:auto auto!important;min-width:0!important;width:100%!important;margin-bottom:7px!important;padding:0!important;border:1px solid #d5e2ef!important;border-radius:12px!important;overflow:hidden!important;background:#fff!important;box-shadow:0 2px 8px rgba(18,55,105,.05)!important}
@@ -2951,6 +3431,86 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleVehicleBreakdo
   .row{margin-bottom:6px!important;padding:8px!important}.status-select,.tech,.wit{height:36px!important;font-size:11px!important}.desc-display,.row textarea{min-height:48px!important;font-size:12px!important}
   .car-location{grid-column:2!important;grid-row:2!important;display:grid!important;grid-template-columns:130px minmax(0,1fr)!important;gap:6px!important;padding:7px 8px!important;border-top:1px solid #dce7f2!important;border-left:0!important;background:#eef6ff!important}.location-select,.location-detail{height:36px!important;font-size:11px!important}
   .savebar{min-height:52px!important;padding:5px 8px!important}.save-submit{height:38px!important;min-width:118px!important;font-size:11.5px!important}
+}
+</style>
+
+<style id="v2-15-typography-master">
+/* ===== V2.15 Global typography & filter consistency ===== */
+:root{
+  --ui-font:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;
+  --ui-text:#183451;
+  --ui-muted:#6b7f98;
+}
+html{font-size:16px!important;}
+body{font-family:var(--ui-font)!important;font-size:14px!important;line-height:1.45!important;color:var(--ui-text)!important;}
+button,input,select,textarea{font-family:var(--ui-font)!important;}
+
+/* Header */
+.brand-text h1{font-size:23px!important;line-height:1.2!important;font-weight:800!important;}
+.brand-text h1 span{font-size:14px!important;font-weight:500!important;}
+.brand-meta,.header-pill,.header-btn{font-size:13px!important;line-height:1.25!important;}
+
+/* Dashboard */
+.dashboard-total-number{font-size:32px!important;line-height:1!important;}
+.dashboard-total-title{font-size:13px!important;line-height:1.25!important;}
+.dashboard-total-subtitle{font-size:11px!important;line-height:1.25!important;}
+.dashboard-status-card .stat-name{font-size:13px!important;line-height:1.2!important;}
+.dashboard-status-card b{font-size:18px!important;}
+
+/* Filter bar — one visual scale */
+.toolbar-controls{align-items:center!important;}
+#search,.quick-filter,.damage-date-select,.clear-filter-btn{height:38px!important;font-size:13px!important;line-height:1.2!important;}
+#search{font-weight:500!important;}
+.quick-filter,.damage-date-select{font-weight:650!important;}
+.damage-date-select{min-width:205px!important;max-width:225px!important;}
+.clear-filter-btn{font-weight:700!important;}
+.toolbar-note{font-size:12px!important;line-height:1.35!important;}
+
+/* Table */
+.col-title{font-size:13px!important;line-height:1.2!important;font-weight:800!important;}
+.col-title small{font-size:10.5px!important;line-height:1.15!important;font-weight:500!important;}
+.rownum{font-size:12px!important;}
+.carno{font-size:16px!important;line-height:1.2!important;}
+.unit-select,.vehicle-no-select,.vehicle-no-custom,.location-select,.location-detail,.status-select,.tech,.wit,.equipment-input,.damage-date-input{font-size:13px!important;line-height:1.25!important;}
+.desc-display,.row textarea{font-size:13.5px!important;line-height:1.5!important;}
+.status-time{font-size:10.5px!important;line-height:1.25!important;}
+.add-btn{font-size:11px!important;line-height:1.2!important;}
+.delete-btn{font-size:18px!important;}
+
+/* Modal/detail */
+.status-detail-modal,.status-unit-breakdown{font-family:var(--ui-font)!important;}
+.status-detail-title{font-size:20px!important;line-height:1.25!important;}
+.status-detail-subtitle,.status-detail-count{font-size:12px!important;line-height:1.35!important;}
+.status-detail-table{font-size:12.5px!important;line-height:1.45!important;}
+.status-detail-table th{font-size:12px!important;line-height:1.25!important;}
+.status-detail-unit-chip{font-size:12.5px!important;}
+
+/* Save bar */
+.savebar .msg,.discard,.save-submit{font-size:13px!important;line-height:1.2!important;}
+
+@media(max-width:1100px){
+  .brand-text h1{font-size:20px!important;}
+  .dashboard-total-number{font-size:28px!important;}
+  #search,.quick-filter,.damage-date-select,.clear-filter-btn{font-size:13px!important;}
+  .damage-date-select{min-width:180px!important;max-width:none!important;}
+}
+@media(max-width:680px){
+  body{font-size:14px!important;line-height:1.45!important;}
+  .brand-text h1{font-size:19px!important;}
+  .brand-text h1 span{font-size:13px!important;}
+  .dashboard-status-card .stat-name{font-size:12.5px!important;}
+  .dashboard-status-card b{font-size:17px!important;}
+  /* 16px form controls prevent Safari focus zoom and keep all input typography consistent. */
+  #search,.quick-filter,.damage-date-select,.clear-filter-btn,.unit-select,.vehicle-no-select,.vehicle-no-custom,.location-select,.location-detail,.status-select,.tech,.wit,.equipment-input,.damage-date-input,.row textarea{font-size:16px!important;}
+  .desc-display{font-size:14px!important;line-height:1.5!important;}
+  .carno{font-size:17px!important;}
+  .status-time{font-size:11px!important;}
+  .toolbar-note{font-size:11.5px!important;}
+  .damage-date-select{width:100%!important;min-width:0!important;max-width:none!important;}
+}
+@media (orientation:landscape) and (max-width:950px) and (max-height:500px){
+  .toolbar-controls{grid-template-columns:minmax(230px,1.5fr) 125px 125px 165px auto auto!important;}
+  .damage-date-select{min-width:0!important;max-width:none!important;width:100%!important;}
 }
 </style>
 </body>
@@ -3306,7 +3866,7 @@ main{background:transparent !important;}
 .column-head{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important}
 .column-head-left{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;padding:0 10px!important}
 .column-head-left .col-title:nth-child(3){display:block!important}
-.column-head-right{display:grid!important;grid-template-columns:155px 180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;padding:0 8px!important}
+.column-head-right{display:grid!important;grid-template-columns:155px 180px minmax(230px,1fr) 115px 115px 26px!important;gap:6px!important;padding:0 8px!important}
 .column-head-location{display:none!important}
 .asset-car{display:grid!important;grid-template-columns:270px minmax(0,1fr)!important;min-width:1120px!important;padding:0!important;border-radius:0!important;margin:0!important;border:0!important;border-bottom:1px solid #dfe7f0!important;box-shadow:none!important;overflow:visible!important;background:#fff!important}
 .shared-vehicle{display:grid!important;grid-template-columns:34px 92px minmax(120px,1fr)!important;gap:7px!important;align-items:start!important;padding:12px 10px!important;background:#f8fbff!important;border-right:1px solid #e2e9f2!important}
@@ -3325,12 +3885,15 @@ main{background:transparent !important;}
 .asset-add-btn:hover{background:#eef5fc!important;border-style:solid!important}
 .asset-location-controls{grid-column:3!important;display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important}
 .asset-location-controls .location-select,.asset-location-controls .location-detail{width:100%!important;height:34px!important;font-size:11.5px!important;border-radius:8px!important}
+.dk-asset .asset-header{grid-template-columns:155px minmax(0,1fr)!important}
+.dk-asset .asset-name-wrap{grid-column:1!important}
+
 .asset-rows{padding:0 8px 7px!important}
-.asset-fault-row{display:grid!important;grid-template-columns:180px minmax(230px,1fr) 115px 115px 180px 26px!important;gap:6px!important;align-items:center!important;min-height:54px!important;margin:6px 0 0!important;padding:6px!important;border-radius:10px!important;background:#fff!important}
+.asset-fault-row{display:grid!important;grid-template-columns:180px minmax(230px,1fr) 115px 115px 26px!important;gap:6px!important;align-items:center!important;min-height:54px!important;margin:6px 0 0!important;padding:6px!important;border-radius:10px!important;background:#fff!important}
 .dk-asset .asset-fault-row{background:#f8fbff!important}
 .asset-fault-row .status-select{height:36px!important;font-size:12px!important}
 .asset-fault-row textarea{height:40px!important;min-height:40px!important}
-.fault-location-display{min-height:36px!important;padding:6px 8px!important;border:1px solid #d6e2ee!important;border-radius:8px!important;background:#f8fbfe!important;color:#24496f!important;font-size:11.5px!important;font-weight:700!important;overflow:hidden!important}
+.fault-location-display{display:none!important;min-height:36px!important;padding:6px 8px!important;border:1px solid #d6e2ee!important;border-radius:8px!important;background:#f8fbfe!important;color:#24496f!important;font-size:11.5px!important;font-weight:700!important;overflow:hidden!important}
 .fault-location-display small{display:block!important;margin-top:2px!important;color:#6f8299!important;font-size:10px!important;font-weight:500!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .asset-empty{margin:7px 0 0!important;padding:10px 12px!important;border-radius:8px!important;background:#f8fafc!important;color:#93a2b5!important;font-size:11.5px!important}
 .car-location,.head,.rows{display:none!important}
@@ -3364,3 +3927,227 @@ main{background:transparent !important;}
   .asset-add-btn{width:100%!important}
 }
 </style>
+
+<style id="toolbar-overlap-fix-v2151">
+/* ===== Toolbar overlap fix ===== */
+.optimized-toolbar{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
+  column-gap:14px !important;
+  row-gap:7px !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+.optimized-toolbar .toolbar-controls{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  gap:7px !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+.optimized-toolbar .toolbar-note{
+  min-width:0 !important;
+  max-width:100% !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+  text-align:right !important;
+  line-height:1.4 !important;
+}
+.optimized-toolbar .toolbar-note #visibleCountNote{
+  white-space:normal !important;
+}
+
+/* When the available width becomes tight, put the note on its own row. */
+@media(max-width:1280px){
+  .optimized-toolbar{
+    grid-template-columns:1fr !important;
+  }
+  .optimized-toolbar .toolbar-note{
+    width:100% !important;
+    text-align:left !important;
+    padding:1px 2px 0 !important;
+  }
+}
+
+@media(max-width:680px){
+  .optimized-toolbar{
+    display:block !important;
+  }
+  .optimized-toolbar .toolbar-controls{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:7px !important;
+  }
+  .optimized-toolbar .search-wrap{
+    grid-column:1 / -1 !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+  .optimized-toolbar .quick-filter,
+  .optimized-toolbar .damage-date-select,
+  .optimized-toolbar .clear-filter-btn{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+  .optimized-toolbar .toolbar-note{
+    margin-top:7px !important;
+    text-align:center !important;
+    font-size:11.5px !important;
+  }
+}
+
+@media(max-width:390px){
+  .optimized-toolbar .toolbar-controls{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
+<style id="v2-18-final-qa-master">
+/* ===== V2.18 FINAL QA — visual consistency / accessibility / production polish ===== */
+:root{
+  --qa-navy:#173b70;
+  --qa-navy-dark:#102f5c;
+  --qa-text:#183451;
+  --qa-muted:#6f8299;
+  --qa-canvas:#f4f7fb;
+  --qa-panel:#ffffff;
+  --qa-border:#d7e1ec;
+  --qa-border-soft:#e7edf4;
+  --qa-focus:#2f6fb1;
+  --qa-fault-bg:#fff4f5;
+  --qa-fault-border:#efc2c7;
+  --qa-fault-text:#a92734;
+  --qa-repair-bg:#fff8ea;
+  --qa-repair-border:#ead39f;
+  --qa-repair-text:#845b0b;
+  --qa-fixed-bg:#eff8f2;
+  --qa-fixed-border:#b9dec8;
+  --qa-fixed-text:#17633e;
+}
+html,body{background:var(--qa-canvas)!important;color:var(--qa-text)!important;}
+body{font-size:14px!important;line-height:1.45!important;}
+
+/* One control rhythm across the application. */
+button,input,select,textarea{font-family:var(--ui-font,"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei",Arial,sans-serif)!important;}
+.header-btn,.header-pill,#search,.quick-filter,.damage-date-select,.clear-filter-btn,.unit-select,.vehicle-no-select,.vehicle-no-custom,.location-select,.location-detail,.status-select,.tech,.wit,.equipment-input,.damage-date-input{
+  min-height:40px!important;
+  border-radius:10px!important;
+}
+#search,.quick-filter,.damage-date-select,.unit-select,.vehicle-no-select,.vehicle-no-custom,.location-select,.location-detail,.tech,.wit,.equipment-input,.damage-date-input{
+  border-color:var(--qa-border)!important;
+  background:#fff!important;
+  color:var(--qa-text)!important;
+}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role="button"]:focus-visible{
+  outline:3px solid rgba(47,111,177,.22)!important;
+  outline-offset:2px!important;
+}
+button:disabled{opacity:.58!important;cursor:not-allowed!important;}
+
+/* Header / dashboard hierarchy. */
+.topbar{background:linear-gradient(118deg,#102f5c 0%,#173b70 58%,#285486 100%)!important;box-shadow:0 4px 16px rgba(16,47,92,.14)!important;}
+.dashboard-summary{gap:10px!important;}
+.dashboard-total-card,.dashboard-status-card{border-color:var(--qa-border)!important;box-shadow:0 2px 8px rgba(22,57,96,.045)!important;}
+.dashboard-status-card{transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease!important;}
+.dashboard-status-card:hover{transform:translateY(-1px)!important;box-shadow:0 5px 14px rgba(22,57,96,.08)!important;}
+.dashboard-status-card.stat-fault{background:var(--qa-fault-bg)!important;border-color:var(--qa-fault-border)!important;color:var(--qa-fault-text)!important;}
+.dashboard-status-card.stat-repair{background:var(--qa-repair-bg)!important;border-color:var(--qa-repair-border)!important;color:var(--qa-repair-text)!important;}
+.dashboard-status-card.stat-fixed{background:var(--qa-fixed-bg)!important;border-color:var(--qa-fixed-border)!important;color:var(--qa-fixed-text)!important;}
+
+/* Toolbar: calm white surface with predictable wrapping. */
+.optimized-toolbar{
+  background:#fff!important;
+  border:1px solid var(--qa-border)!important;
+  border-radius:13px!important;
+  box-shadow:0 2px 9px rgba(20,53,92,.035)!important;
+  padding:9px 10px!important;
+}
+.optimized-toolbar .toolbar-controls{gap:8px!important;}
+.optimized-toolbar .toolbar-note{color:var(--qa-muted)!important;}
+.clear-filter-btn{border:1px solid var(--qa-border)!important;background:#fff!important;color:#345474!important;}
+.clear-filter-btn:hover{background:#f3f7fb!important;border-color:#afc3d9!important;}
+
+/* Main data surface. */
+.table-panel{border-color:var(--qa-border)!important;box-shadow:0 5px 18px rgba(18,53,95,.05)!important;}
+.column-head{background:linear-gradient(105deg,#173b70,#245182)!important;}
+.asset-car{border-bottom-color:var(--qa-border-soft)!important;}
+.shared-vehicle{background:#f8fafc!important;border-right-color:var(--qa-border-soft)!important;}
+.asset-section{border-bottom-color:var(--qa-border-soft)!important;}
+.asset-header{background:#fbfcfe!important;border-bottom-color:var(--qa-border-soft)!important;}
+.asset-name{background:var(--qa-navy)!important;box-shadow:none!important;}
+.asset-add-btn{border-color:#a9bfd6!important;color:#315d89!important;}
+.asset-add-btn:hover{background:#edf4fb!important;border-color:#779dc3!important;}
+.asset-fault-row{border:1px solid #dee7f0!important;box-shadow:0 1px 2px rgba(18,53,95,.025)!important;}
+.asset-fault-row:hover{border-color:#c8d7e7!important;box-shadow:0 4px 12px rgba(18,53,95,.055)!important;}
+.asset-fault-row.unsaved{background:#fff9ec!important;border-color:#e8c46e!important;box-shadow:inset 3px 0 0 #ddb044!important;}
+
+/* Three-status palette only. */
+.status-select.status-fault{background:var(--qa-fault-bg)!important;border-color:#eba8af!important;color:#a51f2d!important;}
+.status-select.status-repair{background:var(--qa-repair-bg)!important;border-color:#dfbd74!important;color:#7f5400!important;}
+.status-select.status-fixed,.status-select.status-clear{background:var(--qa-fixed-bg)!important;border-color:#8ecfac!important;color:#12643d!important;}
+
+/* Empty/filter states look intentional rather than blank. */
+.asset-empty,.empty,.filter-empty-state{
+  border:1px dashed #cfdbe8!important;
+  background:#f9fbfd!important;
+  color:#768aa3!important;
+  border-radius:10px!important;
+}
+.filter-empty-state{max-width:720px!important;margin:28px auto!important;padding:28px 24px!important;text-align:center!important;line-height:1.7!important;}
+.filter-empty-state b{display:block!important;margin-bottom:5px!important;color:#345676!important;font-size:15px!important;}
+
+/* Cloud/save feedback: visible but restrained. */
+.cloud-pill{min-width:150px!important;}
+#cloudStatus[data-state="ok"]{color:#c6f1d5!important;}
+#cloudStatus[data-state="syncing"]{color:#fff0ad!important;}
+#cloudStatus[data-state="pending"]{color:#ffe09a!important;}
+#cloudStatus[data-state="error"]{color:#ffd0d4!important;}
+.savebar{border-top:1px solid rgba(255,255,255,.08)!important;}
+.save-submit{background:#16824a!important;box-shadow:none!important;}
+.save-submit:hover:not(:disabled){background:#126f3f!important;}
+
+/* Detail modal QA. */
+.status-detail-backdrop{backdrop-filter:blur(4px)!important;}
+.status-detail-modal{border:1px solid #d2deea!important;box-shadow:0 24px 65px rgba(13,42,76,.24)!important;}
+.status-detail-head{background:#f8fafc!important;border-bottom:1px solid var(--qa-border)!important;}
+.status-detail-table thead th{background:#eaf1f8!important;color:#274866!important;border-color:#cedbea!important;}
+.status-detail-table tbody td{border-color:#e1e8f0!important;}
+
+/* Print: eliminate decorative shadows and avoid clipped rows. */
+@media print{
+  body{background:#fff!important;}
+  .table-panel,.asset-car,.dashboard-total-card,.dashboard-status-card{box-shadow:none!important;}
+  .asset-fault-row,.asset-section,.asset-car{break-inside:avoid!important;page-break-inside:avoid!important;}
+}
+
+/* Touch targets and typography remain consistent on mobile. */
+@media(max-width:680px){
+  .header-btn,.header-pill,#search,.quick-filter,.damage-date-select,.clear-filter-btn,.unit-select,.vehicle-no-select,.vehicle-no-custom,.location-select,.location-detail,.status-select,.tech,.wit,.equipment-input,.damage-date-input{min-height:44px!important;}
+  .optimized-toolbar{padding:8px!important;border-radius:12px!important;}
+  .dashboard-status-card{min-height:44px!important;}
+  .asset-car{border-radius:14px!important;}
+  .asset-header{padding:10px!important;}
+  .asset-fault-row{padding-top:11px!important;padding-bottom:11px!important;}
+}
+</style>
+<script id="v2-18-final-qa-runtime">
+/* Final QA: keep network status truthful without changing the data workflow. */
+(function(){
+  function syncNetworkState(){
+    document.documentElement.dataset.network=navigator.onLine?'online':'offline';
+    if(!navigator.onLine){
+      const el=document.getElementById('cloudStatus');
+      if(el){el.textContent='離線';el.dataset.state='error';}
+    }
+  }
+  window.addEventListener('online',function(){syncNetworkState(); if(typeof loadFromCloud==='function') loadFromCloud({force:false});});
+  window.addEventListener('offline',syncNetworkState);
+  syncNetworkState();
+})();
+</script>
+
