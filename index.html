@@ -4340,6 +4340,17 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
     }finally{AUTH.completing=false;}
   }
 
+  async function tryDirectAccountLogin(account,password){
+    // New account-login users are stored internally as account@73g.example.com.
+    // This direct path also keeps the bootstrap admin usable even if the Edge Function
+    // has not yet been upgraded. Legacy users (for example mike@gmail.com) fall back
+    // to the Edge Function resolver below.
+    const email=`${account}@73g.example.com`;
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error||!data?.session)return null;
+    return data.session;
+  }
+
   async function loginWithPassword(ev){
     ev?.preventDefault();clearAuthError();
     const account=normalizeAccount(document.getElementById('authEmail')?.value||'');
@@ -4348,19 +4359,33 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
     if(!account){showAuthError('請輸入登入帳號。');return;}
     if(btn){btn.disabled=true;btn.textContent='驗證中...';}
     try{
+      // Fast/direct login for admin and every account created by the new account-only backend.
+      const directSession=await tryDirectAccountLogin(account,password);
+      if(directSession){await completeAuthentication(directSession);return;}
+
+      // Compatibility path for older users whose Supabase Auth email was a real email
+      // (e.g. mike@gmail.com). The latest admin-users Edge Function resolves the account
+      // without exposing the email to the user.
       const {data,error}=await supabaseClient.functions.invoke('admin-users',{body:{action:'login',account,password}});
       if(error){
-        let msg=error.message||'登入失敗';
+        let msg=error.message||'登入服務連線失敗';
         try{if(error.context){const j=await error.context.json();msg=j?.error||j?.message||msg;}}catch(_e){}
+        const low=String(msg).toLowerCase();
+        if(low.includes('unknown action')||low.includes('missing user access token')||low.includes('invalid session')||low.includes('edge function')){
+          throw new Error('帳號登入後端尚未更新。請將最新版 admin-users Edge Function 部署後再試。');
+        }
         throw new Error(msg);
       }
       if(data?.error)throw new Error(data.error);
-      if(!data?.accessToken||!data?.refreshToken)throw new Error('登入服務沒有回傳有效 Session。');
+      if(!data?.accessToken||!data?.refreshToken)throw new Error('帳號登入後端尚未更新。請重新部署 admin-users Edge Function。');
       const {data:sessionData,error:sessionError}=await supabaseClient.auth.setSession({access_token:data.accessToken,refresh_token:data.refreshToken});
       if(sessionError)throw sessionError;
       await completeAuthentication(sessionData.session);
-    }catch(err){showAuthError('帳號或密碼錯誤。');}
-    finally{if(btn){btn.disabled=false;btn.textContent='登入 / Sign In';}}
+    }catch(err){
+      const message=String(err?.message||'');
+      if(message.includes('後端尚未更新')||message.includes('Edge Function'))showAuthError(message);
+      else showAuthError('帳號或密碼錯誤。');
+    }finally{if(btn){btn.disabled=false;btn.textContent='登入 / Sign In';}}
   }
 
   function setChangePasswordStatus(message,type=''){
