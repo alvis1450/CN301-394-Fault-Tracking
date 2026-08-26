@@ -1359,8 +1359,53 @@ body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFa
 }
 </style>
 
+
+<style id="auth-role-ui-v1">
+/* ===== Authentication + role management ===== */
+body.auth-pending,body.auth-locked{overflow:hidden!important;background:#eef3f9!important}
+body.auth-pending > :not(#authGate):not(script):not(style),
+body.auth-locked > :not(#authGate):not(script):not(style){visibility:hidden!important}
+#authGate{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 18% 8%,#274f83 0,#173b70 28%,#102f5c 62%,#0b2448 100%);visibility:visible!important}
+body.auth-ready #authGate{display:none}
+.auth-shell{width:min(960px,100%);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.8fr);overflow:hidden;border:1px solid rgba(255,255,255,.15);border-radius:24px;background:#fff;box-shadow:0 30px 90px rgba(2,18,42,.34)}
+.auth-brand-panel{padding:46px 44px;color:#fff;background:linear-gradient(145deg,#102f5c,#1b477e);display:flex;flex-direction:column;justify-content:space-between;min-height:540px}
+.auth-brand-icon{width:62px;height:62px;border-radius:17px;display:grid;place-items:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);font-size:33px;margin-bottom:26px}
+.auth-brand-panel h2{font-size:31px;line-height:1.18;margin:0 0 12px;font-weight:850;letter-spacing:.01em}.auth-brand-panel h2 span{display:block;margin-top:8px;font-size:17px;color:#d9e6f7;font-weight:600}.auth-brand-panel p{max-width:470px;color:#c8d8eb;font-size:14px;line-height:1.7;margin:0}.auth-secure-note{font-size:12px;color:#b9cbe1;display:flex;gap:8px;align-items:center}
+.auth-form-panel{padding:46px 40px;display:flex;flex-direction:column;justify-content:center;background:#fff}.auth-form-panel h3{font-size:25px;color:#173b70;margin:0 0 7px}.auth-form-panel .auth-sub{color:#72849b;font-size:13px;margin-bottom:28px}.auth-field{display:block;margin-bottom:16px}.auth-field span{display:flex;justify-content:space-between;align-items:end;margin-bottom:7px;color:#29496d;font-size:13px;font-weight:800}.auth-field small{font-size:10px;font-weight:500;color:#8a9aab}.auth-input-wrap{position:relative}.auth-field input{width:100%;height:48px;border:1px solid #ccd9e8;border-radius:11px;background:#fbfdff;color:#173451;padding:0 13px;font-size:15px;outline:none}.auth-field input:focus{border-color:#4d86c1;box-shadow:0 0 0 3px rgba(77,134,193,.15)}.auth-password-toggle{position:absolute;right:7px;top:6px;width:38px;height:36px;border:0;background:transparent;color:#587493;border-radius:8px;cursor:pointer}.auth-submit{height:48px;margin-top:5px;border:0;border-radius:11px;background:#173b70;color:#fff;font-size:14px;font-weight:850;cursor:pointer;box-shadow:0 5px 16px rgba(23,59,112,.2)}.auth-submit:hover{background:#204b82}.auth-submit:disabled{opacity:.65;cursor:wait}.auth-error{display:none;margin:14px 0 0;padding:10px 12px;border:1px solid #f0c4c9;border-radius:9px;background:#fff3f4;color:#a52c38;font-size:12px;line-height:1.5}.auth-error.show{display:block}.auth-foot{margin-top:22px;color:#93a0b1;font-size:10.5px;text-align:center}
+.auth-user-pill{gap:8px!important}.auth-user-pill b{font-size:12.5px}.auth-role-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:7px;background:rgba(255,255,255,.14);font-size:10px;font-weight:850;letter-spacing:.05em}.admin-users-btn{background:#f7fbff!important;color:#173b70!important;border-color:#fff!important;font-weight:800!important}
+.user-admin-backdrop{position:fixed;inset:0;z-index:9500;background:rgba(7,26,52,.54);backdrop-filter:blur(5px);padding:22px;display:flex;align-items:center;justify-content:center}.user-admin-backdrop[hidden]{display:none!important}.user-admin-modal{width:min(1180px,100%);max-height:92vh;overflow:auto;border-radius:18px;background:#f7f9fc;border:1px solid #d7e2ef;box-shadow:0 25px 70px rgba(7,26,52,.3)}.user-admin-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:15px;padding:18px 20px;background:#fff;border-bottom:1px solid #dce5ef}.user-admin-head h3{margin:0;color:#173b70;font-size:19px}.user-admin-head small{display:block;margin-top:3px;color:#7b8da4;font-size:11px;font-weight:500}.user-admin-close{width:38px;height:38px;border:1px solid #d5e0eb;border-radius:9px;background:#fff;color:#617692;font-size:23px;cursor:pointer}.user-admin-body{padding:18px}.user-create-card,.user-list-card{background:#fff;border:1px solid #dce5ef;border-radius:14px;padding:16px}.user-create-card{margin-bottom:14px}.user-card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;color:#27496e;font-size:14px;font-weight:850}.user-create-grid{display:grid;grid-template-columns:1fr 1.2fr 1fr 160px auto;gap:9px}.user-create-grid input,.user-create-grid select,.admin-user-row input,.admin-user-row select{height:40px;border:1px solid #d3deea;border-radius:9px;background:#fff;color:#203b59;padding:0 10px;min-width:0}.user-create-btn{height:40px;border:0;border-radius:9px;background:#17824b;color:#fff;font-weight:800;padding:0 15px;cursor:pointer}.admin-users-list{display:flex;flex-direction:column;gap:8px}.admin-user-row{display:grid;grid-template-columns:minmax(165px,1fr) minmax(210px,1.25fr) 145px 115px minmax(260px,auto);gap:8px;align-items:center;padding:10px;border:1px solid #e0e7ef;border-radius:11px;background:#fbfcfe}.admin-user-email{font-size:12px;color:#536d8a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-user-email b{display:block;color:#1e3e62;font-size:13px;margin-bottom:3px}.admin-user-state{display:flex;gap:6px;align-items:center;color:#47627f;font-size:12px;font-weight:750}.admin-user-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}.admin-user-actions button{height:34px;border:1px solid #cdd9e7;border-radius:8px;background:#fff;color:#345777;font-size:11px;font-weight:750;padding:0 9px;cursor:pointer}.admin-user-actions button.danger{border-color:#efc4c8;color:#a12d39;background:#fff7f8}.admin-user-actions button:disabled{opacity:.45;cursor:not-allowed}.user-admin-status{min-height:18px;margin-top:9px;color:#67809b;font-size:11.5px}.user-admin-status.error{color:#aa2935}.user-admin-status.ok{color:#157347}.user-list-empty{padding:20px;text-align:center;color:#8495a8;font-size:12px}
+body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .delete-btn{display:none!important}
+body.role-viewer .savebar{display:none!important}
+@media(max-width:820px){.auth-shell{grid-template-columns:1fr;max-width:500px}.auth-brand-panel{min-height:185px;padding:28px}.auth-brand-panel p{display:none}.auth-brand-icon{width:48px;height:48px;font-size:25px;margin-bottom:14px}.auth-brand-panel h2{font-size:24px}.auth-form-panel{padding:30px 26px}.user-create-grid{grid-template-columns:1fr 1fr}.user-create-btn{grid-column:1/-1}.admin-user-row{grid-template-columns:1fr 1fr}.admin-user-email{grid-column:1/-1}.admin-user-actions{grid-column:1/-1;justify-content:flex-start}}@media(max-width:520px){#authGate{padding:12px}.auth-shell{border-radius:17px}.auth-brand-panel{padding:22px;min-height:155px}.auth-brand-panel h2{font-size:21px}.auth-brand-panel h2 span{font-size:13px}.auth-secure-note{display:none}.auth-form-panel{padding:25px 20px}.user-admin-backdrop{padding:8px}.user-admin-body{padding:10px}.user-create-grid,.admin-user-row{grid-template-columns:1fr}.admin-user-email,.admin-user-actions{grid-column:1}.admin-user-actions{justify-content:stretch}.admin-user-actions button{flex:1}}
+</style>
+
 </head>
-<body>
+<body class="auth-pending">
+
+<div id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="auth-shell">
+    <section class="auth-brand-panel">
+      <div>
+        <div class="auth-brand-icon">🚆</div>
+        <h2>73G 故障追蹤系統<span>Fault Tracking System · Secure Access</span></h2>
+        <p>使用授權帳號登入後才能讀取與操作故障追蹤資料。權限依管理員設定的角色自動套用。</p>
+      </div>
+      <div class="auth-secure-note">🔐 Supabase Auth · Role Based Access Control</div>
+    </section>
+    <section class="auth-form-panel">
+      <h3 id="authTitle">登入系統</h3>
+      <div class="auth-sub">Sign in to continue</div>
+      <form id="authLoginForm" autocomplete="on">
+        <label class="auth-field"><span>帳號 / Email <small>Account</small></span><input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="admin 或 name@example.com"></label>
+        <label class="auth-field"><span>密碼 / Password <small>8+ characters</small></span><div class="auth-input-wrap"><input id="authPassword" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"><button class="auth-password-toggle" type="button" id="authPasswordToggle" aria-label="顯示密碼">👁</button></div></label>
+        <button id="authLoginBtn" class="auth-submit" type="submit">登入 / Sign In</button>
+        <div id="authError" class="auth-error" role="alert"></div>
+      </form>
+      <div class="auth-foot">Authorized personnel only · 73G Fault Tracking System</div>
+    </section>
+  </div>
+</div>
+
 <div class="topbar">
   <div class="topbar-inner">
     <div class="brand-wrap">
@@ -1377,6 +1422,10 @@ body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFa
     <div class="header-actions">
       <div class="header-pill">🕘 最後更新 <span id="lastUpdated">--</span></div>
       <div class="header-pill cloud-pill">☁️ 雲端 <span id="cloudStatus">連線中...</span></div>
+      <div class="header-pill auth-user-pill" id="authUserBadge" hidden>👤 <b id="authUserName">User</b> <span class="auth-role-badge" id="authRoleBadge">USER</span></div>
+      <button class="header-btn admin-users-btn" id="adminUsersBtn" onclick="openUserAdmin()" hidden>⚙ 帳號管理</button>
+      <button class="header-btn" id="changePasswordBtn" onclick="openChangePassword()" hidden>🔑 修改密碼</button>
+      <button class="header-btn" id="authLogoutBtn" onclick="logoutSystem()" hidden>↪ 登出</button>
       <button class="header-btn" onclick="backupData()">📥 備份 Backup</button>
       <div class="io-wrap">
         <button class="header-btn" id="ioMenuBtn" onclick="toggleIOMenu(event)">⇄ 匯入 / 匯出 <span style="font-size:10px">▼</span></button>
@@ -1505,6 +1554,56 @@ body{font-family:"Segoe UI","Microsoft JhengHei UI","Microsoft JhengHei","PingFa
   </div>
 </div>
 <div id="toast" class="toast">✅ 已成功儲存 / Saved &amp; synced</div>
+
+
+<div id="userAdminBackdrop" class="user-admin-backdrop" hidden>
+  <section class="user-admin-modal" role="dialog" aria-modal="true" aria-labelledby="userAdminTitle">
+    <header class="user-admin-head"><div><h3 id="userAdminTitle">帳號與權限管理</h3><small>User &amp; Permission Management · ADMIN only</small></div><button class="user-admin-close" type="button" onclick="closeUserAdmin()" aria-label="關閉">×</button></header>
+    <div class="user-admin-body">
+      <div class="user-create-card">
+        <div class="user-card-title"><span>＋ 建立新帳號</span><small>初始密碼至少 8 碼</small></div>
+        <form id="createUserForm" class="user-create-grid">
+          <input id="newUserName" required placeholder="姓名 / Display Name">
+          <input id="newUserEmail" type="email" required placeholder="登入 Email">
+          <input id="newUserPassword" type="password" required minlength="8" placeholder="初始密碼">
+          <select id="newUserRole"><option value="manager">Manager 主管</option><option value="editor">Editor 維護人員</option><option value="viewer">Viewer 查看者</option><option value="admin">Admin 管理員</option></select>
+          <button class="user-create-btn" type="submit">建立帳號</button>
+        </form>
+        <div id="userAdminStatus" class="user-admin-status"></div>
+      </div>
+      <div class="user-list-card"><div class="user-card-title"><span>使用者清單</span><button type="button" class="clear-filter-btn" onclick="loadAdminUsers()">↻ 重新整理</button></div><div id="adminUsersList" class="admin-users-list"><div class="user-list-empty">載入中...</div></div></div>
+    </div>
+  </section>
+</div>
+
+<div id="changePasswordBackdrop" class="password-modal-backdrop" hidden>
+  <section class="password-modal" role="dialog" aria-modal="true" aria-labelledby="changePasswordTitle">
+    <header class="password-modal-head">
+      <div><h3 id="changePasswordTitle">修改登入密碼</h3><small>Change Password · Current account</small></div>
+      <button class="user-admin-close" type="button" onclick="closeChangePassword()" aria-label="關閉">×</button>
+    </header>
+    <form id="changePasswordForm" class="password-modal-body" autocomplete="off">
+      <div class="password-account-note">目前帳號：<b id="changePasswordAccount">admin</b></div>
+      <label class="auth-field"><span>目前密碼 <small>Current Password</small></span><div class="auth-input-wrap"><input id="currentPassword" type="password" autocomplete="current-password" required minlength="8" placeholder="輸入目前密碼"></div></label>
+      <label class="auth-field"><span>新密碼 <small>New Password</small></span><div class="auth-input-wrap"><input id="newPasswordSelf" type="password" autocomplete="new-password" required minlength="8" placeholder="至少 8 碼"></div></label>
+      <label class="auth-field"><span>確認新密碼 <small>Confirm Password</small></span><div class="auth-input-wrap"><input id="confirmPasswordSelf" type="password" autocomplete="new-password" required minlength="8" placeholder="再次輸入新密碼"></div></label>
+      <div id="changePasswordStatus" class="password-modal-status" role="alert"></div>
+      <div class="password-modal-actions"><button type="button" class="discard" onclick="closeChangePassword()">取消</button><button id="changePasswordSubmit" type="submit" class="save-submit">🔑 更新密碼</button></div>
+    </form>
+  </section>
+</div>
+
+<style id="change-password-ui-v1">
+.password-modal-backdrop{position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(7,26,52,.58);backdrop-filter:blur(5px)}
+.password-modal-backdrop[hidden]{display:none!important}
+.password-modal{width:min(480px,100%);overflow:hidden;border:1px solid #d5e0ec;border-radius:18px;background:#fff;box-shadow:0 26px 70px rgba(7,26,52,.32)}
+.password-modal-head{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:18px 20px;border-bottom:1px solid #dce5ef;background:#f9fbfd}
+.password-modal-head h3{margin:0;color:#173b70;font-size:19px}.password-modal-head small{display:block;margin-top:3px;color:#7b8da4;font-size:11px;font-weight:500}
+.password-modal-body{padding:20px}.password-account-note{margin:0 0 16px;padding:10px 12px;border:1px solid #dce6f1;border-radius:10px;background:#f6f9fd;color:#607995;font-size:12px}.password-account-note b{color:#173b70;font-size:13px}
+.password-modal-status{display:none;margin:3px 0 13px;padding:10px 12px;border-radius:9px;font-size:12px;line-height:1.45}.password-modal-status.show{display:block}.password-modal-status.error{border:1px solid #f0c4c9;background:#fff3f4;color:#a52c38}.password-modal-status.ok{border:1px solid #b8dfc9;background:#effaf4;color:#176943}
+.password-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:7px}.password-modal-actions .discard,.password-modal-actions .save-submit{min-width:110px}
+@media(max-width:520px){.password-modal-backdrop{padding:9px}.password-modal-head{padding:15px}.password-modal-body{padding:16px}.password-modal-actions{display:grid;grid-template-columns:1fr 1fr}.password-modal-actions .discard,.password-modal-actions .save-submit{width:100%}}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -2798,7 +2897,7 @@ window.addEventListener("beforeunload",e=>{
   if(changesCount()>0){e.preventDefault();e.returnValue="";}
 });
 render();
-initCloud();
+/* initCloud() is started only after Supabase Auth succeeds. */
 </script>
 
 <style>
@@ -4146,9 +4245,244 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
       if(el){el.textContent='離線';el.dataset.state='error';}
     }
   }
-  window.addEventListener('online',function(){syncNetworkState(); if(typeof loadFromCloud==='function') loadFromCloud({force:false});});
+  window.addEventListener('online',function(){syncNetworkState(); if(window.__authReady&&typeof loadFromCloud==='function') loadFromCloud({force:false});});
   window.addEventListener('offline',syncNetworkState);
   syncNetworkState();
+})();
+</script>
+
+
+<script id="auth-role-runtime-v1">
+(function(){
+  'use strict';
+  const ROLE_RANK={viewer:1,editor:2,manager:3,admin:4};
+  const ROLE_LABEL={admin:'ADMIN',manager:'MANAGER',editor:'EDITOR',viewer:'VIEWER'};
+  const ROLE_ZH={admin:'管理員',manager:'主管',editor:'維護人員',viewer:'查看者'};
+  const ADMIN_LOGIN_ACCOUNT='admin';
+  const ADMIN_LOGIN_EMAIL='admin@73g.example.com';
+  const AUTH={user:null,profile:null,guardsInstalled:false,cloudStarted:false,completing:false};
+  window.AUTH_CONTEXT=AUTH;
+  window.__authReady=false;
+
+  function authEsc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
+  function rank(){return ROLE_RANK[AUTH.profile?.role]||0;}
+  function canEdit(){return rank()>=ROLE_RANK.editor;}
+  function canDelete(){return rank()>=ROLE_RANK.manager;}
+  function isAdmin(){return AUTH.profile?.role==='admin' && AUTH.profile?.active!==false;}
+  function showAuthError(message){const el=document.getElementById('authError');if(!el)return;el.textContent=String(message||'登入失敗');el.classList.add('show');}
+  function clearAuthError(){document.getElementById('authError')?.classList.remove('show');}
+  function showMiniMessage(message){const t=document.getElementById('toast');if(t){t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}else alert(message);}
+  function deny(message='你的帳號沒有此操作權限。'){showMiniMessage('🔒 '+message);return false;}
+
+  function lockApp(message=''){
+    window.__authReady=false;
+    document.body.classList.remove('auth-pending','auth-ready','role-admin','role-manager','role-editor','role-viewer');
+    document.body.classList.add('auth-locked');
+    document.getElementById('userAdminBackdrop')?.setAttribute('hidden','');
+    document.getElementById('changePasswordBackdrop')?.setAttribute('hidden','');
+    if(message) showAuthError(message);
+    setTimeout(()=>document.getElementById('authEmail')?.focus(),20);
+  }
+  function updateHeaderIdentity(){
+    const badge=document.getElementById('authUserBadge');
+    const name=document.getElementById('authUserName');
+    const role=document.getElementById('authRoleBadge');
+    const adminBtn=document.getElementById('adminUsersBtn');
+    const passwordBtn=document.getElementById('changePasswordBtn');
+    const logoutBtn=document.getElementById('authLogoutBtn');
+    if(badge)badge.hidden=false;if(passwordBtn)passwordBtn.hidden=false;if(logoutBtn)logoutBtn.hidden=false;
+    if(name)name.textContent=AUTH.profile?.display_name||AUTH.user?.email||'User';
+    if(role)role.textContent=ROLE_LABEL[AUTH.profile?.role]||'USER';
+    if(adminBtn)adminBtn.hidden=!isAdmin();
+  }
+  function unlockApp(){
+    document.body.classList.remove('auth-pending','auth-locked','role-admin','role-manager','role-editor','role-viewer');
+    document.body.classList.add('auth-ready','role-'+AUTH.profile.role);
+    window.__authReady=true;
+    updateHeaderIdentity();
+    applyRoleUI();
+  }
+
+  async function fetchOwnProfile(user){
+    const {data,error}=await supabaseClient.from('user_profiles').select('user_id,email,display_name,role,active').eq('user_id',user.id).single();
+    if(error) throw new Error('帳號權限資料尚未建立或無法讀取。請先完成 Supabase 權限設定。');
+    if(!data?.active) throw new Error('此帳號已停用，請聯絡系統管理員。');
+    if(!ROLE_RANK[data.role]) throw new Error('此帳號尚未設定有效權限。');
+    return data;
+  }
+  async function completeAuthentication(session){
+    if(AUTH.completing)return;
+    AUTH.completing=true;
+    try{
+      if(!session?.user){lockApp();return;}
+      AUTH.user=session.user;
+      AUTH.profile=await fetchOwnProfile(session.user);
+      installRoleGuards();
+      unlockApp();
+      if(typeof render==='function')render();
+      if(!AUTH.cloudStarted && typeof initCloud==='function'){
+        AUTH.cloudStarted=true;
+        await initCloud();
+      }
+      applyRoleUI();
+    }catch(err){
+      console.error('Auth bootstrap error',err);
+      try{await supabaseClient.auth.signOut();}catch(_e){}
+      AUTH.user=null;AUTH.profile=null;AUTH.cloudStarted=false;
+      lockApp(err?.message||'登入驗證失敗');
+    }finally{AUTH.completing=false;}
+  }
+
+  async function loginWithPassword(ev){
+    ev?.preventDefault();clearAuthError();
+    const account=document.getElementById('authEmail')?.value.trim()||'';
+    const email=account.toLowerCase()===ADMIN_LOGIN_ACCOUNT ? ADMIN_LOGIN_EMAIL : account;
+    const password=document.getElementById('authPassword')?.value||'';
+    const btn=document.getElementById('authLoginBtn');
+    if(btn){btn.disabled=true;btn.textContent='驗證中...';}
+    try{
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      await completeAuthentication(data.session);
+    }catch(err){showAuthError(err?.message==='Invalid login credentials'?'帳號或密碼錯誤。':(err?.message||'登入失敗'));}
+    finally{if(btn){btn.disabled=false;btn.textContent='登入 / Sign In';}}
+  }
+
+  function setChangePasswordStatus(message,type=''){
+    const el=document.getElementById('changePasswordStatus');if(!el)return;
+    el.textContent=message||'';el.className='password-modal-status'+(message?' show':'')+(type?' '+type:'');
+  }
+  window.openChangePassword=function(){
+    if(!AUTH.user)return deny('請先登入系統。');
+    const account=document.getElementById('changePasswordAccount');
+    if(account)account.textContent=(AUTH.user.email||'').toLowerCase()===ADMIN_LOGIN_EMAIL.toLowerCase()?ADMIN_LOGIN_ACCOUNT:(AUTH.user.email||'目前帳號');
+    document.getElementById('changePasswordForm')?.reset();setChangePasswordStatus('');
+    const backdrop=document.getElementById('changePasswordBackdrop');if(backdrop)backdrop.hidden=false;
+    setTimeout(()=>document.getElementById('currentPassword')?.focus(),30);
+  };
+  window.closeChangePassword=function(){const backdrop=document.getElementById('changePasswordBackdrop');if(backdrop)backdrop.hidden=true;document.getElementById('changePasswordForm')?.reset();setChangePasswordStatus('');};
+  async function changeOwnPassword(ev){
+    ev?.preventDefault();if(!AUTH.user)return;
+    const current=document.getElementById('currentPassword')?.value||'';
+    const next=document.getElementById('newPasswordSelf')?.value||'';
+    const confirmNext=document.getElementById('confirmPasswordSelf')?.value||'';
+    if(next.length<8)return setChangePasswordStatus('新密碼至少需要 8 碼。','error');
+    if(next!==confirmNext)return setChangePasswordStatus('兩次輸入的新密碼不一致。','error');
+    if(current===next)return setChangePasswordStatus('新密碼不可與目前密碼相同。','error');
+    const btn=document.getElementById('changePasswordSubmit');if(btn){btn.disabled=true;btn.textContent='驗證並更新中...';}
+    setChangePasswordStatus('正在驗證目前密碼...');
+    try{
+      const email=AUTH.user.email||'';
+      if(!email)throw new Error('目前登入帳號缺少 Email，無法重新驗證。');
+      const {error:reauthError}=await supabaseClient.auth.signInWithPassword({email,password:current});
+      if(reauthError)throw new Error('目前密碼不正確。');
+      const {error:updateError}=await supabaseClient.auth.updateUser({password:next});
+      if(updateError)throw updateError;
+      setChangePasswordStatus('✅ 密碼修改成功。下次請使用新密碼登入。','ok');
+      document.getElementById('currentPassword').value='';document.getElementById('newPasswordSelf').value='';document.getElementById('confirmPasswordSelf').value='';
+      showMiniMessage('✅ 登入密碼已更新');
+    }catch(err){setChangePasswordStatus(err?.message||'密碼修改失敗。','error');}
+    finally{if(btn){btn.disabled=false;btn.textContent='🔑 更新密碼';}}
+  }
+
+  window.logoutSystem=async function(){
+    if(typeof changesCount==='function'&&changesCount()>0&&!confirm('目前有尚未儲存的變更，登出後將捨棄。確定登出？'))return;
+    try{await supabaseClient.auth.signOut();}finally{
+      try{[STORAGE_KEY,UNIT_STORAGE_KEY,VEHICLE_STORAGE_KEY,LOCATION_STORAGE_KEY,DK_LOCATION_STORAGE_KEY,UPDATED_KEY].forEach(k=>localStorage.removeItem(k));}catch(_e){}
+      location.reload();
+    }
+  };
+
+  function guardFunction(name,test,message){
+    const original=window[name];
+    if(typeof original!=='function'||original.__roleGuarded)return;
+    const wrapped=function(...args){if(!test())return deny(message);return original.apply(this,args);};
+    wrapped.__roleGuarded=true;wrapped.__original=original;window[name]=wrapped;
+  }
+  function installRoleGuards(){
+    if(AUTH.guardsInstalled)return;AUTH.guardsInstalled=true;
+    ['add','beginEditDesc','updateUnit','updateVehicleNo','updateCustomVehicleNo','updateCarLocationType','updateCarLocationDetail','updateDkLocationType','updateDkLocationDetail','updateEquipmentCategory','updateEquipmentType','updateEquipmentName','updateField','updateLocationType','saveChanges'].forEach(n=>guardFunction(n,canEdit,'此帳號為唯讀或沒有編輯權限。'));
+    ['removeRow'].forEach(n=>guardFunction(n,canDelete,'只有 Manager / Admin 可以刪除紀錄。'));
+    ['chooseImportFile','handleImportFile','importCsvText','importJsonText'].forEach(n=>guardFunction(n,()=>rank()>=ROLE_RANK.manager,'只有 Manager / Admin 可以匯入資料。'));
+    const originalRender=window.render;
+    if(typeof originalRender==='function'&&!originalRender.__roleWrapped){
+      const rr=function(...args){const x=originalRender.apply(this,args);setTimeout(applyRoleUI,0);return x;};rr.__roleWrapped=true;window.render=rr;
+    }
+  }
+
+  function applyRoleUI(){
+    if(!AUTH.profile)return;
+    const editable=canEdit(), deletable=canDelete(), managerUp=rank()>=ROLE_RANK.manager;
+    document.querySelectorAll('.asset-add-btn').forEach(el=>{el.hidden=!editable;el.disabled=!editable;});
+    document.querySelectorAll('.delete-btn').forEach(el=>{el.hidden=!deletable;el.disabled=!deletable;});
+    document.querySelectorAll('.asset-car select,.asset-car input,.asset-car textarea').forEach(el=>{el.disabled=!editable;});
+    document.querySelectorAll('.desc-display').forEach(el=>{el.style.cursor=editable?'pointer':'default';el.setAttribute('aria-disabled',editable?'false':'true');});
+    const importItem=document.querySelector('.io-item[onclick*="chooseImportFile"]');if(importItem)importItem.hidden=!managerUp;
+    const importInput=document.getElementById('importFileInput');if(importInput)importInput.disabled=!managerUp;
+    const saveBtn=document.querySelector('.save-submit');if(saveBtn)saveBtn.disabled=!editable;
+    if(!editable)document.getElementById('savebar')?.classList.remove('show');
+    updateHeaderIdentity();
+  }
+  window.applyRoleUI=applyRoleUI;
+
+  async function invokeAdmin(action,payload={}){
+    if(!isAdmin())throw new Error('ADMIN 權限不足');
+    const {data,error}=await supabaseClient.functions.invoke('admin-users',{body:{action,...payload}});
+    if(error){
+      let msg=error.message||'管理功能呼叫失敗';
+      try{if(error.context){const j=await error.context.json();msg=j?.error||j?.message||msg;}}catch(_e){}
+      throw new Error(msg);
+    }
+    if(data?.error)throw new Error(data.error);
+    return data;
+  }
+  function setAdminStatus(message,type=''){const el=document.getElementById('userAdminStatus');if(!el)return;el.textContent=message||'';el.className='user-admin-status'+(type?' '+type:'');}
+  window.openUserAdmin=async function(){if(!isAdmin())return deny('只有 Admin 可以管理帳號。');document.getElementById('userAdminBackdrop').hidden=false;await loadAdminUsers();};
+  window.closeUserAdmin=function(){document.getElementById('userAdminBackdrop').hidden=true;};
+  window.loadAdminUsers=async function(){
+    if(!isAdmin())return;const box=document.getElementById('adminUsersList');if(box)box.innerHTML='<div class="user-list-empty">載入中...</div>';setAdminStatus('');
+    try{const result=await invokeAdmin('list_users');renderAdminUsers(result?.users||[]);}catch(err){if(box)box.innerHTML='<div class="user-list-empty">無法載入帳號清單</div>';setAdminStatus(err.message,'error');}
+  };
+  function renderAdminUsers(users){
+    const box=document.getElementById('adminUsersList');if(!box)return;
+    if(!users.length){box.innerHTML='<div class="user-list-empty">目前沒有使用者</div>';return;}
+    box.innerHTML=users.map(u=>{
+      const self=u.id===AUTH.user?.id;
+      return `<div class="admin-user-row" data-admin-user="${authEsc(u.id)}">
+        <div class="admin-user-email"><b>${authEsc(u.displayName||'未命名')}</b>${authEsc(u.email||'')}</div>
+        <input class="admin-display-name" value="${authEsc(u.displayName||'')}" aria-label="姓名">
+        <select class="admin-role-select" ${self?'disabled title="目前登入帳號不可自行降權"':''}><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="manager" ${u.role==='manager'?'selected':''}>Manager</option><option value="editor" ${u.role==='editor'?'selected':''}>Editor</option><option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option></select>
+        <label class="admin-user-state"><input class="admin-active" type="checkbox" ${u.active!==false?'checked':''} ${self?'disabled':''}> 啟用</label>
+        <div class="admin-user-actions"><button type="button" onclick="saveAdminUser('${authEsc(u.id)}')">儲存</button><button type="button" onclick="resetAdminPassword('${authEsc(u.id)}')">重設密碼</button><button class="danger" type="button" onclick="deleteAdminUser('${authEsc(u.id)}','${authEsc(u.email||'')}')" ${self?'disabled':''}>刪除</button></div>
+      </div>`;
+    }).join('');
+  }
+  window.saveAdminUser=async function(userId){
+    const row=document.querySelector(`[data-admin-user="${CSS.escape(userId)}"]`);if(!row)return;
+    const displayName=row.querySelector('.admin-display-name').value.trim();const role=row.querySelector('.admin-role-select').value;const active=row.querySelector('.admin-active').checked;
+    setAdminStatus('儲存中...');try{await invokeAdmin('update_user',{userId,displayName,role,active});setAdminStatus('✅ 帳號資料已更新','ok');await loadAdminUsers();if(userId===AUTH.user?.id){AUTH.profile.display_name=displayName;updateHeaderIdentity();}}catch(err){setAdminStatus(err.message,'error');}
+  };
+  window.resetAdminPassword=async function(userId){const p=prompt('輸入新的臨時密碼（至少 8 碼）：');if(p===null)return;if(p.length<8){alert('密碼至少需要 8 碼。');return;}setAdminStatus('重設密碼中...');try{await invokeAdmin('reset_password',{userId,newPassword:p});setAdminStatus('✅ 密碼已重設','ok');}catch(err){setAdminStatus(err.message,'error');}};
+  window.deleteAdminUser=async function(userId,email){if(!confirm(`確定刪除帳號？\n\n${email}\n\n此操作無法復原。`))return;setAdminStatus('刪除帳號中...');try{await invokeAdmin('delete_user',{userId});setAdminStatus('✅ 帳號已刪除','ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}};
+
+  async function createManagedUser(ev){
+    ev?.preventDefault();const displayName=document.getElementById('newUserName').value.trim();const email=document.getElementById('newUserEmail').value.trim();const password=document.getElementById('newUserPassword').value;const role=document.getElementById('newUserRole').value;
+    setAdminStatus('建立帳號中...');try{await invokeAdmin('create_user',{displayName,email,password,role});document.getElementById('createUserForm').reset();document.getElementById('newUserRole').value='manager';setAdminStatus('✅ 新帳號已建立，可立即登入','ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}
+  }
+
+  async function boot(){
+    document.getElementById('authLoginForm')?.addEventListener('submit',loginWithPassword);
+    document.getElementById('createUserForm')?.addEventListener('submit',createManagedUser);
+    document.getElementById('changePasswordForm')?.addEventListener('submit',changeOwnPassword);
+    document.getElementById('authPasswordToggle')?.addEventListener('click',function(){const p=document.getElementById('authPassword');if(!p)return;const show=p.type==='password';p.type=show?'text':'password';this.textContent=show?'🙈':'👁';});
+    document.getElementById('userAdminBackdrop')?.addEventListener('click',e=>{if(e.target.id==='userAdminBackdrop')closeUserAdmin();});
+    document.getElementById('changePasswordBackdrop')?.addEventListener('click',e=>{if(e.target.id==='changePasswordBackdrop')closeChangePassword();});
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error||!data?.session){lockApp();return;}
+    await completeAuthentication(data.session);
+  }
+  supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){AUTH.user=null;AUTH.profile=null;AUTH.cloudStarted=false;lockApp();}else if(event==='TOKEN_REFRESHED'&&session){AUTH.user=session.user;}});
+  boot();
 })();
 </script>
 
