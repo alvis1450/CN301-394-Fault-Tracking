@@ -1396,7 +1396,7 @@ body.role-viewer .savebar{display:none!important}
       <h3 id="authTitle">登入系統</h3>
       <div class="auth-sub">Sign in to continue</div>
       <form id="authLoginForm" autocomplete="on">
-        <label class="auth-field"><span>帳號 / Email <small>Account</small></span><input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="admin 或 name@example.com"></label>
+        <label class="auth-field"><span>帳號 / Account <small>Username</small></span><input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="例如：admin、mike"></label>
         <label class="auth-field"><span>密碼 / Password <small>8+ characters</small></span><div class="auth-input-wrap"><input id="authPassword" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"><button class="auth-password-toggle" type="button" id="authPasswordToggle" aria-label="顯示密碼">👁</button></div></label>
         <button id="authLoginBtn" class="auth-submit" type="submit">登入 / Sign In</button>
         <div id="authError" class="auth-error" role="alert"></div>
@@ -1564,7 +1564,7 @@ body.role-viewer .savebar{display:none!important}
         <div class="user-card-title"><span>＋ 建立新帳號</span><small>初始密碼至少 8 碼</small></div>
         <form id="createUserForm" class="user-create-grid">
           <input id="newUserName" required placeholder="姓名 / Display Name">
-          <input id="newUserEmail" type="email" required placeholder="登入 Email">
+          <input id="newUserAccount" type="text" required minlength="2" maxlength="32" autocomplete="off" autocapitalize="none" spellcheck="false" pattern="[A-Za-z0-9._-]+" placeholder="登入帳號，例如 mike">
           <input id="newUserPassword" type="password" required minlength="8" placeholder="初始密碼">
           <select id="newUserRole"><option value="manager">Manager 主管</option><option value="editor">Editor 維護人員</option><option value="viewer">Viewer 查看者</option><option value="admin">Admin 管理員</option></select>
           <button class="user-create-btn" type="submit">建立帳號</button>
@@ -4259,12 +4259,19 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
   const ROLE_LABEL={admin:'ADMIN',manager:'MANAGER',editor:'EDITOR',viewer:'VIEWER'};
   const ROLE_ZH={admin:'管理員',manager:'主管',editor:'維護人員',viewer:'查看者'};
   const ADMIN_LOGIN_ACCOUNT='admin';
-  const ADMIN_LOGIN_EMAIL='admin@73g.example.com';
   const AUTH={user:null,profile:null,guardsInstalled:false,cloudStarted:false,completing:false};
   window.AUTH_CONTEXT=AUTH;
   window.__authReady=false;
 
   function authEsc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
+  function normalizeAccount(v){
+    const s=String(v??'').trim().toLowerCase();
+    return /^[a-z0-9._-]{2,32}$/.test(s)?s:'';
+  }
+  function accountFromEmail(email){
+    const s=String(email??'').trim();
+    return s.includes('@')?s.split('@')[0]:s;
+  }
   function rank(){return ROLE_RANK[AUTH.profile?.role]||0;}
   function canEdit(){return rank()>=ROLE_RANK.editor;}
   function canDelete(){return rank()>=ROLE_RANK.manager;}
@@ -4291,7 +4298,7 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
     const passwordBtn=document.getElementById('changePasswordBtn');
     const logoutBtn=document.getElementById('authLogoutBtn');
     if(badge)badge.hidden=false;if(passwordBtn)passwordBtn.hidden=false;if(logoutBtn)logoutBtn.hidden=false;
-    if(name)name.textContent=AUTH.profile?.display_name||AUTH.user?.email||'User';
+    if(name)name.textContent=AUTH.profile?.display_name||accountFromEmail(AUTH.user?.email)||'User';
     if(role)role.textContent=ROLE_LABEL[AUTH.profile?.role]||'USER';
     if(adminBtn)adminBtn.hidden=!isAdmin();
   }
@@ -4335,16 +4342,24 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
 
   async function loginWithPassword(ev){
     ev?.preventDefault();clearAuthError();
-    const account=document.getElementById('authEmail')?.value.trim()||'';
-    const email=account.toLowerCase()===ADMIN_LOGIN_ACCOUNT ? ADMIN_LOGIN_EMAIL : account;
+    const account=normalizeAccount(document.getElementById('authEmail')?.value||'');
     const password=document.getElementById('authPassword')?.value||'';
     const btn=document.getElementById('authLoginBtn');
+    if(!account){showAuthError('請輸入登入帳號。');return;}
     if(btn){btn.disabled=true;btn.textContent='驗證中...';}
     try{
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
-      if(error)throw error;
-      await completeAuthentication(data.session);
-    }catch(err){showAuthError(err?.message==='Invalid login credentials'?'帳號或密碼錯誤。':(err?.message||'登入失敗'));}
+      const {data,error}=await supabaseClient.functions.invoke('admin-users',{body:{action:'login',account,password}});
+      if(error){
+        let msg=error.message||'登入失敗';
+        try{if(error.context){const j=await error.context.json();msg=j?.error||j?.message||msg;}}catch(_e){}
+        throw new Error(msg);
+      }
+      if(data?.error)throw new Error(data.error);
+      if(!data?.accessToken||!data?.refreshToken)throw new Error('登入服務沒有回傳有效 Session。');
+      const {data:sessionData,error:sessionError}=await supabaseClient.auth.setSession({access_token:data.accessToken,refresh_token:data.refreshToken});
+      if(sessionError)throw sessionError;
+      await completeAuthentication(sessionData.session);
+    }catch(err){showAuthError('帳號或密碼錯誤。');}
     finally{if(btn){btn.disabled=false;btn.textContent='登入 / Sign In';}}
   }
 
@@ -4355,7 +4370,7 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
   window.openChangePassword=function(){
     if(!AUTH.user)return deny('請先登入系統。');
     const account=document.getElementById('changePasswordAccount');
-    if(account)account.textContent=(AUTH.user.email||'').toLowerCase()===ADMIN_LOGIN_EMAIL.toLowerCase()?ADMIN_LOGIN_ACCOUNT:(AUTH.user.email||'目前帳號');
+    if(account)account.textContent=accountFromEmail(AUTH.user?.email)||'目前帳號';
     document.getElementById('changePasswordForm')?.reset();setChangePasswordStatus('');
     const backdrop=document.getElementById('changePasswordBackdrop');if(backdrop)backdrop.hidden=false;
     setTimeout(()=>document.getElementById('currentPassword')?.focus(),30);
@@ -4449,11 +4464,11 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
     box.innerHTML=users.map(u=>{
       const self=u.id===AUTH.user?.id;
       return `<div class="admin-user-row" data-admin-user="${authEsc(u.id)}">
-        <div class="admin-user-email"><b>${authEsc(u.displayName||'未命名')}</b>${authEsc(u.email||'')}</div>
+        <div class="admin-user-email"><b>${authEsc(u.account||accountFromEmail(u.email)||'未設定')}</b>${authEsc(u.displayName||'未命名')}</div>
         <input class="admin-display-name" value="${authEsc(u.displayName||'')}" aria-label="姓名">
         <select class="admin-role-select" ${self?'disabled title="目前登入帳號不可自行降權"':''}><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="manager" ${u.role==='manager'?'selected':''}>Manager</option><option value="editor" ${u.role==='editor'?'selected':''}>Editor</option><option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option></select>
         <label class="admin-user-state"><input class="admin-active" type="checkbox" ${u.active!==false?'checked':''} ${self?'disabled':''}> 啟用</label>
-        <div class="admin-user-actions"><button type="button" onclick="saveAdminUser('${authEsc(u.id)}')">儲存</button><button type="button" onclick="resetAdminPassword('${authEsc(u.id)}')">重設密碼</button><button class="danger" type="button" onclick="deleteAdminUser('${authEsc(u.id)}','${authEsc(u.email||'')}')" ${self?'disabled':''}>刪除</button></div>
+        <div class="admin-user-actions"><button type="button" onclick="saveAdminUser('${authEsc(u.id)}')">儲存</button><button type="button" onclick="resetAdminPassword('${authEsc(u.id)}')">重設密碼</button><button class="danger" type="button" onclick="deleteAdminUser('${authEsc(u.id)}','${authEsc(u.account||accountFromEmail(u.email)||'')}')" ${self?'disabled':''}>刪除</button></div>
       </div>`;
     }).join('');
   }
@@ -4463,11 +4478,12 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
     setAdminStatus('儲存中...');try{await invokeAdmin('update_user',{userId,displayName,role,active});setAdminStatus('✅ 帳號資料已更新','ok');await loadAdminUsers();if(userId===AUTH.user?.id){AUTH.profile.display_name=displayName;updateHeaderIdentity();}}catch(err){setAdminStatus(err.message,'error');}
   };
   window.resetAdminPassword=async function(userId){const p=prompt('輸入新的臨時密碼（至少 8 碼）：');if(p===null)return;if(p.length<8){alert('密碼至少需要 8 碼。');return;}setAdminStatus('重設密碼中...');try{await invokeAdmin('reset_password',{userId,newPassword:p});setAdminStatus('✅ 密碼已重設','ok');}catch(err){setAdminStatus(err.message,'error');}};
-  window.deleteAdminUser=async function(userId,email){if(!confirm(`確定刪除帳號？\n\n${email}\n\n此操作無法復原。`))return;setAdminStatus('刪除帳號中...');try{await invokeAdmin('delete_user',{userId});setAdminStatus('✅ 帳號已刪除','ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}};
+  window.deleteAdminUser=async function(userId,account){if(!confirm(`確定刪除帳號？\n\n${account}\n\n此操作無法復原。`))return;setAdminStatus('刪除帳號中...');try{await invokeAdmin('delete_user',{userId});setAdminStatus('✅ 帳號已刪除','ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}};
 
   async function createManagedUser(ev){
-    ev?.preventDefault();const displayName=document.getElementById('newUserName').value.trim();const email=document.getElementById('newUserEmail').value.trim();const password=document.getElementById('newUserPassword').value;const role=document.getElementById('newUserRole').value;
-    setAdminStatus('建立帳號中...');try{await invokeAdmin('create_user',{displayName,email,password,role});document.getElementById('createUserForm').reset();document.getElementById('newUserRole').value='manager';setAdminStatus('✅ 新帳號已建立，可立即登入','ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}
+    ev?.preventDefault();const displayName=document.getElementById('newUserName').value.trim();const account=normalizeAccount(document.getElementById('newUserAccount').value);const password=document.getElementById('newUserPassword').value;const role=document.getElementById('newUserRole').value;
+    if(!account)return setAdminStatus('帳號只能使用英文字母、數字、點、底線或連字號。','error');
+    setAdminStatus('建立帳號中...');try{await invokeAdmin('create_user',{displayName,account,password,role});document.getElementById('createUserForm').reset();document.getElementById('newUserRole').value='manager';setAdminStatus(`✅ 帳號 ${account} 已建立，可立即登入`,'ok');await loadAdminUsers();}catch(err){setAdminStatus(err.message,'error');}
   }
 
   async function boot(){
