@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>73G裝備庫存管理</title>
+<!-- v46 delete linkage correction -->
+<!-- v39 per-record action buttons --><!-- v37 delete quantity linkage patch -->
+<!-- v36 stock quantity adjustment --><!-- v35 quantity-linkage review patch -->
 <style>
 :root{--navy:#173b70;--navy2:#28558f;--bg:#f4f7fb;--panel:#fff;--line:#dce5ef;--text:#17365f;--muted:#71849c;--green:#178a52;--orange:#b57414;--red:#b42b39;--blue:#2f6fb2;--soft:#f8fafc}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -40,7 +43,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:10px 11px;border-bottom:
 .qty-control{display:inline-flex;align-items:center;gap:5px;justify-content:center}.qty-btn{width:28px;height:28px;border:1px solid #cbd9e8;background:#fff;color:#214e80;border-radius:7px;font-weight:900;cursor:pointer;font-size:17px;line-height:1}.qty-btn:hover{background:#eef5fb}.qty-input{width:58px;height:30px;border:1px solid #cbd9e8;border-radius:7px;text-align:center;font-weight:850;color:#17365f;background:#fff}.qty-input:focus{outline:none;border-color:#6e9dcc;box-shadow:0 0 0 2px #e7f0fa}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10.5px;font-weight:800}.badge.stock{background:#edf6fc;color:#286287}.badge.issued{background:#fff7e6;color:#845400}.badge.installed{background:#eaf8f0;color:#126a40}.badge.broken{background:#fff0f1;color:#a91c2a}
 .empty{padding:22px;text-align:center;color:#899aaf}.savebar{position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(20,55,103,.97);color:#fff;padding:10px 14px;display:none;box-shadow:0 -4px 18px rgba(10,35,70,.18);backdrop-filter:blur(8px)}.savebar.show{display:block}.savebar-inner{max-width:1320px;margin:auto;display:flex;align-items:center;gap:12px}.savebar-msg{flex:1;font-size:12px;font-weight:700}.savebar .btn{height:36px}.unsaved-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffca55;margin-right:7px;vertical-align:1px}
 .history{margin-top:16px}.history h3{font-size:15px;margin:0 0 8px}.history-item{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:12px}.history-item b{color:#103e78}
-.modal{position:fixed;inset:0;background:#0c1e3677;display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.show{display:flex}.dialog{width:min(560px,100%);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px #0003}.dialog h3{margin:0;padding:15px 17px;background:#173b70;color:#fff;font-size:16px}.form{padding:15px 17px;display:grid;gap:10px}.form label{font-size:12px;color:#61758f}.form input,.form select,.form textarea{width:100%;margin-top:5px;border:1px solid #d2deec;border-radius:9px;padding:9px 10px;font:inherit}.form textarea{min-height:66px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 17px 17px}
+.modal{position:fixed;inset:0;background:#0c1e3677;display:none;align-items:center;justify-content:center;padding:16px;z-index:9999!important}.modal.show{display:flex}.dialog{width:min(560px,100%);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px #0003}.dialog h3{margin:0;padding:15px 17px;background:#173b70;color:#fff;font-size:16px}.form{padding:15px 17px;display:grid;gap:10px}.form label{font-size:12px;color:#61758f}.form input,.form select,.form textarea{width:100%;margin-top:5px;border:1px solid #d2deec;border-radius:9px;padding:9px 10px;font:inherit}.form textarea{min-height:66px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 17px 17px}
 @media(max-width:820px){.summary{grid-template-columns:repeat(2,1fr)}.comp-body{overflow-x:auto}table{min-width:900px}.comp-head{grid-template-columns:minmax(0,1fr) auto}.mini-action{display:none}}
 @media(max-width:520px){.brand h1{font-size:19px}.summary{grid-template-columns:1fr 1fr}.card b{font-size:22px}main{padding:12px 9px 34px}}
 
@@ -175,6 +178,73 @@ table{font-variant-numeric:tabular-nums}th,td{padding:11px 11px;font-size:13px;l
 }
 @media(max-width:390px){.summary-card{min-height:94px}.summary-card b{font-size:25px}.summary-card span{font-size:12px}.summary-card .card-sub{font-size:9.8px}.action-group .btn{font-size:11.5px}.history-count{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* v38 top spacing correction */
+main{padding-top:4px!important;margin-top:0!important}
+.topbar + main{margin-top:0!important}
+
+/* v40 layout correction: reduce unused top spacing */
+
+
+
+
+/* v46 commercial UI polish */
+:root{
+ --bg:#eef3f8;
+ --panel:#ffffff;
+ --line:#d6e1ee;
+ --text:#17365f;
+ --muted:#6b7f99;
+}
+body{
+ font-family:"Noto Sans TC","Microsoft JhengHei","Segoe UI",Arial,sans-serif !important;
+ background:var(--bg)!important;
+ color:var(--text)!important;
+ letter-spacing:.02em;
+}
+.wrap{padding-top:0!important;}
+.main,.container{padding-top:8px!important;}
+h1,h2,h3,.title,.section-title{
+ font-weight:700!important;
+ letter-spacing:.03em;
+}
+.card,.section-card,.panel{
+ border:1px solid var(--line)!important;
+ border-radius:16px!important;
+ box-shadow:0 4px 14px rgba(20,55,90,.08)!important;
+ background:#fff!important;
+}
+table{
+ border-collapse:separate!important;
+ border-spacing:0!important;
+ width:100%;
+}
+th{
+ background:#edf4fb!important;
+ color:#24466f!important;
+ font-weight:700!important;
+ font-size:14px!important;
+}
+td{
+ font-size:14px!important;
+ color:#304d70!important;
+ padding:12px 14px!important;
+}
+tr:hover td{
+ background:#f7fbff!important;
+}
+button{
+ font-family:inherit!important;
+ font-weight:600!important;
+ border-radius:10px!important;
+}
+input,textarea,select{
+ font-family:inherit!important;
+ border-radius:10px!important;
+ border-color:#cbd9e8!important;
+ font-size:14px!important;
+}
 
 </style>
 
@@ -712,6 +782,206 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
 @media(max-width:820px){.auth-shell{grid-template-columns:1fr;max-width:500px}.auth-brand-panel{min-height:180px;padding:28px}.auth-brand-panel p{display:none}.auth-form-panel{padding:30px 26px}.user-create-grid{grid-template-columns:1fr 1fr}.user-create-btn{grid-column:1/-1}.admin-user-row{grid-template-columns:1fr 1fr}.admin-user-email,.admin-user-actions{grid-column:1/-1}.admin-user-actions{justify-content:flex-start}}
 @media(max-width:520px){#authGate{padding:12px}.auth-shell{border-radius:17px}.auth-brand-panel{padding:22px;min-height:150px}.auth-brand-panel h2{font-size:21px}.auth-form-panel{padding:25px 20px}.user-admin-backdrop,.password-modal-backdrop{padding:8px}.user-admin-body{padding:10px}.user-create-grid,.admin-user-row{grid-template-columns:1fr}.admin-user-email,.admin-user-actions{grid-column:1}.admin-user-actions button{flex:1}}
 </style>
+
+<style>
+/* v34 scroll restore: CSS only, no login/data script changes */
+html, body { overflow-y: auto !important; }
+.modal { overflow-y: auto; }
+</style>
+
+<style>
+/* v42 actual layout fix */
+.wrap{padding-top:0!important}
+.topbar + .wrap{padding-top:0!important}
+.dashboard,.summary-grid,.section-card{margin-top:0!important}
+main{padding-top:4px!important}
+
+/* per-record action buttons */
+.history-item,.stock-move-item{position:relative;padding-right:170px!important}
+.history-edit-btn,.stock-move-edit{
+ position:absolute;right:92px;top:10px;height:28px;
+ border:1px solid #c8d8e7;background:#f3f8fd;color:#214f7c;
+ border-radius:7px;padding:0 9px;font-size:10.5px;font-weight:800;cursor:pointer;
+}
+.history-edit-btn:hover,.stock-move-edit:hover{background:#e8f2fb}
+.history-delete-btn,.stock-move-delete{right:10px!important;top:10px!important;height:28px!important}
+
+/* v43 final layout/action correction */
+main{padding-top:4px!important}
+.history-item,.stock-move-item{padding-right:12px!important}
+.history-edit-btn,.history-delete-btn,.stock-move-delete,.stock-move-edit{
+ position:static!important;
+ display:inline-flex!important;
+ align-items:center!important;
+ margin:6px 4px 0 0!important;
+ height:32px!important;
+}
+
+</style>
+
+<style id="enterprise-v1-ui">
+:root{--ent-blue:#123f78;--ent-bg:#f4f7fb;--ent-card:#ffffff;--ent-line:#d9e3f0;--ent-text:#17375e;}
+body{background:var(--ent-bg)!important;font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif!important;color:var(--ent-text);}
+header,.header{box-shadow:0 2px 10px rgba(0,0,0,.12)!important;}
+.card,.section-card,.dashboard-card{border-radius:16px!important;box-shadow:0 3px 12px rgba(20,55,90,.08)!important;border:1px solid var(--ent-line)!important;}
+button{border-radius:10px!important;font-weight:600!important;letter-spacing:.2px;}
+table th{font-weight:700!important;background:#eef4fb!important;color:#17375e!important;}
+table td{font-size:14px!important;line-height:1.5!important;}
+input,select,textarea{border-radius:10px!important;border:1px solid #cfdbea!important;}
+.badge,.tag{border-radius:999px!important;}
+/* remove excessive top spacing */
+main,.main,.container,.wrap{padding-top:0!important;margin-top:0!important;}
+.dashboard,.dashboard-grid,.section-card{margin-top:10px!important;}
+</style>
+
+<style id="enterprise-v2-layout">
+/* Enterprise v2.0 layout refinement */
+:root{--v2-gap:12px;}
+body{font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;}
+header,.header,.top-header{min-height:unset!important;padding-top:14px!important;padding-bottom:14px!important;}
+main,.main,.container,.content,.page-content{padding-top:12px!important;}
+.card,.summary-card,.stat-card{min-height:110px!important;padding:18px!important;}
+.section-card,.panel,.record-section{margin-top:12px!important;margin-bottom:12px!important;}
+.section-card .title,.panel .title{font-size:18px!important;}
+.table-container,table{font-size:14px!important;}
+button,.btn{border-radius:10px!important;}
+</style>
+
+<style>
+/* v2.1 newline and top spacing final correction */
+html,body{
+ margin:0!important;
+ padding-top:0!important;
+}
+body:before, body:after{
+ content:none!important;
+}
+.topbar{
+ margin-top:0!important;
+}
+main{
+ margin-top:0!important;
+ padding-top:4px!important;
+}
+</style>
+
+<style>
+/* ===== Final typography balance pass ===== */
+:root{
+ --ui-text:#274765;
+ --ui-title:#153b6b;
+ --ui-muted:#6f8399;
+}
+body{
+ font-family:"Noto Sans TC","Microsoft JhengHei","Segoe UI",Arial,sans-serif!important;
+ font-size:14px!important;
+ line-height:1.45!important;
+ letter-spacing:.01em!important;
+}
+h1,h2,h3,.title,.section-title{
+ font-weight:750!important;
+}
+.card b,.summary-card b{
+ font-weight:800!important;
+}
+.card span,.summary-card span{
+ font-weight:650!important;
+}
+.card-sub,.part,.note,.guide-help{
+ font-weight:450!important;
+ color:var(--ui-muted)!important;
+}
+/* table balance */
+th{
+ font-size:13px!important;
+ font-weight:700!important;
+ color:#345878!important;
+}
+td{
+ font-size:13px!important;
+ font-weight:450!important;
+ color:var(--ui-text)!important;
+}
+.device-name,.comp-name{
+ font-weight:700!important;
+}
+.detail-serial,.qty,.qty-input{
+ font-weight:700!important;
+}
+/* avoid excessive bold */
+button,.btn,label{
+ font-weight:650!important;
+}
+.btn.primary,.btn.save-main,.btn.green{
+ font-weight:750!important;
+}
+/* modal/table title hierarchy */
+.dialog h3{
+ font-weight:750!important;
+}
+.form label{
+ font-weight:600!important;
+}
+/* stock status clearer */
+.device-row.state-stock{background:#f5f9fd!important}
+.device-row.state-issued{background:#fff9ed!important}
+.device-row.state-installed{background:#f2faf5!important}
+.device-row.state-broken{background:#fff4f5!important}
+/* mobile typography */
+@media(max-width:680px){
+ body{font-size:13.5px!important}
+ .summary-card b{font-size:26px!important}
+ .summary-card span{font-size:12px!important}
+ .system-title{font-size:16px!important;font-weight:750!important}
+ .comp-name{font-size:14px!important}
+ th{font-size:12px!important}
+ td{font-size:12.5px!important}
+}
+</style>
+
+<style>
+/* ===== v3.1 Text hierarchy balance refinement ===== */
+body{
+  font-size:14px;
+  line-height:1.5;
+  letter-spacing:.015em;
+}
+/* Header hierarchy */
+.brand h1{font-size:22px!important;font-weight:700!important}
+.brand h1 span{font-weight:500!important}
+.brand small{font-weight:400!important}
+/* Summary cards */
+.summary-card b{font-size:32px!important;font-weight:750!important}
+.summary-card span{font-size:13px!important;font-weight:650!important}
+.summary-card .card-sub{font-size:11.5px!important;font-weight:400!important}
+/* System first level */
+.system-title{font-size:17px!important;font-weight:700!important}
+.system-meta{font-weight:600!important}
+/* Component second level */
+.comp-name{font-size:15px!important;font-weight:650!important}
+.part{font-size:11px!important;font-weight:400!important}
+.comp-count{font-size:11px!important;font-weight:600!important}
+/* Tables */
+th{font-size:12px!important;font-weight:650!important}
+td{font-size:13px!important;font-weight:400!important}
+.device-name{font-size:13px!important;font-weight:650!important}
+.qty{font-weight:650!important}
+.status{font-weight:600!important}
+/* Buttons */
+button,.btn,.mini-action{font-weight:600!important}
+/* Modal */
+.dialog h3{font-size:16px!important;font-weight:700!important}
+.form label{font-weight:600!important}
+/* Avoid heavy Chinese text */
+strong,b{font-weight:650}
+/* Mobile balance */
+@media(max-width:680px){
+ .system-title{font-size:15.5px!important}
+ .comp-name{font-size:14px!important;font-weight:650!important}
+ th{font-size:11.5px!important}
+ td{font-size:12.5px!important}
+}
+</style>
 </head>
 <body class="auth-pending">
 <div id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -729,19 +999,17 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('qty')" onkeydown="summaryKey(event,'qty')"><b id="sQty">0</b><span>庫存總量</span><small class="card-sub">目前實際在庫數量</small></div>
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('tracked')" onkeydown="summaryKey(event,'tracked')"><b id="sTracked">0</b><span>已登記序號</span><small class="card-sub">序號、狀態與位置</small></div>
 </section>
-<section class="history" id="historyPanel">
-  <button class="history-toggle" type="button" onclick="openRecordDetailModal('replacement')" aria-expanded="false" aria-controls="historyBody">
-    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>設備維修更換／人員領用紀錄</h3><p>查看設備維修更換與人員領用的時間、位置、序號及備註。</p></span></span>
+<section class="history summary-card" id="historyPanel" style="cursor:pointer;" onclick="openHistoryDetail('replacement')">
+  <button class="history-toggle" type="button" aria-label="查看設備維修更換紀錄">
+    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>🔧 設備維修更換／人員領用紀錄</h3><p>點擊查看完整明細（含更正、刪除）。</p></span></span>
     <span id="historyCount" class="history-count">0 筆紀錄</span>
   </button>
-  <div id="historyBody" class="history-body"><div id="history"></div></div>
 </section>
-<section class="stock-history" id="stockHistoryPanel">
-  <button class="stock-history-toggle" type="button" onclick="openRecordDetailModal('movement')" aria-expanded="false" aria-controls="stockHistoryBody">
-    <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>庫存異動紀錄</h3><p>追蹤新設備入庫與設備維修更換領出；保留時間、數量、序號與位置。</p></span></span>
+<section class="stock-history summary-card" id="stockHistoryPanel" style="cursor:pointer;" onclick="openHistoryDetail('movement')">
+  <button class="stock-history-toggle" type="button" aria-label="查看庫存異動紀錄">
+    <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>📦 庫存異動紀錄</h3><p>點擊查看完整異動明細（含更正、刪除）。</p></span></span>
     <span id="stockHistoryCount" class="stock-history-count">0 筆異動</span>
   </button>
-  <div id="stockHistoryBody" class="stock-history-body"><div id="stockHistory"></div></div>
 </section>
 <section class="toolbar main-actions">
 <div class="search-wrap"><span class="search-icon">⌕</span><input id="search" class="search" placeholder="搜尋組件、料號、設備名稱、序號或位置" oninput="render()"></div>
@@ -778,7 +1046,7 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
   <span class="guide-pill stock"><i></i>有庫存</span>
   <span class="guide-help">主清單狀態由系統依目前庫存自動判定；已安裝與損壞設備請至「設備維修更換／人員領用紀錄」查看。</span>
 </section>
-<div class="note"><b>操作提醒：</b>收到新設備請使用每列的 <b>＋ 新增庫存</b>，系統會建立可追溯的入庫紀錄；設備維修更換時系統會自動扣除 1 件庫存並留下領出紀錄。庫存數量為系統計算結果，不提供直接手動調整。</div>
+<div class="note"><b>操作提醒：</b>收到新設備請使用每列的 <b>＋ 新增庫存</b>，系統會建立可追溯的入庫紀錄；設備維修更換時系統會自動扣除 1 件庫存並留下領出紀錄。若發生誤新增或盤點差異，可使用「修改庫存」調整，系統會自動記錄數量異動。</div>
 <div id="components"></div>
 
 </main>
@@ -985,7 +1253,7 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
 
 <div class="modal" id="serialBatchModal"><div class="dialog" style="width:min(620px,100%)"><h3>批次加入庫存序號</h3><div class="form">
 <label>設備<input id="serialBatchDevice" readonly></label>
-<label>批次序號<textarea id="serialBatchInput" placeholder="可直接貼上 Excel 一整欄，或使用逗號、全形逗號、換行、Tab 分隔。\n例如：\nSN-A001\nSN-A002\nSN-A003"></textarea></label>
+<label>批次序號<textarea id="serialBatchInput" placeholder="可直接貼上 Excel 一整欄，或使用逗號、全形逗號、換行、Tab 分隔。例如：SN-A001SN-A002SN-A003"></textarea></label>
 <div style="font-size:11px;line-height:1.55;color:#70849a;background:#f7fafc;border:1px solid #e1e9f1;border-radius:9px;padding:9px 10px">系統會自動去除空白與重複序號；若序號已存在於其他設備，會略過並提示。序號筆數超過目前庫存時，庫存量會自動補足。</div>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeSerialBatch()">取消</button><button class="btn primary" onclick="confirmSerialBatch()">加入序號</button></div></div></div>
 
@@ -1001,7 +1269,7 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 保密器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 無線電","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"n/a","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"n/a","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-Drawer","items":[{"part":"A30-2030-010","name":"筆電","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"N/A","name":"電源線","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"11457-2309-01","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01 ","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 紅區交換器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線x1","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250手持話機x1","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051電源線x1","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"N/A","name":"市電轉換接頭（澳洲）x1","qty":0,"serials":[]},{"part":"10515-0607-4100*","name":"RF-7800W卡x1","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟x1","qty":0,"serials":[]},{"part":"N/A","name":"螺絲包x1 (4ea)","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線 / 無線電配備","sourcePart":"11457-2042-01","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"天線桅桿與工具配備","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-0504","name":"電纜導引環","qty":0,"serials":[]},{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"N/A","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"N/A","name":"内六角板手組","qty":0,"serials":[]},{"part":"E75-0373-001","name":"10M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"鐵槌","qty":0,"serials":[]},{"part":"N/A","name":"量距繩(黃)","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"N/A","name":"地樁","qty":0,"serials":[]},{"part":"E75-0372-001","name":"25M 天線桅桿T型桿套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"E75-0376-001","name":"25M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"E75-0377-001","name":"25M 天線桅杆手動天線定位器(MAP)套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（內部）","sourcePart":"11457-2000-01","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"OMNI ANT HORZ(N)","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（外部）","sourcePart":"11457-2000-01","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"N/A","name":"TOCNET P-case","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 RUGGED laptop GETAC S510 COMPUTER","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"CABLE ASSY, TOCNET AUDIO TO RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"Dual Radio 6-pin Generic Cable Assemblies","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB POWER SUPPLY KIT, AC TO 24VDC","qty":0,"serials":[]}]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2592-001","name":"4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"11457-2307-01","name":"COMMAND POST INTERFACE PANEL ASSEMBLY","qty":0,"serials":[]},{"part":"N/A","name":"POWER CORD","qty":0,"serials":[]},{"part":"N/A","name":"USB","qty":0,"serials":[]},{"part":"N/A","name":"RS-232","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]},{"part":"11457-2309-01","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線x1","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線x1","qty":0,"serials":[]},{"part":"N/A","name":"電源線x1","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-Cabnet","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-Drawer","items":[{"part":"A30-2030-010","name":"筆電(1)","qty":0,"serials":[]},{"part":"A30-2030-010","name":"筆電(2)","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]},{"part":"A30-2305-004","name":"HDT 帳篷套件，橄欖褐色","qty":0,"serials":[]},{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具包，橄欖褐色，標準款","qty":0,"serials":[]},{"part":"n/a","name":"螺絲起子x1","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"11457-3000-01","items":[{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"11457-3000-01","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]}]}];
+const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 保密器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 無線電","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"n/a","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"n/a","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-Drawer","items":[{"part":"A30-2030-010","name":"筆電","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"N/A","name":"電源線","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"11457-2309-01","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01 ","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 紅區交換器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線x1","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250手持話機x1","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051電源線x1","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"N/A","name":"市電轉換接頭（澳洲）x1","qty":0,"serials":[]},{"part":"10515-0607-4100*","name":"RF-7800W卡x1","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟x1","qty":0,"serials":[]},{"part":"N/A","name":"螺絲包x1 (4ea)","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線 / 無線電配備","sourcePart":"11457-2042-01","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"天線桅桿與工具配備","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-0504","name":"電纜導引環","qty":0,"serials":[]},{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"N/A","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"N/A","name":"内六角板手組","qty":0,"serials":[]},{"part":"E75-0373-001","name":"10M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"鐵槌","qty":0,"serials":[]},{"part":"N/A","name":"量距繩(黃)","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"N/A","name":"地樁","qty":0,"serials":[]},{"part":"E75-0372-001","name":"25M 天線桅桿T型桿套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"E75-0376-001","name":"25M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"E75-0377-001","name":"25M 天線桅杆手動天線定位器(MAP)套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（內部）","sourcePart":"11457-2000-01","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"OMNI ANT HORZ(N)","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（外部）","sourcePart":"11457-2000-01","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"N/A","name":"TOCNET P-case","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 RUGGED laptop GETAC S510 COMPUTER","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"CABLE ASSY, TOCNET AUDIO TO RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"Dual Radio 6-pin Generic Cable Assemblies","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB POWER SUPPLY KIT, AC TO 24VDC","qty":0,"serials":[]}]},{"name":"CN 其他組件","sourcePart":"CN-OTHER","items":[]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2592-001","name":"4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"11457-2307-01","name":"COMMAND POST INTERFACE PANEL ASSEMBLY","qty":0,"serials":[]},{"part":"N/A","name":"POWER CORD","qty":0,"serials":[]},{"part":"N/A","name":"USB","qty":0,"serials":[]},{"part":"N/A","name":"RS-232","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]},{"part":"11457-2309-01","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線x1","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線x1","qty":0,"serials":[]},{"part":"N/A","name":"電源線x1","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-Cabnet","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-Drawer","items":[{"part":"A30-2030-010","name":"筆電(1)","qty":0,"serials":[]},{"part":"A30-2030-010","name":"筆電(2)","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]},{"part":"A30-2305-004","name":"HDT 帳篷套件，橄欖褐色","qty":0,"serials":[]},{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具包，橄欖褐色，標準款","qty":0,"serials":[]},{"part":"n/a","name":"螺絲起子x1","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"11457-3000-01","items":[{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"11457-3000-01","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]}]},{"name":"NMS 其他組件","sourcePart":"NMS-OTHER","items":[]}];
 // ===== Supabase multi-device cloud sync =====
 // Publishable keys are intended for browser-side use. Never put a service_role / secret key here.
 const SYSTEM_ID='73G-MASON';
@@ -1152,7 +1420,22 @@ window.addEventListener('online',()=>{
 window.addEventListener('offline',()=>setCloudStatus('offline','離線｜使用本機資料'));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!dirty&&!cloudUnsynced)refreshFromCloud({notify:false})});
 
+
+// ===== Added custom components: CN/NMS Other =====
+function ensureOtherComponents(groups){
+  if(!Array.isArray(groups)) return groups;
+  const add=(name,part)=>{
+    if(!groups.some(g=>g.name===name)){
+      groups.push({name,sourcePart:part,items:[]});
+    }
+  };
+  add('CN 其他組件','CN-OTHER');
+  add('NMS 其他組件','NMS-OTHER');
+  return groups;
+}
+
 let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:JSON.parse(JSON.stringify(baseGroups)),replacements:[],stockMovements:[]};
+store.groups=ensureOtherComponents(store.groups);
 /* Built-in catalog migration: add new catalog groups/items without overwriting user-entered data. */
 (function mergeBuiltInCatalog(){
   if(!store || !Array.isArray(store.groups)) store={groups:[],replacements:[],stockMovements:[]};
@@ -1232,7 +1515,7 @@ function save(){
 async function saveAll(){
  normalizeInventoryStore();
  const dups=findDuplicateSerials();
- if(dups.length){alert('無法儲存：發現重複設備序號。\n\n'+dups.slice(0,8).join('\n')+(dups.length>8?'\n…':''));return}
+ if(dups.length){alert('無法儲存：發現重複設備序號。'+dups.slice(0,8).join('')+(dups.length>8?'…':''));return}
  persistLocalSnapshot();cloudUnsynced=true;render();showSavedNotice();
  const ok=await queueCloudSave(JSON.parse(JSON.stringify(store)),{silent:false});
  showToast(ok?'資料已儲存並同步雲端':'資料已存本機；雲端尚未完成同步',ok?'success':'error')
@@ -1292,7 +1575,25 @@ function clearFilters(){
  const gf=document.getElementById('groupFilter'),so=document.getElementById('stockOnly'),ro=document.getElementById('recordOnly');
  if(gf)gf.value='';if(so)so.checked=false;if(ro)ro.checked=false;render();
 }
+
+/* ===== v19 CN/NMS Other component runtime fix ===== */
+function ensureOtherComponents(){
+  try{
+    if(!Array.isArray(store.groups)) return;
+    let changed=false;
+    ['CN','NMS'].forEach(system=>{
+      const name=system+' 其他組件';
+      if(!store.groups.some(g=>String(g.name||'').trim()===name)){
+        store.groups.push({name,items:[],sourcePart:''});
+        changed=true;
+      }
+    });
+    return changed;
+  }catch(e){console.warn('ensureOtherComponents',e);}
+}
+
 function render(){
+ ensureOtherComponents();
  refreshGroupFilter();
  const q=search.value.trim().toLowerCase();
  const selectedGroup=document.getElementById('groupFilter')?.value ?? '';
@@ -1310,7 +1611,8 @@ function render(){
      const recordMatch=!recordOnly || hasRecord(x);
      return textMatch&&stockMatch&&recordMatch;
    });
-   if(!rows.length)return;
+   const isOtherGroup = /其他組件$/.test(g.name||'');
+   if(!rows.length && !isOtherGroup)return;
    shownGroups++;
    buckets[systemType(g)].push({g,gi,rows});
  });
@@ -1335,7 +1637,7 @@ function render(){
        </div>
        <div class="comp-body">${rows.length?`<table><thead><tr><th style="width:125px">料號</th><th>設備名稱</th><th style="width:135px">庫存量</th><th style="width:330px">庫存序號</th><th style="width:110px">狀態</th><th style="width:170px">位置</th></tr></thead><tbody>`+rows.map(x=>{
          const ii=g.items.indexOf(x), serial=(x.serials||[]).join(', '), st=itemStatus(x), qty=Number(x.qty)||0;
-         return `<tr class="device-row state-${st} ${qty===0?'qty-zero':''}"><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="qty"><div class="qty-control"><span class="stock-qty-readonly" aria-label="目前庫存量">${qty}</span>${qty===0?'<span class="zero-stock-label">無庫存</span>':''}</div><div style="margin-top:6px"><button type="button" class="stock-in-btn" onclick="openStockIn(${gi},${ii})">＋ 新增庫存</button></div></td>
+         return `<tr class="device-row state-${st} ${qty===0?'qty-zero':''}"><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="qty"><div class="qty-control"><span class="stock-qty-readonly" aria-label="目前庫存量">${qty}</span>${qty===0?'<span class="zero-stock-label">無庫存</span>':''}</div><div style="margin-top:6px"><button type="button" class="stock-in-btn" onclick="openStockIn(${gi},${ii})">＋ 新增庫存</button><button type="button" class="stock-in-btn" style="margin-left:5px" onclick="modifyStockQty(${gi},${ii})">✎ 修改庫存</button></div></td>
          <td>${serialTagEditor(x,gi,ii)}</td>
          <td><span class="inventory-status ${qty<=0?'empty':''}" title="庫存狀態由系統自動判定">${qty>0?'庫存':'無庫存'}</span></td>
          <td><select class="loc" onchange="setLocation(${gi},${ii},this.value)">${locationOptions(x.location||'')}</select></td></tr>`}).join('')+`</tbody></table>`:`<div class="empty">沒有設備</div>`}</div>
@@ -1345,7 +1647,7 @@ function render(){
  });
  components.innerHTML=html||'<div class="empty">找不到符合資料</div>';
  const fc=document.getElementById('filterCount');if(fc)fc.textContent=`顯示 ${shownGroups} / ${store.groups.length} 個組件`;
- const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-edit-btn" onclick="editReplacementRecord(${sourceIndex})" title="更正此筆紀錄">✏️ 更正</button><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除紀錄</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}${Array.isArray(r.corrections)&&r.corrections.length?`<div class="correction-note">✏️ 已更正 ${r.corrections.length} 次｜最後更正：${esc(r.corrections[r.corrections.length-1].correctedAt||'—')}</div>`:''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
+ const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-edit-btn" onclick="editReplacementRecord(${sourceIndex})" title="更正此筆紀錄">✏️ 更正</button><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}${Array.isArray(r.corrections)&&r.corrections.length?`<div class="correction-note">✏️ 已更正 ${r.corrections.length} 次｜最後更正：${esc(r.corrections[r.corrections.length-1].correctedAt||'—')}</div>`:''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
  renderStockHistory();
  updateSummary();
 }
@@ -1391,16 +1693,23 @@ function renderStockHistory(){
  box.innerHTML=rows.length?rows.map(({m,sourceIndex})=>{
    const cls=m.type==='inbound'?'inbound':(m.type==='replacement_out'||m.type==='personnel_issue')?'outbound':'adjust';
    const delta=m.qtyChange>0?`+${m.qtyChange}`:String(m.qtyChange);
-   return `<div class="stock-move-item ${cls}"><button type="button" class="stock-move-delete" onclick="deleteStockMovement(${sourceIndex})" title="刪除此筆庫存異動紀錄">刪除紀錄</button><span class="stock-move-type">${esc(stockMovementTypeText(m.type))}</span><b>${esc(m.dateTime||'—')}｜${esc(m.system||'—')}｜${esc(m.group||'—')}</b><br><b>設備：</b>${esc(m.device||'—')}｜${esc(m.part||'—')}　<b>數量：</b>${esc(delta)}（${m.beforeQty} → ${m.afterQty}）${m.serials.length?`<br><b>本次序號：</b><span class="detail-serial">${esc(m.serials.join('、'))}</span>`:''}<br><b>位置：</b>${esc(m.location||'—')}${m.reference?`　<b>來源/單號：</b>${esc(m.reference)}`:''}${m.note?`<br><b>備註：</b>${esc(m.note)}`:''}</div>`;
+   return `<div class="stock-move-item ${cls}"><button type="button" class="stock-move-edit" onclick="editStockMovement(${sourceIndex})" title="更正此筆庫存異動紀錄">更正</button><button type="button" class="stock-move-delete" onclick="deleteStockMovement(${sourceIndex})" title="刪除此筆庫存異動紀錄">刪除</button><span class="stock-move-type">${esc(stockMovementTypeText(m.type))}</span><b>${esc(m.dateTime||'—')}｜${esc(m.system||'—')}｜${esc(m.group||'—')}</b><br><b>設備：</b>${esc(m.device||'—')}｜${esc(m.part||'—')}　<b>數量：</b>${esc(delta)}（${m.beforeQty} → ${m.afterQty}）${m.serials.length?`<br><b>本次序號：</b><span class="detail-serial">${esc(m.serials.join('、'))}</span>`:''}<br><b>位置：</b>${esc(m.location||'—')}${m.reference?`　<b>來源/單號：</b>${esc(m.reference)}`:''}${m.note?`<br><b>備註：</b>${esc(m.note)}`:''}</div>`;
  }).join(''):'<div class="empty">尚無庫存異動紀錄。收到新設備時請使用「＋ 新增庫存」。</div>';
 }
 function deleteStockMovement(index){
  const arr=store.stockMovements||[],m=arr[index];if(!m)return;
  const delta=m.qtyChange>0?`+${m.qtyChange}`:String(m.qtyChange),when=m.dateTime||'未記錄時間';
- if(!confirm(`確定刪除這筆庫存異動紀錄？\n\n${when}\n${m.device||'設備'}｜${stockMovementTypeText(m.type)} ${delta}\n\n注意：只會刪除歷史紀錄，不會回滾目前庫存數量，也不會恢復或移除任何序號。`))return;
+ if(!confirm(`確定刪除這筆庫存異動紀錄？${when}${m.device||'設備'}｜${stockMovementTypeText(m.type)} ${delta}刪除後將反向恢復庫存數量。`))return;
+ const g=store.groups?.[m.g],x=g?.items?.[m.i];
+ if(x){
+   x.qty=Math.max(0,(Number(x.qty)||0)-Number(m.qtyChange||0));
+   if(Array.isArray(m.serials)&&m.serials.length){
+     if(Number(m.qtyChange)>0){x.serials=(x.serials||[]).filter(sn=>!m.serials.includes(sn));}
+   }
+ }
  arr.splice(index,1);
  save();render();toggleStockHistoryPanel(true);
- showToast('庫存異動紀錄已刪除；目前庫存資料未變更','success');
+ showToast('庫存異動紀錄已刪除，庫存已反向調整','success');
 }
 function toggleStockHistoryPanel(forceOpen){
  const panel=document.getElementById('stockHistoryPanel');if(!panel)return;
@@ -1409,6 +1718,21 @@ function toggleStockHistoryPanel(forceOpen){
  const btn=panel.querySelector('.stock-history-toggle');if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
 }
 let stockInGI=null,stockInII=null;
+function modifyStockQty(g,i){
+ const group=store.groups[g],x=group?.items?.[i];if(!x)return;
+ const oldQty=Number(x.qty)||0;
+ const input=prompt(`修改庫存數量${x.name}目前庫存：${oldQty}請輸入新的庫存數量：`,oldQty);
+ if(input===null)return;
+ const newQty=Math.max(0,Math.floor(Number(input)));
+ if(Number.isNaN(newQty))return showToast('請輸入有效數量','error');
+ if(newQty===oldQty)return showToast('數量未變更','success');
+ const delta=newQty-oldQty;
+ x.qty=newQty;
+ if((x.serials||[]).length>newQty)x.serials=x.serials.slice(0,newQty);
+ addStockMovement(g,i,{type:'adjust',qtyChange:delta,beforeQty:oldQty,afterQty:newQty,location:x.location||'',note:'庫存數量修正'});
+ save();render();toggleStockHistoryPanel(true);
+ showToast(`庫存已調整：${oldQty} → ${newQty}`,'success');
+}
 function openStockIn(g,i){
  stockInGI=g;stockInII=i;const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
  stockInCurrentQty.textContent=Number(x.qty)||0;stockInCurrentSerials.textContent=(x.serials||[]).filter(Boolean).length;stockInSystem.textContent=systemType(group);
@@ -1424,7 +1748,7 @@ function confirmStockIn(){
  if(serials.length>addQty)return showToast(`本次輸入 ${serials.length} 個序號，不能高於新增數量 ${addQty}`,'error');
  const own=new Set((x.serials||[]).map(v=>String(v).trim().toLowerCase())),conflicts=[];
  serials.forEach(sn=>{if(own.has(sn.toLowerCase()))conflicts.push(`${sn}（已在此設備庫存）`);else{const owner=findSerialOwner(sn,g,i);if(owner)conflicts.push(`${sn}（${owner.group}｜${owner.item.name}）`)}})
- if(conflicts.length){alert('無法入庫：發現重複序號。\n\n'+conflicts.slice(0,12).join('\n')+(conflicts.length>12?'\n…':''));return}
+ if(conflicts.length){alert('無法入庫：發現重複序號。'+conflicts.slice(0,12).join('')+(conflicts.length>12?'…':''));return}
  const before=Number(x.qty)||0;x.qty=before+addQty;x.serials=x.serials||[];serials.forEach(sn=>x.serials.push(sn));x.serials=sortSerialsNatural(x.serials);x.location=location;
  addStockMovement(g,i,{type:'inbound',qtyChange:addQty,beforeQty:before,afterQty:x.qty,serials,location,reference:stockInReference.value.trim(),note:stockInNote.value.trim()||'新設備入庫'});
  save();closeStockIn();render();toggleStockHistoryPanel(true);document.getElementById('stockHistoryPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -1440,10 +1764,12 @@ function toggleHistoryPanel(forceOpen){
 function deleteReplacementRecord(index){
  const arr=store.replacements||[],r=arr[index];if(!r)return;
  const when=r.dateTime||r.date||'未記錄時間',label=`${r.device||'設備'}｜損壞序號 ${r.old||'—'} → 新序號 ${r.next||'—'}`;
- if(!confirm(`確定刪除這筆設備維修更換 / 損壞紀錄？\n\n${when}\n${label}\n\n注意：只會刪除歷史紀錄，不會增加庫存，也不會把已領出的新序號放回庫存。`))return;
+ if(!confirm(`確定刪除這筆設備維修更換 / 損壞紀錄？${when}${label}刪除後將同步恢復可回補的庫存資料。`))return;
+ const mov=(store.stockMovements||[]).find(m=>m.id===r.movementId);
+ if(mov){ const g=store.groups?.[mov.g],x=g?.items?.[mov.i]; if(x){x.qty=Math.max(0,(Number(x.qty)||0)-Number(mov.qtyChange||0));} }
  arr.splice(index,1);
  save();render();toggleHistoryPanel(true);
- showToast('更換 / 損壞紀錄已刪除；庫存資料未變更','success');
+ showToast('更換 / 損壞紀錄已刪除，庫存已同步調整','success');
 }
 function toggleSystem(type){systemOpenSet.has(type)?systemOpenSet.delete(type):systemOpenSet.add(type);render()}
 function summaryKey(e,type){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSummaryDetail(type)}}
@@ -1499,7 +1825,7 @@ function serialTagEditor(x,g,i){
  const tags=serials.length?serials.map((sn,si)=>`<span class="serial-tag" title="${esc(sn)}"><span class="serial-tag-text">${esc(sn)}</span><button type="button" class="serial-tag-remove" title="移除序號 ${esc(sn)}" aria-label="移除序號 ${esc(sn)}" onclick="removeSerial(${g},${i},${si})">×</button></span>`).join(''):'<span class="serial-empty">尚未登記庫存序號</span>';
  return `<div class="serial-editor"><div class="serial-editor-head"><span style="font-size:10.5px;font-weight:800;color:#59718a">庫存序號</span><span class="serial-editor-count ${countClass}">${serials.length} / ${qty}</span></div><div class="serial-tags">${tags}</div><div class="serial-entry-row"><input class="serial-entry" id="serialEntry-${g}-${i}" placeholder="輸入序號後 Enter" autocomplete="off" onkeydown="serialEntryKey(event,${g},${i})"><button type="button" class="serial-add-btn" onclick="addSerialFromInput(${g},${i})">＋新增</button><button type="button" class="serial-batch-btn" onclick="openSerialBatch(${g},${i})">批次貼上</button></div><small class="serial-help">支援 Enter 新增；批次可貼 Excel、逗號或換行資料；序號會自動依數字由小到大排序。</small></div>`;
 }
-function parseSerialValues(v){return sortSerialsNatural([...new Set(String(v??'').split(/[,，\n\r\t;；]+/).map(s=>s.trim()).filter(Boolean))])}
+function parseSerialValues(v){return sortSerialsNatural([...new Set(String(v??'').split(/[,，\r\t;；]+/).map(s=>s.trim()).filter(Boolean))])}
 function findSerialOwner(serial,skipG=-1,skipI=-1){
  const key=String(serial||'').trim().toLowerCase();if(!key)return null;
  for(let gi=0;gi<store.groups.length;gi++){const g=store.groups[gi];for(let ii=0;ii<(g.items||[]).length;ii++){if(gi===skipG&&ii===skipI)continue;const x=g.items[ii];const hit=(x.serials||[]).some(sn=>String(sn).trim().toLowerCase()===key);if(hit)return {gi,ii,group:g.name,item:x};}}
@@ -1521,7 +1847,7 @@ function removeSerial(g,i,serialIndex){const x=store.groups[g]?.items?.[i];if(!x
 let serialBatchGI=null,serialBatchII=null;
 function openSerialBatch(g,i){serialBatchGI=g;serialBatchII=i;const x=store.groups[g]?.items?.[i];if(!x)return;serialBatchDevice.value=`${x.name}｜${x.part}`;serialBatchInput.value='';serialBatchModal.classList.add('show');setTimeout(()=>serialBatchInput.focus(),80)}
 function closeSerialBatch(){serialBatchModal.classList.remove('show');serialBatchGI=serialBatchII=null}
-function confirmSerialBatch(){if(serialBatchGI===null)return;const raw=serialBatchInput.value;if(!parseSerialValues(raw).length)return showToast('請貼上至少一個序號','error');const result=addSerialValues(serialBatchGI,serialBatchII,raw,{silent:true});closeSerialBatch();if(result.conflicts.length){alert(`批次加入完成：\n成功 ${result.added} 筆\n同設備重複 ${result.duplicates} 筆\n其他設備已存在 ${result.conflicts.length} 筆\n\n已略過：\n${result.conflicts.slice(0,12).join('\n')}${result.conflicts.length>12?'\n…':''}`)}else showToast(`批次加入 ${result.added} 筆${result.duplicates?`，略過重複 ${result.duplicates} 筆`:''}`,'success')}
+function confirmSerialBatch(){if(serialBatchGI===null)return;const raw=serialBatchInput.value;if(!parseSerialValues(raw).length)return showToast('請貼上至少一個序號','error');const result=addSerialValues(serialBatchGI,serialBatchII,raw,{silent:true});closeSerialBatch();if(result.conflicts.length){alert(`批次加入完成：成功 ${result.added} 筆同設備重複 ${result.duplicates} 筆其他設備已存在 ${result.conflicts.length} 筆已略過：${result.conflicts.slice(0,12).join('')}${result.conflicts.length>12?'…':''}`)}else showToast(`批次加入 ${result.added} 筆${result.duplicates?`，略過重複 ${result.duplicates} 筆`:''}`,'success')}
 // Backward-compatible parser for older inline calls / imported UI state.
 function setSerials(g,i,v){
  const x=store.groups[g].items[i],vals=parseSerialValues(v),clean=[];
@@ -1570,7 +1896,7 @@ function editReplacementRecord(index){
  rOld.value=isPersonnel?'':(r.old||'');rNote.value=r.note||'';const pn=document.getElementById('rPersonnelName'),pu=document.getElementById('rPersonnelUnit');if(pn)pn.value=r.personnelName||'';if(pu)pu.value=r.personnelUnit||'';updateReplacementMode();if(r.cn&&!Array.from(rCN.options).some(o=>o.value===r.cn))rCN.insertAdjacentHTML('beforeend',`<option value="${esc(r.cn)}">${esc(r.cn)}</option>`);rCN.value=r.cn||'';
  const current=String(r.next||'').trim(),stockSerials=found?(found.item.serials||[]).map(v=>String(v).trim()).filter(Boolean):[],choices=[current,...stockSerials.filter(v=>v.toLowerCase()!==current.toLowerCase())];
  rNew.disabled=false;rNew.innerHTML=choices.map((sn,i)=>`<option value="${esc(sn)}">${i===0?'目前紀錄｜':''}${esc(sn)}</option>`).join('');rNew.value=current;const h=document.getElementById('rNewHelp');if(h){h.textContent=found?'可保留原序號，或改選目前仍在庫存中的其他序號。變更時系統會自動交換庫存序號，庫存總量不變。':'找不到原設備庫存項目，因此目前只能更正其他欄位，不能變更已領出序號。';h.style.color=found?'#58718b':'#b42336'}if(!found)rNew.disabled=true;
- const btn=document.getElementById('saveReplaceBtn');if(btn)btn.textContent='💾 儲存更正';modal.classList.add('show');
+ const btn=document.getElementById('saveReplaceBtn');if(btn)btn.textContent='💾 儲存更正';const detail=document.getElementById('summaryDetailModal');if(detail)detail.classList.remove('show');modal.classList.add('show');modal.style.zIndex='20000';document.body.style.overflow='hidden';setTimeout(()=>{window.scrollTo({top:0,behavior:'instant'});const dlg=modal.querySelector('.dialog'),form=modal.querySelector('.form');if(dlg)dlg.scrollTop=0;if(form)form.scrollTop=0;},80);
 }
 function openReplace(){
  replacementEditIndex=null;const title=document.getElementById('replacementModalTitle'),notice=document.getElementById('replacementEditNotice'),at0=document.getElementById('rActionType');if(title)title.textContent='設備維修更換／人員領用';if(notice){notice.className='';notice.textContent=''}if(at0)at0.disabled=false;rGroup.disabled=false;rDevice.disabled=false;
@@ -1747,7 +2073,7 @@ function exportBackup(){
 }
 function importBackup(ev){
  const f=ev.target.files&&ev.target.files[0];if(!f)return;
- if(!confirm('匯入備份會取代目前畫面中的全部庫存與設備維修更換/人員領用紀錄。備份中沒有的已刪除紀錄不會恢復。\n\n建議先匯出目前備份。確定繼續？')){ev.target.value='';return}
+ if(!confirm('匯入備份會取代目前畫面中的全部庫存與設備維修更換/人員領用紀錄。備份中沒有的已刪除紀錄不會恢復。建議先匯出目前備份。確定繼續？')){ev.target.value='';return}
  const r=new FileReader();
  r.onload=()=>{try{
   const obj=JSON.parse(r.result),incoming=obj.data||obj;
@@ -1757,7 +2083,7 @@ function importBackup(ev){
   normalizeInventoryStore(incoming);normalizeReplacementHistory(incoming);normalizeStockMovements(incoming);
   // 匯入前檢查「目前庫存序號」不可重複；歷史更換序號不視為目前庫存，不參與重複判斷。
   const oldStore=store;store=incoming;const dups=findDuplicateSerials();
-  if(dups.length){store=oldStore;throw new Error('備份內有重複的目前庫存序號：\n'+dups.slice(0,5).join('\n'))}
+  if(dups.length){store=oldStore;throw new Error('備份內有重複的目前庫存序號：'+dups.slice(0,5).join(''))}
   save();render();toggleHistoryPanel(false);toggleStockHistoryPanel(false);
   const st=inventoryStats();showToast(`備份匯入完成：庫存 ${st.qty} 件 / 庫存異動 ${st.stockMovements} 筆 / 更換紀錄 ${st.replacements} 筆`,'success');
  }catch(e){alert('匯入失敗：'+e.message)}finally{ev.target.value=''}};
@@ -1831,35 +2157,76 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;table-layout:fixed}t
    reportBody=`${reportHeader('73G裝備庫存與維修管理','庫存・序號・維修更換・人員領用綜合報告')}<div class="notice"><b>報告說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
  }
  const html=wordHead+reportBody+`<div class="footer"><strong>73G裝備庫存與維修管理</strong>｜System Generated Report｜本文件由系統自動產生</div>
-<!-- ===== Record detail modal redesign ===== -->
-<div class="modal" id="recordDetailModal">
- <div class="dialog record-detail-dialog">
-  <h3 id="recordDetailTitle">紀錄明細</h3>
-  <div class="form" id="recordDetailContent"></div>
-  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
- </div>
-</div>
 <style>
-.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
-.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
-@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
-</style>
-<script>
-function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
-function openRecordDetailModal(type){
- const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
- title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
- if(type==='movement'){
-  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }else{
-  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }
- modal.classList.add('show');
+/* v31 stock edit modal scroll isolation fix */
+body.modal-lock{overflow:hidden!important;}
+#stockMoveModal,
+#stockEditModal,
+#stockHistoryModal{
+  overflow:hidden!important;
 }
-function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
-</script>
+#stockMoveModal .dialog,
+#stockEditModal .dialog{
+  max-height:calc(100vh - 32px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#stockMoveModal .form,
+#stockEditModal .form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#stockMoveModal .dialog-actions,
+#stockEditModal .dialog-actions{
+  flex:0 0 auto!important;
+  position:sticky!important;
+  bottom:0!important;
+  background:#fff!important;
+  z-index:5!important;
+}
+</style>
+
+<style>
+/* v41 final layout/action correction */
+main{
+  padding-top:0!important;
+}
+.topbar + main,
+.topbar + .wrap,
+.wrap{
+  margin-top:0!important;
+  padding-top:0!important;
+}
+.dashboard,.summary-grid,.section-card{
+  margin-top:0!important;
+}
+/* keep per-row operation buttons visible */
+.detail-table-wrap td:last-child{
+  white-space:nowrap!important;
+}
+</style>
+
+<style>
+/* v46 final commercial UI polish */
+body{font-family:"Microsoft JhengHei UI","Segoe UI",Arial,sans-serif;letter-spacing:.02em}
+.topbar{box-shadow:0 6px 20px rgba(20,50,90,.18)}
+.card,.component,.history,.stock-history{box-shadow:0 4px 16px rgba(20,55,95,.07)}
+.card b{font-weight:900}
+.system-title,.detail-title,.history-title-wrap h3,.stock-history-title h3{letter-spacing:.03em}
+table th{background:#eef4fa;color:#244b74;font-weight:900}
+table td{font-size:13px;color:#304b68}
+tr:hover td{background:#f7fbff}
+.btn.primary{background:#173f74}
+.btn.green{background:#e8f7ee;color:#12653d;border-color:#bfe2cf}
+.history-delete-btn,.stock-move-delete{font-weight:900}
+.modal .dialog,.dialog{box-shadow:0 24px 70px rgba(15,40,75,.25)}
+.form input,.form select,.form textarea{background:#fbfdff}
+</style>
 </body></html>`;
  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=`73G_${fileLabel}_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(`${reportTitle} 已匯出`,'success');
@@ -1869,19 +2236,19 @@ function csvCell(v){v=String(v??'');return '"'+v.replace(/"/g,'""')+'"'}
 function exportReportCSV(){
  normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
  const rows=reportRows(),st=inventoryStats();let csv='\ufeff';
- csv+=['裝備庫存 Report','產生時間',new Date().toLocaleString('zh-TW')].map(csvCell).join(',')+'\n';
- csv+=['統計','組件分類',st.groups,'設備種類',st.types,'新設備庫存',st.qty,'庫存序號',st.serials,'損壞/更換紀錄',st.replacements].map(csvCell).join(',')+'\n\n';
- csv+=['系統','組件數','設備種類','新設備庫存','庫存序號'].map(csvCell).join(',')+'\n';
- csv+=['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return [t,x.groups,x.types,x.qty,x.serials].map(csvCell).join(',')}).join('\n')+'\n\n';
- csv+=['目前新設備庫存明細'].map(csvCell).join(',')+'\n';
- csv+=['系統','組件','料號','設備名稱','庫存量','庫存序號','狀態','庫存位置'].map(csvCell).join(',')+'\n';
- csv+=rows.map(x=>[x.system,x.group,x.part,x.name,x.qty,x.serial,x.state,x.location].map(csvCell).join(',')).join('\n');
- csv+='\n\n'+['庫存異動紀錄'].map(csvCell).join(',')+'\n';
- csv+=['異動時間','類型','系統','組件','設備','料號','數量異動','異動前','異動後','本次序號','位置','來源/單號','備註'].map(csvCell).join(',')+'\n';
- csv+=(store.stockMovements||[]).slice().reverse().map(m=>[m.dateTime||'',stockMovementTypeText(m.type),m.system,m.group,m.device,m.part,m.qtyChange,m.beforeQty,m.afterQty,(m.serials||[]).join('、'),m.location,m.reference,m.note].map(csvCell).join(',')).join('\n');
- csv+='\n\n'+['設備維修更換 / 人員領用紀錄'].map(csvCell).join(',')+'\n';
- csv+=['更換時間','位置','組件','設備','料號','故障設備序號','替換設備序號','損壞狀態','備註'].map(csvCell).join(',')+'\n';
- csv+=(store.replacements||[]).slice().reverse().map(r=>[r.dateTime||r.date||'',r.cn,r.group,r.device,r.part||'',r.old,r.next,r.damagedStatus||'損壞／已換下',r.note||''].map(csvCell).join(',')).join('\n');
+ csv+=['裝備庫存 Report','產生時間',new Date().toLocaleString('zh-TW')].map(csvCell).join(',')+'';
+ csv+=['統計','組件分類',st.groups,'設備種類',st.types,'新設備庫存',st.qty,'庫存序號',st.serials,'損壞/更換紀錄',st.replacements].map(csvCell).join(',')+'';
+ csv+=['系統','組件數','設備種類','新設備庫存','庫存序號'].map(csvCell).join(',')+'';
+ csv+=['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return [t,x.groups,x.types,x.qty,x.serials].map(csvCell).join(',')}).join('')+'';
+ csv+=['目前新設備庫存明細'].map(csvCell).join(',')+'';
+ csv+=['系統','組件','料號','設備名稱','庫存量','庫存序號','狀態','庫存位置'].map(csvCell).join(',')+'';
+ csv+=rows.map(x=>[x.system,x.group,x.part,x.name,x.qty,x.serial,x.state,x.location].map(csvCell).join(',')).join('');
+ csv+=''+['庫存異動紀錄'].map(csvCell).join(',')+'';
+ csv+=['異動時間','類型','系統','組件','設備','料號','數量異動','異動前','異動後','本次序號','位置','來源/單號','備註'].map(csvCell).join(',')+'';
+ csv+=(store.stockMovements||[]).slice().reverse().map(m=>[m.dateTime||'',stockMovementTypeText(m.type),m.system,m.group,m.device,m.part,m.qtyChange,m.beforeQty,m.afterQty,(m.serials||[]).join('、'),m.location,m.reference,m.note].map(csvCell).join(',')).join('');
+ csv+=''+['設備維修更換 / 人員領用紀錄'].map(csvCell).join(',')+'';
+ csv+=['更換時間','位置','組件','設備','料號','故障設備序號','替換設備序號','損壞狀態','備註'].map(csvCell).join(',')+'';
+ csv+=(store.replacements||[]).slice().reverse().map(r=>[r.dateTime||r.date||'',r.cn,r.group,r.device,r.part||'',r.old,r.next,r.damagedStatus||'損壞／已換下',r.note||''].map(csvCell).join(',')).join('');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_report_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('Report CSV 已匯出','success');
 }
 function printReport(){
@@ -1889,35 +2256,56 @@ function printReport(){
  const generated=new Date().toLocaleString('zh-TW');
  const printCss=`@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;color:#263f59;background:#fff;margin:0;font-size:10pt;line-height:1.42}.print-head{width:100%;border-collapse:collapse;margin:0 0 10px;border:0}.print-head td{border:0!important;padding:0!important}.print-head .left{border-left:6px solid #173f70!important;padding-left:10px!important}.print-head h1{margin:0;color:#123b6b;font-size:20pt;line-height:1.1}.print-head .sub{margin-top:4px;color:#667d95;font-size:9pt}.print-head .right{text-align:right;color:#687e95;font-size:8.5pt}.rule{height:3px;background:#173f70;margin:0 0 12px}.card{display:inline-block;vertical-align:top;min-width:125px;border:1px solid #ccd8e4;border-radius:6px;padding:8px 11px;margin:0 5px 10px 0;background:#f8fafc}.card b{font-size:16pt;line-height:1;color:#123f76;display:block}.card span{display:block;margin-top:4px;font-size:8.5pt;color:#607892;font-weight:700}h4{font-size:12pt!important;color:#173f70!important;margin:15px 0 6px!important;padding:5px 8px!important;border-left:4px solid #2d6299!important;border-bottom:1px solid #c7d5e3!important;background:#f7f9fc!important}table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:4px 0 11px;table-layout:auto}th,td{border:1px solid #afc0d1;padding:4px 5px;text-align:left;vertical-align:middle;word-break:break-word}th{background:#dfe8f2;color:#173b70;font-weight:700;text-align:center;font-size:8.7pt}tbody tr:nth-child(even) td{background:#fafbfd}.detail-serial{font-family:Consolas,"Microsoft JhengHei",monospace}.empty{padding:14px;border:1px solid #d7e1eb;background:#f8fafc;color:#6c8096}tr{page-break-inside:avoid}thead{display:table-header-group}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
  w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>73G 裝備庫存與維修管理報告</title><style>${printCss}</style></head><body><table class="print-head"><tr><td class="left"><h1>73G裝備庫存與維修管理</h1><div class="sub">Equipment Inventory & Maintenance｜正式庫存管理報告</div></td><td class="right">文件類型：列印 / PDF<br>產生時間：${esc(generated)}</td></tr></table><div class="rule"></div>${reportContent.innerHTML}<div style="margin-top:14px;padding-top:6px;border-top:1px solid #ccd7e2;text-align:right;color:#71849c;font-size:8pt">73G裝備庫存與維修管理｜System Generated Report</div>
-<!-- ===== Record detail modal redesign ===== -->
-<div class="modal" id="recordDetailModal">
- <div class="dialog record-detail-dialog">
-  <h3 id="recordDetailTitle">紀錄明細</h3>
-  <div class="form" id="recordDetailContent"></div>
-  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
- </div>
-</div>
 <style>
-.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
-.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
-@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
-</style>
-<script>
-function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
-function openRecordDetailModal(type){
- const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
- title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
- if(type==='movement'){
-  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }else{
-  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }
- modal.classList.add('show');
+/* v31 stock edit modal scroll isolation fix */
+body.modal-lock{overflow:hidden!important;}
+#stockMoveModal,
+#stockEditModal,
+#stockHistoryModal{
+  overflow:hidden!important;
 }
-function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
-</script>
+#stockMoveModal .dialog,
+#stockEditModal .dialog{
+  max-height:calc(100vh - 32px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#stockMoveModal .form,
+#stockEditModal .form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#stockMoveModal .dialog-actions,
+#stockEditModal .dialog-actions{
+  flex:0 0 auto!important;
+  position:sticky!important;
+  bottom:0!important;
+  background:#fff!important;
+  z-index:5!important;
+}
+</style>
+
+<style>
+/* v46 final commercial UI polish */
+body{font-family:"Microsoft JhengHei UI","Segoe UI",Arial,sans-serif;letter-spacing:.02em}
+.topbar{box-shadow:0 6px 20px rgba(20,50,90,.18)}
+.card,.component,.history,.stock-history{box-shadow:0 4px 16px rgba(20,55,95,.07)}
+.card b{font-weight:900}
+.system-title,.detail-title,.history-title-wrap h3,.stock-history-title h3{letter-spacing:.03em}
+table th{background:#eef4fa;color:#244b74;font-weight:900}
+table td{font-size:13px;color:#304b68}
+tr:hover td{background:#f7fbff}
+.btn.primary{background:#173f74}
+.btn.green{background:#e8f7ee;color:#12653d;border-color:#bfe2cf}
+.history-delete-btn,.stock-move-delete{font-weight:900}
+.modal .dialog,.dialog{box-shadow:0 24px 70px rgba(15,40,75,.25)}
+.form input,.form select,.form textarea{background:#fbfdff}
+</style>
 </body></html>`);
  w.document.close();w.focus();setTimeout(()=>w.print(),250);
 }
@@ -2151,7 +2539,7 @@ function deleteIssueReceiptRecord(id){
   const records=loadIssueReceiptRecords();
   const row=records.find(r=>r.id===id);
   if(!row)return;
-  if(!confirm(`確定刪除此筆簽收資料？\n${row.unit}\n工作命令：${row.workOrder}`))return;
+  if(!confirm(`確定刪除此筆簽收資料？${row.unit}工作命令：${row.workOrder}`))return;
   saveIssueReceiptRecords(records.filter(r=>r.id!==id));
   updateReceiptUnitSummary();
   showToast('已刪除簽收資料','success');
@@ -2207,6 +2595,38 @@ th{background:#eaf1f8;font-weight:bold;text-align:center}
 .receipt-data-row td{height:23pt;padding-top:1px;padding-bottom:1px}
 .sign{height:23pt;min-width:72px;text-align:center;overflow:hidden;padding:1px 4px;background:transparent}
 .sign img{display:block;margin:auto;width:72px;height:24px;object-fit:contain;background:transparent}
+
+/* ===== v28 stock edit modal fix ===== */
+#stockEditTempModal{align-items:center!important;padding:16px!important;overflow:hidden!important;}
+#stockEditTempModal .dialog{width:min(620px,96vw)!important;max-height:82vh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
+#stockEditTempModal .dialog h3{flex:0 0 auto!important;}
+#stockEditTempModal .form{flex:1 1 auto!important;overflow-y:auto!important;max-height:calc(82vh - 130px)!important;padding:14px 18px!important;gap:8px!important;}
+#stockEditTempModal .form input,#stockEditTempModal .form textarea{min-height:38px!important;padding:7px 10px!important;}
+#stockEditTempModal .form textarea{min-height:70px!important;max-height:100px!important;}
+#stockEditTempModal .dialog-actions{flex:0 0 auto!important;position:sticky!important;bottom:0!important;background:#fff!important;padding:10px 18px 14px!important;}
+@media(max-width:760px){#stockEditTempModal{align-items:flex-end!important;padding:0!important}#stockEditTempModal .dialog{width:100%!important;max-height:90vh!important;border-radius:18px 18px 0 0!important}#stockEditTempModal .form{max-height:calc(90vh - 130px)!important}}
+
+/* v29 stock adjustment edit modal fix */
+#stockAdjustModal, #inventoryEditModal, #stockEditModal {
+  align-items:center !important;
+  padding:12px !important;
+}
+#stockAdjustModal .dialog, #inventoryEditModal .dialog, #stockEditModal .dialog {
+  max-height:88vh !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+}
+#stockAdjustModal .form, #inventoryEditModal .form, #stockEditModal .form {
+  overflow-y:auto !important;
+  max-height:calc(88vh - 150px) !important;
+}
+#stockAdjustModal .dialog-actions, #inventoryEditModal .dialog-actions, #stockEditModal .dialog-actions {
+  position:sticky !important;
+  bottom:0 !important;
+  background:#fff !important;
+  z-index:5 !important;
+}
 </style></head><body>
 <table>
 <tr><td colspan="11" class="title">裝備領用簽收紀錄</td></tr>
@@ -2227,41 +2647,62 @@ th{background:#eaf1f8;font-weight:bold;text-align:center}
 ${bodyRows}
 </table>
 
-<!-- ===== Record detail modal redesign ===== -->
-<div class="modal" id="recordDetailModal">
- <div class="dialog record-detail-dialog">
-  <h3 id="recordDetailTitle">紀錄明細</h3>
-  <div class="form" id="recordDetailContent"></div>
-  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
- </div>
-</div>
 <style>
-.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
-.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
-@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
-</style>
-<script>
-function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
-function openRecordDetailModal(type){
- const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
- title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
- if(type==='movement'){
-  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }else{
-  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }
- modal.classList.add('show');
+/* v31 stock edit modal scroll isolation fix */
+body.modal-lock{overflow:hidden!important;}
+#stockMoveModal,
+#stockEditModal,
+#stockHistoryModal{
+  overflow:hidden!important;
 }
-function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
-</script>
+#stockMoveModal .dialog,
+#stockEditModal .dialog{
+  max-height:calc(100vh - 32px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#stockMoveModal .form,
+#stockEditModal .form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#stockMoveModal .dialog-actions,
+#stockEditModal .dialog-actions{
+  flex:0 0 auto!important;
+  position:sticky!important;
+  bottom:0!important;
+  background:#fff!important;
+  z-index:5!important;
+}
+</style>
+
+<style>
+/* v46 final commercial UI polish */
+body{font-family:"Microsoft JhengHei UI","Segoe UI",Arial,sans-serif;letter-spacing:.02em}
+.topbar{box-shadow:0 6px 20px rgba(20,50,90,.18)}
+.card,.component,.history,.stock-history{box-shadow:0 4px 16px rgba(20,55,95,.07)}
+.card b{font-weight:900}
+.system-title,.detail-title,.history-title-wrap h3,.stock-history-title h3{letter-spacing:.03em}
+table th{background:#eef4fa;color:#244b74;font-weight:900}
+table td{font-size:13px;color:#304b68}
+tr:hover td{background:#f7fbff}
+.btn.primary{background:#173f74}
+.btn.green{background:#e8f7ee;color:#12653d;border-color:#bfe2cf}
+.history-delete-btn,.stock-move-delete{font-weight:900}
+.modal .dialog,.dialog{box-shadow:0 24px 70px rgba(15,40,75,.25)}
+.form input,.form select,.form textarea{background:#fbfdff}
+</style>
 </body></html>`;
 
   // Excel 對 HTML .xls 裡的 data:image URI 支援不完整，會顯示「無法顯示連結的影像」。
   // 改用 MHTML multipart/related，把 PNG 簽名真正封裝在同一個 .xls 檔案內。
   const boundary='----=_73G_SIGNATURE_'+Date.now();
-  const crlf='\r\n';
+  const crlf='\r';
   const wrap76=s=>String(s||'').match(/.{1,76}/g)?.join(crlf)||'';
   let mhtml='MIME-Version: 1.0'+crlf+
     `Content-Type: multipart/related; boundary="${boundary}"`+crlf+crlf+
@@ -2331,6 +2772,28 @@ refreshReceiptSignatureUI('repair');refreshReceiptSignatureUI('final');
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSummaryDetail();closeModal();closeAddDevice();closeReport();closeSerialBatch();closeStockIn();closeIssueReceipt()}});
 today.textContent=new Date().toLocaleString('zh-TW',{dateStyle:'medium',timeStyle:'short'});
 normalizeStockMovements();render();updateSaveUI();updateLastSaved();/* initializeCloudSync() starts after authentication. */
+
+
+/* ===== v15 add CN/NMS Other component (safe extension, login untouched) ===== */
+(function(){
+  try{
+    if(typeof store==='undefined' || !Array.isArray(store.groups) || typeof render!=='function') return;
+    let changed=false;
+    function ensureOther(system){
+      const exists=store.groups.some(g=>String(g.name||'').trim()===system+' 其他組件');
+      if(!exists){
+        store.groups.push({name:system+' 其他組件',items:[]});
+        changed=true;
+      }
+    }
+    ensureOther('CN');
+    ensureOther('NMS');
+    if(changed){
+      try{ localStorage.setItem('73g_store',JSON.stringify(store)); }catch(e){}
+      render();
+    }
+  }catch(e){console.warn('v15 extension skipped',e)}
+})();
 </script>
 
 <script id="tenant-auth-runtime-v2">
@@ -2362,40 +2825,987 @@ normalizeStockMovements();render();updateSaveUI();updateLastSaved();/* initializ
   async function invokeAdmin(action,payload={}){if(!isAdmin())throw new Error('ADMIN 權限不足');const s=await supabaseClient.auth.getSession();const token=s.data?.session?.access_token;if(!token)throw new Error('登入狀態已失效');const {data,error}=await supabaseClient.functions.invoke('admin-users',{headers:{Authorization:`Bearer ${token}`},body:{action,systemId:SYSTEM_ID,...payload}});if(error){let msg=error.message||'管理功能呼叫失敗';try{if(error.context){const j=await error.context.json();msg=j?.error||j?.message||msg}}catch(_e){}throw new Error(msg)}if(data?.error)throw new Error(data.error);return data}
   function setAdminStatus(m,t=''){const el=document.getElementById('userAdminStatus');if(el){el.textContent=m||'';el.className='user-admin-status'+(t?' '+t:'')}}window.openUserAdmin=async function(){if(!isAdmin())return deny('只有 Admin 可以管理帳號。');document.getElementById('userAdminBackdrop').hidden=false;await loadAdminUsers()};window.closeUserAdmin=function(){document.getElementById('userAdminBackdrop').hidden=true};window.loadAdminUsers=async function(){const box=document.getElementById('adminUsersList');if(box)box.innerHTML='<div class="user-list-empty">載入中...</div>';try{const result=await invokeAdmin('list_users');renderAdminUsers(result?.users||[])}catch(err){if(box)box.innerHTML='<div class="user-list-empty">無法載入帳號清單</div>';setAdminStatus(err.message,'error')}};
   function renderAdminUsers(users){const box=document.getElementById('adminUsersList');if(!box)return;if(!users.length){box.innerHTML='<div class="user-list-empty">目前沒有使用者</div>';return}box.innerHTML=users.map(u=>{const self=u.id===AUTH.user?.id;return `<div class="admin-user-row" data-admin-user="${authEsc(u.id)}"><div class="admin-user-email"><b>${authEsc(u.account||'未設定')}</b>${authEsc(u.displayName||'未命名')}</div><input class="admin-display-name" value="${authEsc(u.displayName||'')}"><select class="admin-role-select" ${self?'disabled':''}><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option><option value="manager" ${u.role==='manager'?'selected':''}>Manager</option><option value="editor" ${u.role==='editor'?'selected':''}>Editor</option><option value="viewer" ${u.role==='viewer'?'selected':''}>Viewer</option></select><label class="admin-user-state"><input class="admin-active" type="checkbox" ${u.active!==false?'checked':''} ${self?'disabled':''}> 啟用</label><div class="admin-user-actions"><button type="button" onclick="saveAdminUser('${authEsc(u.id)}')">儲存</button><button type="button" onclick="resetAdminPassword('${authEsc(u.id)}')">重設密碼</button><button class="danger" type="button" onclick="deleteAdminUser('${authEsc(u.id)}','${authEsc(u.account||'')}')" ${self?'disabled':''}>刪除</button></div></div>`}).join('')}
-  window.saveAdminUser=async function(userId){const row=document.querySelector(`[data-admin-user="${CSS.escape(userId)}"]`);if(!row)return;const displayName=row.querySelector('.admin-display-name').value.trim(),role=row.querySelector('.admin-role-select').value,active=row.querySelector('.admin-active').checked;try{await invokeAdmin('update_user',{userId,displayName,role,active});setAdminStatus('✅ 帳號資料已更新','ok');await loadAdminUsers();if(userId===AUTH.user?.id){AUTH.profile.display_name=displayName;updateHeaderIdentity()}}catch(err){setAdminStatus(err.message,'error')}};window.resetAdminPassword=async function(userId){const p=prompt('輸入新的臨時密碼（至少 8 碼）：');if(p===null)return;if(p.length<8)return alert('密碼至少需要 8 碼。');try{await invokeAdmin('reset_password',{userId,newPassword:p});setAdminStatus('✅ 密碼已重設','ok')}catch(err){setAdminStatus(err.message,'error')}};window.deleteAdminUser=async function(userId,account){if(!confirm(`確定刪除帳號？\n\n${account}`))return;try{await invokeAdmin('delete_user',{userId});setAdminStatus('✅ 帳號已刪除','ok');await loadAdminUsers()}catch(err){setAdminStatus(err.message,'error')}};
+  window.saveAdminUser=async function(userId){const row=document.querySelector(`[data-admin-user="${CSS.escape(userId)}"]`);if(!row)return;const displayName=row.querySelector('.admin-display-name').value.trim(),role=row.querySelector('.admin-role-select').value,active=row.querySelector('.admin-active').checked;try{await invokeAdmin('update_user',{userId,displayName,role,active});setAdminStatus('✅ 帳號資料已更新','ok');await loadAdminUsers();if(userId===AUTH.user?.id){AUTH.profile.display_name=displayName;updateHeaderIdentity()}}catch(err){setAdminStatus(err.message,'error')}};window.resetAdminPassword=async function(userId){const p=prompt('輸入新的臨時密碼（至少 8 碼）：');if(p===null)return;if(p.length<8)return alert('密碼至少需要 8 碼。');try{await invokeAdmin('reset_password',{userId,newPassword:p});setAdminStatus('✅ 密碼已重設','ok')}catch(err){setAdminStatus(err.message,'error')}};window.deleteAdminUser=async function(userId,account){if(!confirm(`確定刪除帳號？${account}`))return;try{await invokeAdmin('delete_user',{userId});setAdminStatus('✅ 帳號已刪除','ok');await loadAdminUsers()}catch(err){setAdminStatus(err.message,'error')}};
   async function createManagedUser(ev){ev?.preventDefault();const displayName=document.getElementById('newUserName').value.trim(),account=normalizeAccount(document.getElementById('newUserAccount').value),password=document.getElementById('newUserPassword').value,role=document.getElementById('newUserRole').value;if(!account)return setAdminStatus('帳號格式不正確。','error');try{await invokeAdmin('create_user',{displayName,account,password,role});document.getElementById('createUserForm').reset();document.getElementById('newUserRole').value='manager';setAdminStatus(`✅ 帳號 ${account} 已建立`,'ok');await loadAdminUsers()}catch(err){setAdminStatus(err.message,'error')}}
   async function boot(){document.getElementById('authLoginForm')?.addEventListener('submit',loginWithPassword);document.getElementById('createUserForm')?.addEventListener('submit',createManagedUser);document.getElementById('changePasswordForm')?.addEventListener('submit',changeOwnPassword);document.getElementById('authPasswordToggle')?.addEventListener('click',function(){const p=document.getElementById('authPassword');if(!p)return;const show=p.type==='password';p.type=show?'text':'password';this.textContent=show?'🙈':'👁'});document.getElementById('userAdminBackdrop')?.addEventListener('click',e=>{if(e.target.id==='userAdminBackdrop')closeUserAdmin()});document.getElementById('changePasswordBackdrop')?.addEventListener('click',e=>{if(e.target.id==='changePasswordBackdrop')closeChangePassword()});const {data,error}=await supabaseClient.auth.getSession();if(error||!data?.session){lockApp();return}await completeAuthentication(data.session)}
   supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){AUTH.user=null;AUTH.profile=null;AUTH.accessToken='';AUTH.cloudStarted=false;lockApp()}else if(session){AUTH.user=session.user;AUTH.accessToken=session.access_token||AUTH.accessToken}});boot();
 })();
+
+
+function editStockMovement(index){
+ const arr=store.stockMovements||[]; const m=arr[index];
+ if(!m){showToast('找不到庫存異動紀錄','error');return;}
+ const box=document.createElement('div');
+ box.className='modal show';
+ box.id='stockEditTempModal';
+ box.style.zIndex='30000';
+ box.innerHTML=`<div class="dialog">
+ <h3>更正庫存異動紀錄</h3>
+ <div class="form">
+ <label>數量異動<input id="semQty" value="${m.qtyChange??0}"></label>
+ <label>異動前<input id="semBefore" value="${m.beforeQty??0}"></label>
+ <label>異動後<input id="semAfter" value="${m.afterQty??0}"></label>
+ <label>序號<input id="semSerial" value="${esc((m.serials||[]).join('、'))}"></label>
+ <label>位置<input id="semLocation" value="${esc(m.location||'')}"></label>
+ <label>來源/單號<input id="semRef" value="${esc(m.reference||'')}"></label>
+ <label>備註<textarea id="semNote">${esc(m.note||'')}</textarea></label>
+ </div>
+ <div class="dialog-actions"><button class="btn light" onclick="document.getElementById('stockEditTempModal').remove()">取消</button><button class="btn primary" onclick="saveStockMovementEdit(${index})">儲存更正</button></div>
+ </div>`;
+ document.body.appendChild(box);
+}
+function saveStockMovementEdit(index){
+ const m=(store.stockMovements||[])[index];
+ if(!m)return;
+ const val=id=>document.getElementById(id)?.value||'';
+ const oldQtyChange = Number(m.qtyChange)||0;
+ const oldAfterQty = Number(m.afterQty)||0;
+ m.qtyChange=Number(val('semQty'))||0;
+ m.beforeQty=Number(val('semBefore'))||0;
+ m.afterQty=Number(val('semAfter'))||0;
+ m.adjustDelta = (m.afterQty - oldAfterQty);
+ m.serials=val('semSerial').split(/[，,\s]+/).map(x=>x.trim()).filter(Boolean);
+ m.location=val('semLocation').trim();
+ m.reference=val('semRef').trim();
+ m.note=val('semNote').trim();
+ save();
+ document.getElementById('stockEditTempModal')?.remove();
+ render();
+ toggleStockHistoryPanel(true);
+ showToast('庫存異動更正完成','success');
+}
+
+function openHistoryDetail(type){
+ const modal=document.getElementById('summaryDetailModal'), heading=document.getElementById('summaryDetailHeading'), box=document.getElementById('summaryDetailContent');
+ let html='';
+ if(type==='replacement'){
+  heading.textContent='設備維修更換／人員領用紀錄明細';
+  const rows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();
+  html=`<div class="detail-toolbar"><div class="detail-title">維修更換／領用紀錄</div><div class="detail-count">${rows.length} 筆</div></div><div class="detail-table-wrap"><table><thead><tr><th>日期</th><th>類型</th><th>設備</th><th>序號</th><th>位置</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,sourceIndex})=>{const personnel=r.actionType==='personnel_issue'||r.newStatus==='已領用';return `<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(personnel?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(personnel?(r.next||'—'):(r.old||'—')+' → '+(r.next||'—'))}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'')}</td><td><button class="mini-action" onclick="editReplacementRecord(${sourceIndex})">更正</button> <button class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})">刪除</button></td></tr>`}).join('')}</tbody></table></div>`;
+ }else{
+  heading.textContent='庫存異動紀錄明細';
+  const rows=(store.stockMovements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();
+  html=`<div class="detail-toolbar"><div class="detail-title">庫存異動</div><div class="detail-count">${rows.length} 筆</div></div><div class="detail-table-wrap"><table><thead><tr><th>日期</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量</th><th>異動前</th><th>異動後</th><th>序號</th><th>位置</th><th>來源</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,sourceIndex})=>`<tr><td>${esc(r.dateTime||'—')}</td><td>${esc(stockMovementTypeText(r.type))}</td><td>${esc(r.system||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(r.qtyChange??'')}</td><td>${esc(r.beforeQty??'')}</td><td>${esc(r.afterQty??'')}</td><td>${esc((r.serials||[]).join('、')||'—')}</td><td>${esc(r.location||'—')}</td><td>${esc(r.reference||'')}</td><td>${esc(r.note||'')}</td><td><button class="mini-action" onclick="editStockMovement(${sourceIndex})">更正</button> <button class="history-delete-btn" onclick="deleteStockMovement(${sourceIndex})">刪除</button></td></tr>`).join('')}</tbody></table></div>`;
+ }
+ box.innerHTML=html; modal.classList.add('show');
+}
+
+
 </script>
 
-<!-- ===== Record detail modal redesign ===== -->
-<div class="modal" id="recordDetailModal">
- <div class="dialog record-detail-dialog">
-  <h3 id="recordDetailTitle">紀錄明細</h3>
-  <div class="form" id="recordDetailContent"></div>
-  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
- </div>
-</div>
 <style>
-.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
-.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
-@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
-</style>
-<script>
-function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
-function openRecordDetailModal(type){
- const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
- title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
- if(type==='movement'){
-  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }else{
-  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
-  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
- }
- modal.classList.add('show');
+/* v31 stock edit modal scroll isolation fix */
+body.modal-lock{overflow:hidden!important;}
+#stockMoveModal,
+#stockEditModal,
+#stockHistoryModal{
+  overflow:hidden!important;
 }
-function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
-</script>
+#stockMoveModal .dialog,
+#stockEditModal .dialog{
+  max-height:calc(100vh - 32px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#stockMoveModal .form,
+#stockEditModal .form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#stockMoveModal .dialog-actions,
+#stockEditModal .dialog-actions{
+  flex:0 0 auto!important;
+  position:sticky!important;
+  bottom:0!important;
+  background:#fff!important;
+  z-index:5!important;
+}
+</style>
+
+<style>
+/* v46 final commercial UI polish */
+body{font-family:"Microsoft JhengHei UI","Segoe UI",Arial,sans-serif;letter-spacing:.02em}
+.topbar{box-shadow:0 6px 20px rgba(20,50,90,.18)}
+.card,.component,.history,.stock-history{box-shadow:0 4px 16px rgba(20,55,95,.07)}
+.card b{font-weight:900}
+.system-title,.detail-title,.history-title-wrap h3,.stock-history-title h3{letter-spacing:.03em}
+table th{background:#eef4fa;color:#244b74;font-weight:900}
+table td{font-size:13px;color:#304b68}
+tr:hover td{background:#f7fbff}
+.btn.primary{background:#173f74}
+.btn.green{background:#e8f7ee;color:#12653d;border-color:#bfe2cf}
+.history-delete-btn,.stock-move-delete{font-weight:900}
+.modal .dialog,.dialog{box-shadow:0 24px 70px rgba(15,40,75,.25)}
+.form input,.form select,.form textarea{background:#fbfdff}
+
+
+/* ===== v2.1 Dashboard layout correction ===== */
+.topbar{
+  padding:10px 20px!important;
+}
+.topbar .wrap{
+  min-height:42px!important;
+}
+main{
+  padding-top:0!important;
+  margin-top:0!important;
+}
+.topbar + main{
+  padding-top:0!important;
+}
+.summary{
+  margin-top:0!important;
+}
+.summary-card{
+  min-height:92px!important;
+  padding:13px 16px!important;
+}
+.system-section{
+  margin-top:8px!important;
+}
+
+
+/* ===== v2.2 Final Release UI Optimization ===== */
+:root{
+  --release-bg:#eef3f8;
+  --release-blue:#173f74;
+  --release-text:#163657;
+  --release-muted:#6c8098;
+  --release-line:#d6e1ec;
+}
+
+body{
+  font-family:"Noto Sans TC","Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif!important;
+  background:var(--release-bg)!important;
+  color:var(--release-text)!important;
+  letter-spacing:.025em;
+}
+
+/* Header */
+.topbar{
+  padding:14px 22px!important;
+}
+.brand h1{
+  font-size:24px!important;
+  font-weight:900!important;
+}
+.brand small{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* Dashboard cards */
+.summary{
+  gap:12px!important;
+}
+.summary-card{
+  min-height:108px!important;
+  padding:18px 20px!important;
+  border-radius:16px!important;
+  background:#fff!important;
+}
+.summary-card b{
+  font-size:36px!important;
+  font-weight:900!important;
+}
+.summary-card span{
+  font-size:14px!important;
+  font-weight:850!important;
+}
+
+/* Section cards */
+.system-section,
+.component,
+.history,
+.toolbar,
+.filterbar{
+  border-color:#d4e0ec!important;
+  box-shadow:0 4px 14px rgba(20,55,90,.07)!important;
+}
+
+/* Titles */
+.system-title,
+.comp-name,
+.history-title-wrap h3{
+  font-weight:900!important;
+  color:#123d70!important;
+}
+
+/* Table */
+table th{
+  background:#eaf2fb!important;
+  color:#23476e!important;
+  font-size:13px!important;
+  font-weight:900!important;
+}
+
+table td{
+  font-size:13.5px!important;
+  font-weight:500;
+  padding:12px 14px!important;
+}
+
+.device-name{
+  font-size:14px!important;
+  font-weight:850!important;
+}
+
+/* Inputs */
+input,select,textarea{
+  font-size:13.5px!important;
+}
+
+/* Buttons */
+button,.btn{
+  font-weight:850!important;
+  letter-spacing:.02em;
+}
+
+/* Quantity */
+.qty,
+.qty-input{
+  font-weight:900!important;
+}
+
+/* Status labels */
+.badge,.status{
+  font-weight:850!important;
+}
+
+/* Mobile safe */
+@media(max-width:760px){
+  .brand h1{font-size:20px!important}
+  .summary-card b{font-size:30px!important}
+  table td{font-size:13px!important}
+}
+
+
+/* ===== v2.3 Balanced Comfortable Reading UI ===== */
+
+/* overall typography */
+body{
+  font-family:"Noto Sans TC","Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",Arial,sans-serif!important;
+  font-weight:400!important;
+  letter-spacing:.015em!important;
+}
+
+/* only important headings bold */
+h1,h2,h3,h4,
+.system-title,
+.section-title{
+  font-weight:700!important;
+}
+
+/* normal content */
+p,span,td,div,label{
+  font-weight:400;
+}
+
+/* dashboard numbers */
+.summary-card b,
+.qty,
+.total-number{
+  font-weight:700!important;
+}
+
+/* labels */
+.summary-card span,
+th,
+.badge,
+.status{
+  font-weight:600!important;
+}
+
+/* reduce visual pressure */
+.summary-card{
+  box-shadow:0 2px 8px rgba(20,55,90,.08)!important;
+}
+
+table td{
+  font-weight:400!important;
+  line-height:1.55!important;
+}
+
+table th{
+  font-weight:600!important;
+}
+
+/* softer background */
+body{
+  background:#f3f6fa!important;
+}
+
+input,select,textarea{
+  font-weight:400!important;
+}
+
+/* buttons */
+button,.btn{
+  font-weight:600!important;
+}
+
+/* device names */
+.device-name{
+  font-weight:600!important;
+}
+
+/* avoid oversized text */
+.brand h1{
+  font-weight:700!important;
+}
+
+
+/* ===== v2.4 Inventory Status Visual Optimization ===== */
+
+/* 有庫存狀態 */
+.status-available,
+.has-stock,
+.stock-ok,
+.badge-stock{
+  background:#e8f5f0!important;
+  border:1px solid #8acdb1!important;
+  color:#176b4d!important;
+}
+
+/* 無庫存狀態 */
+.status-empty,
+.no-stock,
+.stock-none,
+.badge-empty{
+  background:#f2f4f7!important;
+  border:1px solid #c9d1dc!important;
+  color:#667085!important;
+}
+
+/* 狀態標籤提升辨識 */
+.status,
+.badge{
+  border-radius:999px!important;
+  padding:5px 12px!important;
+  font-weight:600!important;
+}
+
+/* 庫存數量框 */
+.qty,
+.qty-input{
+  background:#ffffff!important;
+  border:1px solid #bfd3e8!important;
+  border-radius:10px!important;
+}
+
+/* 新增庫存按鈕柔和化 */
+button.add-stock,
+.btn-add-stock{
+  background:#eaf7f1!important;
+  border-color:#8acdb1!important;
+  color:#176b4d!important;
+}
+
+/* 狀態區塊增加層次 */
+.stock-panel,
+.inventory-box{
+  border-radius:14px!important;
+}
+
+
+/* ===== v2.5 Strong Inventory Status Contrast ===== */
+
+/* 有庫存：明顯正常狀態 */
+.has-stock,
+.stock-ok,
+.status-available,
+.badge-stock{
+  background:#dff6e8!important;
+  border:1px solid #55b87a!important;
+  color:#11633b!important;
+}
+
+/* 無庫存：明顯缺貨狀態 */
+.no-stock,
+.stock-none,
+.status-empty,
+.badge-empty{
+  background:#ffe9e9!important;
+  border:1px solid #e28a8a!important;
+  color:#9b2c2c!important;
+}
+
+/* 狀態文字 */
+.status,
+.badge{
+  font-weight:650!important;
+  padding:6px 14px!important;
+}
+
+/* 無庫存資料列輕微提示 */
+.inventory-empty-row{
+  background:#fff8f8!important;
+}
+
+/* 有庫存資料列 */
+.inventory-stock-row{
+  background:#f5fcf7!important;
+}
+
+
+/* ===== v2.6 Simple Enterprise Final UI ===== */
+
+/* 保持簡潔，不增加複雜功能 */
+
+/* 一般文字 */
+body{
+  font-family:"Noto Sans TC","Microsoft JhengHei UI","Segoe UI",sans-serif!important;
+  font-weight:400!important;
+}
+
+/* 標題 */
+h1,h2,h3,
+.system-title,
+.section-title{
+  font-weight:700!important;
+}
+
+/* 表格閱讀 */
+table th{
+  font-weight:650!important;
+  background:#eaf2fb!important;
+}
+
+table td{
+  font-weight:400!important;
+  line-height:1.5!important;
+}
+
+/* 設備名稱稍微突出 */
+.device-name{
+  font-weight:600!important;
+}
+
+/* 庫存數量 */
+.qty,
+.qty-input{
+  font-weight:700!important;
+  font-size:16px!important;
+}
+
+/* 狀態簡化 */
+.status,
+.badge{
+  font-weight:600!important;
+  border-radius:999px!important;
+}
+
+/* 有庫存 */
+.has-stock,
+.stock-ok,
+.status-available,
+.badge-stock{
+  background:#e3f5e9!important;
+  border-color:#7bc28f!important;
+  color:#17633a!important;
+}
+
+/* 無庫存 */
+.no-stock,
+.stock-none,
+.status-empty,
+.badge-empty{
+  background:#f1f3f5!important;
+  border-color:#c7cdd4!important;
+  color:#68717c!important;
+}
+
+/* 按鈕統一 */
+button,.btn{
+  font-weight:600!important;
+}
+
+/* 減少視覺負擔 */
+.summary-card,
+.component,
+.history,
+.toolbar{
+  box-shadow:0 2px 8px rgba(20,55,90,.06)!important;
+}
+
+
+/* ===== v2.7 Typography + Mobile Responsive Optimization ===== */
+
+/* 基礎文字 */
+body{
+  font-family:"Noto Sans TC","Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:400!important;
+  line-height:1.55!important;
+  letter-spacing:.01em!important;
+}
+
+/* 系統標題 */
+.brand h1{
+  font-size:24px!important;
+  font-weight:700!important;
+}
+
+.brand small{
+  font-size:13px!important;
+  font-weight:400!important;
+}
+
+/* 區塊標題 */
+h2,h3,
+.section-title,
+.system-title{
+  font-size:18px!important;
+  font-weight:700!important;
+}
+
+/* 一般說明文字 */
+p,
+.description,
+.helper-text{
+  font-size:13px!important;
+  font-weight:400!important;
+  color:#64748b!important;
+}
+
+/* KPI */
+.summary-card b{
+  font-size:34px!important;
+  font-weight:700!important;
+}
+
+.summary-card span{
+  font-size:14px!important;
+  font-weight:600!important;
+}
+
+/* 表格 */
+table th{
+  font-size:14px!important;
+  font-weight:650!important;
+}
+
+table td{
+  font-size:14px!important;
+  font-weight:400!important;
+}
+
+.device-name{
+  font-size:15px!important;
+  font-weight:650!important;
+}
+
+/* 按鈕 */
+button,.btn{
+  font-size:14px!important;
+  font-weight:600!important;
+}
+
+/* 輸入 */
+input,select,textarea{
+  font-size:14px!important;
+  font-weight:400!important;
+}
+
+
+/* ===== Mobile Layout ===== */
+@media(max-width:768px){
+
+  body{
+    font-size:14px!important;
+  }
+
+  .topbar{
+    padding:12px 14px!important;
+  }
+
+  .brand h1{
+    font-size:20px!important;
+  }
+
+  .brand small{
+    font-size:12px!important;
+  }
+
+  /* Header 按鈕排列 */
+  .topbar button,
+  .header-actions button{
+    padding:8px 10px!important;
+    font-size:13px!important;
+  }
+
+  /* KPI 改單欄 */
+  .summary{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+  }
+
+  .summary-card{
+    min-height:90px!important;
+    padding:14px!important;
+  }
+
+  .summary-card b{
+    font-size:28px!important;
+  }
+
+  /* 表格手機橫向滑動 */
+  .table-container,
+  .table-wrap{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+
+  table{
+    min-width:900px!important;
+  }
+
+  /* 設備卡片 */
+  .component,
+  .inventory-box{
+    padding:12px!important;
+  }
+
+  /* 操作按鈕 */
+  button,.btn{
+    min-height:38px!important;
+  }
+}
+
+@media(max-width:480px){
+
+  .summary{
+    grid-template-columns:1fr!important;
+  }
+
+  .brand h1{
+    font-size:18px!important;
+  }
+
+  .system-title{
+    font-size:16px!important;
+  }
+}
+
+
+/* ===== v2.8 Final Small UI Tuning ===== */
+
+/* 讓閱讀更舒服 */
+body{
+  line-height:1.6!important;
+}
+
+/* 標題微調 */
+.brand h1{
+  letter-spacing:.02em!important;
+}
+
+.system-title{
+  font-size:17px!important;
+  font-weight:700!important;
+}
+
+/* 卡片降低壓迫感 */
+.summary-card{
+  border-radius:14px!important;
+}
+
+.summary-card b{
+  font-size:32px!important;
+  font-weight:700!important;
+}
+
+.summary-card span{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* 表格最佳閱讀比例 */
+table th{
+  font-size:13px!important;
+  font-weight:650!important;
+}
+
+table td{
+  font-size:13px!important;
+}
+
+.device-name{
+  font-weight:650!important;
+}
+
+/* 狀態標籤不要太粗 */
+.status,
+.badge{
+  font-size:12px!important;
+  font-weight:600!important;
+}
+
+/* 按鈕舒適化 */
+button,.btn{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* 減少卡片陰影 */
+.card,
+.component,
+.history,
+.toolbar,
+.filterbar{
+  box-shadow:0 2px 7px rgba(20,55,90,.05)!important;
+}
+
+/* 手機最後調整 */
+@media(max-width:768px){
+  main{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  .summary-card{
+    min-height:82px!important;
+    padding:12px!important;
+  }
+
+  .summary-card b{
+    font-size:26px!important;
+  }
+
+  table td,
+  table th{
+    font-size:12.5px!important;
+  }
+
+  button,.btn{
+    font-size:12.5px!important;
+  }
+}
+
+@media(max-width:480px){
+  .summary-card{
+    min-height:78px!important;
+  }
+
+  .system-title{
+    font-size:15px!important;
+  }
+}
+
+
+/* ===== v2.9 Typography Balance ===== */
+
+/* 基礎文字：避免整頁過重 */
+body{
+  font-family:"Noto Sans TC","Microsoft JhengHei UI","Microsoft JhengHei","Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:400!important;
+  line-height:1.5!important;
+}
+
+/* 系統標題 */
+.brand h1{
+  font-size:22px!important;
+  font-weight:700!important;
+}
+
+.brand small{
+  font-size:12px!important;
+  font-weight:400!important;
+}
+
+/* 區塊標題 */
+h2,h3,
+.system-title,
+.section-title{
+  font-size:17px!important;
+  font-weight:700!important;
+}
+
+/* 一般說明 */
+.description,
+.helper-text,
+small,
+p{
+  font-size:13px!important;
+  font-weight:400!important;
+}
+
+/* KPI */
+.summary-card b{
+  font-size:32px!important;
+  font-weight:700!important;
+}
+
+.summary-card span{
+  font-size:13px!important;
+  font-weight:500!important;
+}
+
+/* 設備名稱：半粗，不搶過標題 */
+.device-name{
+  font-size:15px!important;
+  font-weight:600!important;
+}
+
+/* 料號、位置、一般資料 */
+.part-number,
+.location,
+table td{
+  font-size:13px!important;
+  font-weight:400!important;
+}
+
+/* 表頭 */
+table th{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* 狀態 */
+.status,
+.badge{
+  font-size:12px!important;
+  font-weight:600!important;
+}
+
+/* 按鈕 */
+button,.btn{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* Modal 表格避免過大 */
+.modal table td,
+.modal table th{
+  font-size:13px!important;
+}
+
+.modal .device-name{
+  font-size:14px!important;
+  font-weight:600!important;
+}
+
+/* 手機 */
+@media(max-width:768px){
+  body{
+    font-size:13px!important;
+  }
+
+  .brand h1{
+    font-size:19px!important;
+  }
+
+  .summary-card b{
+    font-size:26px!important;
+  }
+
+  table td, table th{
+    font-size:12px!important;
+  }
+}
+
+
+/* ===== v3.0 UI Hierarchy Balance ===== */
+
+/* 清理文字層級 */
+body{
+  font-weight:400!important;
+}
+
+/* 第一層：系統分類 */
+.component-header,
+.category-header,
+.section-header,
+.system-title{
+  font-size:17px!important;
+  font-weight:650!important;
+  letter-spacing:.01em!important;
+}
+
+/* 第二層：設備分類 */
+.component-title,
+.category-title,
+.group-title{
+  font-size:15px!important;
+  font-weight:700!important;
+}
+
+/* 編號 / 輔助文字 */
+.component-code,
+.category-code,
+.subtitle,
+small{
+  font-size:12px!important;
+  font-weight:400!important;
+  color:#64748b!important;
+}
+
+/* 設備名稱 */
+.device-name{
+  font-size:15px!important;
+  font-weight:650!important;
+}
+
+/* 一般資料 */
+table td,
+.data-text{
+  font-size:13px!important;
+  font-weight:400!important;
+}
+
+/* 表頭 */
+table th{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+/* 數量與狀態 */
+.qty,
+.quantity,
+.status,
+.badge{
+  font-weight:700!important;
+}
+
+/* 展開按鈕降低存在感 */
+.expand-btn,
+.collapse-btn{
+  width:34px!important;
+  height:34px!important;
+  font-size:18px!important;
+}
+
+/* 避免長文字過度突出 */
+.long-name{
+  font-weight:600!important;
+}
+
+/* 手機版 */
+@media(max-width:768px){
+  .component-header,
+  .category-header,
+  .section-header,
+  .system-title{
+    font-size:16px!important;
+  }
+
+  .component-title,
+  .category-title,
+  .group-title{
+    font-size:14px!important;
+  }
+
+  .device-name{
+    font-size:14px!important;
+  }
+}
+
+</style>
 </body></html>
