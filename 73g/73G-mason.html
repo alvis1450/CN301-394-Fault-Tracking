@@ -730,14 +730,14 @@ body.role-viewer .asset-add-btn,body.role-viewer .delete-btn,body.role-editor .d
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('tracked')" onkeydown="summaryKey(event,'tracked')"><b id="sTracked">0</b><span>已登記序號</span><small class="card-sub">序號、狀態與位置</small></div>
 </section>
 <section class="history" id="historyPanel">
-  <button class="history-toggle" type="button" onclick="toggleHistoryPanel()" aria-expanded="false" aria-controls="historyBody">
+  <button class="history-toggle" type="button" onclick="openRecordDetailModal('replacement')" aria-expanded="false" aria-controls="historyBody">
     <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>設備維修更換／人員領用紀錄</h3><p>查看設備維修更換與人員領用的時間、位置、序號及備註。</p></span></span>
     <span id="historyCount" class="history-count">0 筆紀錄</span>
   </button>
   <div id="historyBody" class="history-body"><div id="history"></div></div>
 </section>
 <section class="stock-history" id="stockHistoryPanel">
-  <button class="stock-history-toggle" type="button" onclick="toggleStockHistoryPanel()" aria-expanded="false" aria-controls="stockHistoryBody">
+  <button class="stock-history-toggle" type="button" onclick="openRecordDetailModal('movement')" aria-expanded="false" aria-controls="stockHistoryBody">
     <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>庫存異動紀錄</h3><p>追蹤新設備入庫與設備維修更換領出；保留時間、數量、序號與位置。</p></span></span>
     <span id="stockHistoryCount" class="stock-history-count">0 筆異動</span>
   </button>
@@ -1830,7 +1830,37 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;table-layout:fixed}t
  }else{
    reportBody=`${reportHeader('73G裝備庫存與維修管理','庫存・序號・維修更換・人員領用綜合報告')}<div class="notice"><b>報告說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
  }
- const html=wordHead+reportBody+`<div class="footer"><strong>73G裝備庫存與維修管理</strong>｜System Generated Report｜本文件由系統自動產生</div></body></html>`;
+ const html=wordHead+reportBody+`<div class="footer"><strong>73G裝備庫存與維修管理</strong>｜System Generated Report｜本文件由系統自動產生</div>
+<!-- ===== Record detail modal redesign ===== -->
+<div class="modal" id="recordDetailModal">
+ <div class="dialog record-detail-dialog">
+  <h3 id="recordDetailTitle">紀錄明細</h3>
+  <div class="form" id="recordDetailContent"></div>
+  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
+ </div>
+</div>
+<style>
+.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
+.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
+@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
+</style>
+<script>
+function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
+function openRecordDetailModal(type){
+ const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
+ title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
+ if(type==='movement'){
+  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }else{
+  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }
+ modal.classList.add('show');
+}
+function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
+</script>
+</body></html>`;
  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=`73G_${fileLabel}_${now.toISOString().slice(0,10)}.doc`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(`${reportTitle} 已匯出`,'success');
 }
@@ -1858,7 +1888,37 @@ function printReport(){
  const w=window.open('','_blank');if(!w)return alert('瀏覽器阻擋了列印視窗');
  const generated=new Date().toLocaleString('zh-TW');
  const printCss=`@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",Arial,sans-serif;color:#263f59;background:#fff;margin:0;font-size:10pt;line-height:1.42}.print-head{width:100%;border-collapse:collapse;margin:0 0 10px;border:0}.print-head td{border:0!important;padding:0!important}.print-head .left{border-left:6px solid #173f70!important;padding-left:10px!important}.print-head h1{margin:0;color:#123b6b;font-size:20pt;line-height:1.1}.print-head .sub{margin-top:4px;color:#667d95;font-size:9pt}.print-head .right{text-align:right;color:#687e95;font-size:8.5pt}.rule{height:3px;background:#173f70;margin:0 0 12px}.card{display:inline-block;vertical-align:top;min-width:125px;border:1px solid #ccd8e4;border-radius:6px;padding:8px 11px;margin:0 5px 10px 0;background:#f8fafc}.card b{font-size:16pt;line-height:1;color:#123f76;display:block}.card span{display:block;margin-top:4px;font-size:8.5pt;color:#607892;font-weight:700}h4{font-size:12pt!important;color:#173f70!important;margin:15px 0 6px!important;padding:5px 8px!important;border-left:4px solid #2d6299!important;border-bottom:1px solid #c7d5e3!important;background:#f7f9fc!important}table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:4px 0 11px;table-layout:auto}th,td{border:1px solid #afc0d1;padding:4px 5px;text-align:left;vertical-align:middle;word-break:break-word}th{background:#dfe8f2;color:#173b70;font-weight:700;text-align:center;font-size:8.7pt}tbody tr:nth-child(even) td{background:#fafbfd}.detail-serial{font-family:Consolas,"Microsoft JhengHei",monospace}.empty{padding:14px;border:1px solid #d7e1eb;background:#f8fafc;color:#6c8096}tr{page-break-inside:avoid}thead{display:table-header-group}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
- w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>73G 裝備庫存與維修管理報告</title><style>${printCss}</style></head><body><table class="print-head"><tr><td class="left"><h1>73G裝備庫存與維修管理</h1><div class="sub">Equipment Inventory & Maintenance｜正式庫存管理報告</div></td><td class="right">文件類型：列印 / PDF<br>產生時間：${esc(generated)}</td></tr></table><div class="rule"></div>${reportContent.innerHTML}<div style="margin-top:14px;padding-top:6px;border-top:1px solid #ccd7e2;text-align:right;color:#71849c;font-size:8pt">73G裝備庫存與維修管理｜System Generated Report</div></body></html>`);
+ w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>73G 裝備庫存與維修管理報告</title><style>${printCss}</style></head><body><table class="print-head"><tr><td class="left"><h1>73G裝備庫存與維修管理</h1><div class="sub">Equipment Inventory & Maintenance｜正式庫存管理報告</div></td><td class="right">文件類型：列印 / PDF<br>產生時間：${esc(generated)}</td></tr></table><div class="rule"></div>${reportContent.innerHTML}<div style="margin-top:14px;padding-top:6px;border-top:1px solid #ccd7e2;text-align:right;color:#71849c;font-size:8pt">73G裝備庫存與維修管理｜System Generated Report</div>
+<!-- ===== Record detail modal redesign ===== -->
+<div class="modal" id="recordDetailModal">
+ <div class="dialog record-detail-dialog">
+  <h3 id="recordDetailTitle">紀錄明細</h3>
+  <div class="form" id="recordDetailContent"></div>
+  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
+ </div>
+</div>
+<style>
+.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
+.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
+@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
+</style>
+<script>
+function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
+function openRecordDetailModal(type){
+ const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
+ title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
+ if(type==='movement'){
+  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }else{
+  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }
+ modal.classList.add('show');
+}
+function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
+</script>
+</body></html>`);
  w.document.close();w.focus();setTimeout(()=>w.print(),250);
 }
 
@@ -2166,6 +2226,36 @@ th{background:#eaf1f8;font-weight:bold;text-align:center}
 </tr>
 ${bodyRows}
 </table>
+
+<!-- ===== Record detail modal redesign ===== -->
+<div class="modal" id="recordDetailModal">
+ <div class="dialog record-detail-dialog">
+  <h3 id="recordDetailTitle">紀錄明細</h3>
+  <div class="form" id="recordDetailContent"></div>
+  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
+ </div>
+</div>
+<style>
+.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
+.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
+@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
+</style>
+<script>
+function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
+function openRecordDetailModal(type){
+ const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
+ title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
+ if(type==='movement'){
+  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }else{
+  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }
+ modal.classList.add('show');
+}
+function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
+</script>
 </body></html>`;
 
   // Excel 對 HTML .xls 裡的 data:image URI 支援不完整，會顯示「無法顯示連結的影像」。
@@ -2277,5 +2367,35 @@ normalizeStockMovements();render();updateSaveUI();updateLastSaved();/* initializ
   async function boot(){document.getElementById('authLoginForm')?.addEventListener('submit',loginWithPassword);document.getElementById('createUserForm')?.addEventListener('submit',createManagedUser);document.getElementById('changePasswordForm')?.addEventListener('submit',changeOwnPassword);document.getElementById('authPasswordToggle')?.addEventListener('click',function(){const p=document.getElementById('authPassword');if(!p)return;const show=p.type==='password';p.type=show?'text':'password';this.textContent=show?'🙈':'👁'});document.getElementById('userAdminBackdrop')?.addEventListener('click',e=>{if(e.target.id==='userAdminBackdrop')closeUserAdmin()});document.getElementById('changePasswordBackdrop')?.addEventListener('click',e=>{if(e.target.id==='changePasswordBackdrop')closeChangePassword()});const {data,error}=await supabaseClient.auth.getSession();if(error||!data?.session){lockApp();return}await completeAuthentication(data.session)}
   supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){AUTH.user=null;AUTH.profile=null;AUTH.accessToken='';AUTH.cloudStarted=false;lockApp()}else if(session){AUTH.user=session.user;AUTH.accessToken=session.access_token||AUTH.accessToken}});boot();
 })();
+</script>
+
+<!-- ===== Record detail modal redesign ===== -->
+<div class="modal" id="recordDetailModal">
+ <div class="dialog record-detail-dialog">
+  <h3 id="recordDetailTitle">紀錄明細</h3>
+  <div class="form" id="recordDetailContent"></div>
+  <div class="dialog-actions"><button class="btn light" onclick="closeRecordDetailModal()">關閉</button></div>
+ </div>
+</div>
+<style>
+.record-detail-dialog{width:min(1100px,calc(100vw - 32px));max-height:calc(100vh - 32px)}
+.record-detail-dialog .form{overflow:auto}.record-table{width:100%;min-width:900px;border-collapse:collapse}.record-table th{background:#f7f9fc}.record-action{display:flex;gap:6px}.record-action button{height:32px;border-radius:8px;border:1px solid #ccd9e6;background:#fff;color:#214f7c;font-weight:800;cursor:pointer}.record-action .del{color:#a12b39;background:#fff5f6;border-color:#efc7cc}
+@media(max-width:680px){.record-detail-dialog{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.record-table{min-width:980px}}
+</style>
+<script>
+function closeRecordDetailModal(){document.getElementById('recordDetailModal').classList.remove('show')}
+function openRecordDetailModal(type){
+ const modal=document.getElementById('recordDetailModal'),title=document.getElementById('recordDetailTitle'),box=document.getElementById('recordDetailContent');
+ title.textContent=type==='movement'?'庫存異動紀錄明細':'設備維修更換／人員領用紀錄明細';
+ if(type==='movement'){
+  const rows=(store.stockMovements||[]).map((m,i)=>({m,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>數量</th><th>序號</th><th>位置</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({m,i})=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.device||'—')}</td><td>${m.beforeQty} → ${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.note||'—')}</td><td><div class="record-action"><button onclick="editStockMovement(${i})">✏️更正</button><button class="del" onclick="deleteStockMovement(${i});openRecordDetailModal('movement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }else{
+  const rows=(store.replacements||[]).map((r,i)=>({r,i})).reverse();
+  box.innerHTML=`<table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>設備</th><th>原序號</th><th>新序號</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,i})=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.actionType==='personnel_issue'?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.old||'—')}</td><td>${esc(r.next||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'—')}</td><td><div class="record-action"><button onclick="editReplacementRecord(${i})">✏️更正</button><button class="del" onclick="deleteReplacementRecord(${i});openRecordDetailModal('replacement')">刪除</button></div></td></tr>`).join('')||'<tr><td colspan="8">尚無紀錄</td></tr>'}</tbody></table>`;
+ }
+ modal.classList.add('show');
+}
+function editStockMovement(index){showToast('庫存異動更正功能保留，將沿用原異動編輯流程','success')}
 </script>
 </body></html>
