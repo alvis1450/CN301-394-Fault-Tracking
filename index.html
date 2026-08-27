@@ -1740,6 +1740,19 @@ function dateInputValue(v){
   if(Number.isNaN(d.getTime())) return new Date().toLocaleDateString("en-CA");
   return d.toLocaleDateString("en-CA");
 }
+// Convert imported/display dates (YYYY/M/D or YYYY/MM/DD) to HTML date input format
+function normalizeDamageDateInput(v){
+  if(!v) return "";
+  const s=String(v).trim().replace(/\./g,"/").replace(/-/g,"/");
+  const parts=s.split("/");
+  if(parts.length===3){
+    const y=parts[0].padStart(4,"0");
+    const m=parts[1].padStart(2,"0");
+    const d=parts[2].padStart(2,"0");
+    return `${y}-${m}-${d}`;
+  }
+  return s;
+}
 
 let savedData=readSaved();
 let data=clone(savedData);
@@ -2183,7 +2196,7 @@ function add(car,assetType="CN"){
   const stamp=nowISO();
   const isDk=assetType==="DK";
   const assetLoc=isDk?(dkLocations[car]||{}):(locations[car]||{});
-  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",category:"其他",damageDate:dateInputValue(stamp),equipmentCategory:"",equipmentType:"",equipmentName:"",history:[{status:"Fault / 故障",at:stamp,note:"建立故障紀錄"}],wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
+  const r={id:newId(),car,assetType:isDk?"DK":"CN",unit:isDk?"":(units[car]||""),vehicleNo:isDk?"":(vehicleNos[car]||""),status:"Fault / 故障",desc:"",tech:"",cat:"",category:"其他",damageDate:dateInputValue(stamp),repairDate:"",fixedDate:"",equipmentCategory:"",equipmentType:"",equipmentName:"",history:[{status:"Fault / 故障",at:stamp,note:"建立故障紀錄"}],wit:"",locationType:(assetLoc.type||""),locationDetail:(assetLoc.detail||""),createdAt:stamp,statusAt:stamp,date:new Date().toLocaleString()};
   data.push(r);
   markDirty(r.id);
   render();
@@ -2401,7 +2414,7 @@ function assetLabelForRecord(r){
 }
 function exportCsvData(statusFilter=""){
   document.getElementById("ioMenu")?.classList.remove("show");
-  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","維修中日期 Repair Date","已修復日期 Fixed Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const rows=[];
   const scopedCars=getDashboardScopeCars();
   const pushAsset=(car,assetType)=>{
@@ -2413,7 +2426,7 @@ function exportCsvData(statusFilter=""){
     if(statusFilter==='unfinished') rr=rr.filter(r=>['fault','repair'].includes(color(r.status)));
     else if(statusFilter) rr=rr.filter(r=>color(r.status)===statusFilter);
     const base=[units[car]||"",vehicleNos[car]||"",assetType,assetNo,car,loc.type||"",loc.detail||""];
-    rr.forEach(r=>rows.push([...base,r.damageDate||dateInputValue(r.createdAt),r.equipmentName||"",statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
+    rr.forEach(r=>rows.push([...base,r.damageDate||dateInputValue(r.createdAt),r.repairDate||"",r.fixedDate||"",r.equipmentName||"",statusToImportText(r.status),r.desc||"",r.tech||"",r.wit||"",r.createdAt||"",r.statusAt||""]));
     if(!statusFilter && !rr.length) rows.push([...base,"","","","","","","",""]);
   };
   scopedCars.forEach(car=>{
@@ -2427,7 +2440,7 @@ function exportCsvData(statusFilter=""){
   downloadBlob(csv,"text/csv;charset=utf-8",`CN301-394_Data${unitSuffix}${statusSuffix}_${new Date().toISOString().slice(0,10)}.csv`);
 }
 function csvTemplateText(){
-  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
+  const headers=["單位 Unit","車號 Vehicle No.","設備類型 Asset Type","設備編號 Asset No.","母車廂號碼 Parent Carriage No.","地點 Location","詳細地點 Location Detail","損壞日期 Damage Date","維修中日期 Repair Date","已修復日期 Fixed Date","設備名稱 Equipment Name","狀態 Status","故障描述 Fault Description","維修人員 Repair Technician","見證人 Witness","建立時間 Created At","狀態時間 Status Updated At"];
   const examples=[
     ["4C","軍2-24467","CN","CN-D-301","CN-D-301","營區","A區","2026-08-24","CN 紅區路由器 CISCO C8300-1N1S-6T","故障","無法連線","Mason","王先生","2026-08-24 09:20","2026-08-24 09:20"],
     ["4C","軍2-24467","DK","DK301","CN-D-301","","","2026-08-24","RF-9850W 無線電機","維修中","電源異常","Emma","林先生","2026-08-24 09:25","2026-08-24 09:40"],
@@ -2497,6 +2510,12 @@ function importCsvText(text){
     updated:findColumn(h,["狀態時間 status updated at","狀態時間","status updated at"])
   };
   if(idx.assetNo<0 && idx.car<0 && idx.parent<0) throw new Error("找不到『設備編號 Asset No.』或『車廂號碼 Carriage No.』欄位");
+  // 匯入 CSV 改為「覆蓋模式」：匯入前清除目前資料，避免重複累加
+  data=[];
+  units={};
+  vehicleNos={};
+  locations={};
+  dkLocations={};
   let count=0,metaCount=0,skipped=0;
   table.slice(1).forEach(row=>{
     const get=k=>idx[k]>=0?String(row[idx[k]]??"").trim():"";
@@ -2536,7 +2555,7 @@ function importJsonText(text){
     if(String(r.assetType||r.assetNo||"").toUpperCase().startsWith("DK")) x.assetType="DK";
     else if(!x.assetType) x.assetType=assetTypeForCar(x.car);
     x.id=x.id||newId();x.createdAt=x.createdAt||nowISO();x.statusAt=x.statusAt||x.createdAt;x.status=normalizeImportedStatus(x.status);
-    x.category=x.category||"其他";x.damageDate=x.damageDate||dateInputValue(x.createdAt);x.equipmentCategory=x.equipmentCategory||"";x.equipmentType=x.equipmentType||"";x.equipmentName=x.equipmentName||"";x.history=Array.isArray(x.history)?x.history:[];
+    x.category=x.category||"其他";x.damageDate=x.damageDate||dateInputValue(x.createdAt);x.repairDate=x.repairDate||"";x.fixedDate=x.fixedDate||"";x.equipmentCategory=x.equipmentCategory||"";x.equipmentType=x.equipmentType||"";x.equipmentName=x.equipmentName||"";x.history=Array.isArray(x.history)?x.history:[];
     return x;
   };
   if(Array.isArray(obj)){
@@ -2579,10 +2598,11 @@ async function handleImportFile(file){
       render();updateSavebar();
       alert(`JSON 匯入完成：${n} 筆紀錄。請按「儲存並送出」正式保存。`);
     }else if(lower.endsWith(".csv")){
+      if(!confirm("匯入 CSV 將覆蓋目前畫面上的全部資料，不會再累加。\n\n建議確認已完成備份。\n\n確定繼續？")) return;
       const result=importCsvText(text);
       dirtyIds.add("import-csv");
       render();updateSavebar();
-      alert(`CSV 匯入完成：新增 ${result.count} 筆故障紀錄；已更新車廂基本資料。${result.skipped?`\n略過 ${result.skipped} 筆無效車廂號碼。`:""}\n請按「儲存並送出」正式保存。`);
+      alert(`CSV 覆蓋匯入完成：${result.count} 筆故障紀錄；已更新車廂基本資料。${result.skipped?`\n略過 ${result.skipped} 筆無效車廂號碼。`:""}\n請按「儲存並送出」正式保存。`);
     }else throw new Error("只支援 CSV 或 JSON 檔案");
   }catch(err){
     console.error(err);alert("匯入失敗："+(err?.message||err));
@@ -2837,7 +2857,7 @@ function faultRowHtml(r){
       <div class="status-time" title="建立時間 Created: ${esc(formatRecordTime(r.createdAt))}">🕒 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div>
       <div class="fault-meta-controls damage-date-wrap">
         <label class="damage-date-label">損壞日期<small>Damage Date</small></label>
-        <input class="damage-date-input" type="date" value="${esc(r.damageDate||dateInputValue(r.createdAt))}" onchange="updateField('${r.id}','damageDate',this.value)">
+        <input class="damage-date-input" type="date" value="${esc(normalizeDamageDateInput(r.damageDate||dateInputValue(r.createdAt)))}" onchange="updateField('${r.id}','damageDate',this.value)">
       </div>
     </div>
     <div class="fault-desc-cell">
@@ -3382,7 +3402,7 @@ function renderStatusDetailModal(){
   const recs=statusDetailRecords().slice().sort((a,b)=>{const ua=getRecordUnit(a),ub=getRecordUnit(b);const ui=(UNIT_OPTIONS.indexOf(ua)<0?99:UNIT_OPTIONS.indexOf(ua))-(UNIT_OPTIONS.indexOf(ub)<0?99:UNIT_OPTIONS.indexOf(ub));if(ui)return ui;return String(a.car).localeCompare(String(b.car),'en',{numeric:true});});
   body.innerHTML=recs.map(r=>{
     const unit=getRecordUnit(r),vehicle=r.vehicleNo||vehicleNos[r.car]||"—",asset=r.assetType==="DK"?getDkCode(r.car):r.car,locMap=r.assetType==="DK"?(dkLocations[r.car]||{}):(locations[r.car]||{}),loc=[locMap.type||r.locationType,locMap.detail||r.locationDetail].filter(Boolean).join("｜")||"—",st=color(r.status);
-    return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(r.damageDate||dateInputValue(r.createdAt)||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
+    return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(r.damageDate||dateInputValue(r.createdAt)||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span><div class="status-time">🕘 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
   }).join("");
   if(empty)empty.hidden=recs.length>0;
   const table=body.closest('table');if(table)table.style.display=recs.length?'table':'none';
