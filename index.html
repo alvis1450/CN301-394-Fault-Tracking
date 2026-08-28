@@ -1230,6 +1230,46 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
 .damage-date-input{width:100%!important;height:32px!important;min-height:32px!important;padding:0 6px!important;border:1px solid #cfdbea!important;border-radius:8px!important;background:#fff!important;color:#23476e!important;font-size:11px!important;font-weight:700!important}
 .io-subtitle{margin-top:1px;padding-top:4px!important;padding-bottom:4px!important;border-bottom:0!important;color:#45688f!important}
 @media(max-width:680px){.damage-date-label{font-size:11px}.damage-date-input{height:40px!important;min-height:40px!important;font-size:14px!important}}
+
+/* ===== V2.2 Detail smart filters ===== */
+.status-detail-filter{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#fbfdff;border-bottom:1px solid #e2e9f2;align-items:center}
+.status-detail-filter label{font-size:12px;font-weight:800;color:#47627f;display:flex;align-items:center;gap:6px}
+.status-detail-filter select,.status-detail-filter input{height:34px;border:1px solid #cfdae8;border-radius:9px;background:#fff;color:#173b70;padding:0 9px;font-size:12px}
+.status-detail-filter button{height:34px;border-radius:9px;padding:0 13px;border:1px solid #cbd9e8;background:#fff;color:#31577f;font-weight:800;cursor:pointer}
+.status-detail-filter button.primary{background:#173b70;color:#fff;border-color:#173b70}
+.status-detail-filter .filter-count{margin-left:auto;color:#71839a;font-size:12px;font-weight:700}
+@media(max-width:680px){.status-detail-filter{align-items:stretch}.status-detail-filter label{width:100%;justify-content:space-between}.status-detail-filter .filter-count{margin-left:0}}
+
+.filter-date-title{display:inline-block;text-align:center;line-height:1.15;font-weight:700;color:#173b70;min-width:76px}.filter-date-title small{font-size:12px;font-weight:600;color:#60738d;white-space:nowrap}
+/* ===== V2.2 fix01 - detail filter label alignment ===== */
+.status-detail-filter{
+  align-items:center !important;
+  gap:12px !important;
+}
+.status-detail-filter label{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  white-space:nowrap !important;
+  line-height:1.2 !important;
+  min-height:42px;
+}
+.status-detail-filter label:nth-child(2){
+  min-width:410px;
+}
+.status-detail-filter input[type="date"]{
+  height:42px !important;
+  min-width:150px;
+}
+.status-detail-filter label:first-child select{
+  height:42px !important;
+  min-width:150px;
+}
+@media(max-width:900px){
+ .status-detail-filter label:nth-child(2){min-width:0;}
+ .status-detail-filter label{flex-wrap:wrap;}
+}
+
 </style>
 
 <style id="v2-core-styles">
@@ -1535,6 +1575,14 @@ body.role-viewer .savebar{display:none!important}
       <button type="button" class="status-detail-close" aria-label="關閉" onclick="closeStatusDetailModal()">×</button>
     </header>
     <div class="status-detail-summary" id="statusDetailUnitSummary"></div>
+    <div class="status-detail-filter">
+      <label>車廂 / 設備 Asset <select id="detailAssetFilter" onchange="setDetailAssetFilter(this.value)"><option value="">全部</option></select></label>
+      <label><span class="filter-date-title">損壞日期<br><small>Damage Date</small></span><select id="detailDateFilter" onchange="setDetailDateFilter(this.value)"><option value="">全部日期</option></select></label>
+      
+      
+      <span class="filter-count" id="detailFilterCount"></span>
+    </div>
+
     <div class="status-detail-table-wrap" id="statusDetailTableWrap">
       <table class="status-detail-table">
         <thead><tr><th>單位<br>Unit</th><th>車號<br>Vehicle</th><th>車廂 / 設備<br>Asset</th><th>損壞日期<br>Damage Date</th><th>狀態<br>Status</th><th>設備名稱<br>Equipment</th><th>故障描述<br>Description</th><th>維修人員<br>Technician</th><th>見證人<br>Witness</th><th>地點<br>Location</th></tr></thead>
@@ -1741,6 +1789,15 @@ function dateInputValue(v){
   return d.toLocaleDateString("en-CA");
 }
 // Convert imported/display dates (YYYY/M/D or YYYY/MM/DD) to HTML date input format
+function formatDamageDateDisplay(v){
+  if(!v) return "";
+  const s=String(v).trim().replace(/\./g,"/").replace(/-/g,"/");
+  const p=s.split("/");
+  if(p.length===3){
+    return `${p[0].padStart(4,"0")}/${p[1].padStart(2,"0")}/${p[2].padStart(2,"0")}`;
+  }
+  return s;
+}
 function normalizeDamageDateInput(v){
   if(!v) return "";
   const s=String(v).trim().replace(/\./g,"/").replace(/-/g,"/");
@@ -2664,7 +2721,7 @@ function exportWordReport(){
       const statusHtml=reportStatusText(r.status);
       const timeHtml=wordEsc(formatReportStatusTime(r.statusAt||r.createdAt));
       const place=wordEsc([loc.type,loc.detail].filter(Boolean).join("｜"))||"—";
-      const damageHtml=r.damageDate?`<div class="damage-line"><span>損壞日期</span><b>${wordEsc(r.damageDate)}</b></div>`:"";
+      const damageHtml=r.damageDate?`<div class="damage-line"><span>損壞日期</span><b>${wordEsc(formatDamageDateDisplay(r.damageDate))}</b></div>`:"";
       const equipmentHtml=r.equipmentName?`<div class="equipment-name">${wordEsc(r.equipmentName)}</div>`:"";
       const descHtml=`<div class="fault-desc">${wordEsc(r.desc)||"—"}</div>`;
       return `<tr><td class="num" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${i+1}</td><td class="status" bgcolor="${pal.statusBg}" style="background:${pal.statusBg};color:${pal.text};font-weight:800;border-left:4px solid ${pal.bar}">${statusHtml}<div class="report-time">更新 ${timeHtml}</div></td><td class="fault-content" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${damageHtml}${equipmentHtml}${descHtml}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.tech)||"—"}</td><td class="person" bgcolor="${pal.rowBg}" style="background:${pal.rowBg}">${wordEsc(r.wit)||"—"}</td></tr>`;
@@ -3310,7 +3367,7 @@ function applyQuickFilters(){
       const rid=row.dataset.id;
       const rec=rid?data.find(r=>r.id===rid):null;
       const today=dateInputValue(nowISO());
-      const recordDamageDate=rec ? (rec.damageDate||dateInputValue(rec.createdAt)) : "";
+      const recordDamageDate=rec ? normalizeDamageDateInput(rec.damageDate||dateInputValue(rec.createdAt)) : "";
       const todayMatch=!quickTodayFaults || (!!rec && recordDamageDate===today);
       const damageDateMatch=!quickDamageDate || (!!rec && recordDamageDate===quickDamageDate);
       const show=statusMatch && todayMatch && damageDateMatch;
@@ -3380,13 +3437,62 @@ function closeStatusUnitBreakdown(){
 }
 let statusDetailKey="all";
 let statusDetailUnit="";
+let statusDetailAsset="";
+let statusDetailDateStart="";
+let statusDetailDateEnd="";
+let statusDetailDateFilter="";
 function statusDetailRecords(){
   return data.filter(r=>{
     const statusOk=statusDetailKey==="all" || color(r.status)===statusDetailKey;
     const unit=getRecordUnit(r);
     const unitOk=!statusDetailUnit || unit===statusDetailUnit;
-    return statusOk&&unitOk;
+    const asset=(r.assetType==="DK"?getDkCode(r.car):r.car)||"";
+    const assetOk=!statusDetailAsset || asset===statusDetailAsset;
+    const d=normalizeDamageDateInput(r.damageDate||dateInputValue(r.createdAt)||"");
+    const dateOk=(!statusDetailDateFilter||d===normalizeDamageDateInput(statusDetailDateFilter));
+    return statusOk&&unitOk&&assetOk&&dateOk;
   });
+}
+function updateStatusDetailFilters(){
+  const sel=document.getElementById('detailAssetFilter');
+  const dateSel=document.getElementById('detailDateFilter');
+  if(!sel)return;
+  const current=statusDetailAsset;
+  // 依目前明細狀態/單位動態建立 Asset 選單，只顯示實際存在的資料
+  const baseRecords=data.filter(r=>{
+    const statusOk=statusDetailKey==='all'||color(r.status)===statusDetailKey;
+    const unitOk=!statusDetailUnit||getRecordUnit(r)===statusDetailUnit;
+    const asset=(r.assetType==='DK'?getDkCode(r.car):r.car)||'';
+    const assetOk=!statusDetailAsset||asset===statusDetailAsset;
+    return statusOk&&unitOk&&assetOk;
+  });
+  const assets=[...new Set(baseRecords.map(r=>r.assetType==='DK'?getDkCode(r.car):r.car).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">全部</option>'+assets.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
+  sel.value=assets.includes(current)?current:'';
+  if(sel.value!==current) statusDetailAsset=sel.value;
+
+  // 日期下拉依目前明細資料自動產生，只顯示存在的故障日期
+  const dates=[...new Set(baseRecords.map(r=>normalizeDamageDateInput(r.damageDate||dateInputValue(r.createdAt)||'')).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  if(dateSel){
+    dateSel.innerHTML='<option value="">全部日期</option>'+dates.map(d=>`<option value="${esc(d)}">${esc(formatDamageDateDisplay(d))}</option>`).join('');
+    dateSel.value=dates.includes(normalizeDamageDateInput(statusDetailDateFilter))?normalizeDamageDateInput(statusDetailDateFilter):'';
+  }
+}
+function setDetailAssetFilter(v){
+  statusDetailAsset=v||"";
+  statusDetailDateFilter="";
+  updateStatusDetailFilters();
+  renderStatusDetailModal();
+}
+function setDetailDateFilter(v){statusDetailDateFilter=normalizeDamageDateInput(v||"");renderStatusDetailModal();}
+function applyStatusDetailFilters(){
+  statusDetailAsset=document.getElementById('detailAssetFilter')?.value||'';
+  statusDetailDateFilter=document.getElementById('detailDateFilter')?.value||'';
+  renderStatusDetailModal();
+}
+function clearStatusDetailFilters(){
+  statusDetailAsset='';statusDetailDateStart='';statusDetailDateEnd='';statusDetailDateFilter='';
+  updateStatusDetailFilters();renderStatusDetailModal();
 }
 function renderStatusDetailModal(){
   const title=document.getElementById("statusDetailTitle"),sub=document.getElementById("statusDetailSubtitle"),summary=document.getElementById("statusDetailUnitSummary"),body=document.getElementById("statusDetailTableBody"),empty=document.getElementById("statusDetailEmpty"),count=document.getElementById("statusDetailCount");
@@ -3399,18 +3505,20 @@ function renderStatusDetailModal(){
   const counts=Object.fromEntries(order.map(u=>[u,0]));
   allForStatus.forEach(r=>{const u=getRecordUnit(r);counts[u]=(counts[u]||0)+1;});
   summary.innerHTML=`<button type="button" class="status-detail-unit-chip${statusDetailUnit?'':' active'}" onclick="setStatusDetailUnit('')"><span>全部</span><b>${allForStatus.length}</b></button>`+order.map(u=>`<button type="button" class="status-detail-unit-chip${statusDetailUnit===u?' active':''}${(counts[u]||0)===0?' zero':''}" onclick="setStatusDetailUnit('${esc(u)}')"><span>${esc(u)}</span><b>${counts[u]||0}</b></button>`).join("");
+  updateStatusDetailFilters();
   const recs=statusDetailRecords().slice().sort((a,b)=>{const ua=getRecordUnit(a),ub=getRecordUnit(b);const ui=(UNIT_OPTIONS.indexOf(ua)<0?99:UNIT_OPTIONS.indexOf(ua))-(UNIT_OPTIONS.indexOf(ub)<0?99:UNIT_OPTIONS.indexOf(ub));if(ui)return ui;return String(a.car).localeCompare(String(b.car),'en',{numeric:true});});
   body.innerHTML=recs.map(r=>{
     const unit=getRecordUnit(r),vehicle=r.vehicleNo||vehicleNos[r.car]||"—",asset=r.assetType==="DK"?getDkCode(r.car):r.car,locMap=r.assetType==="DK"?(dkLocations[r.car]||{}):(locations[r.car]||{}),loc=[locMap.type||r.locationType,locMap.detail||r.locationDetail].filter(Boolean).join("｜")||"—",st=color(r.status);
-    return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(r.damageDate||dateInputValue(r.createdAt)||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span><div class="status-time">🕘 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
+    return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(formatDamageDateDisplay(r.damageDate||dateInputValue(r.createdAt))||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span><div class="status-time">🕘 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
   }).join("");
   if(empty)empty.hidden=recs.length>0;
   const table=body.closest('table');if(table)table.style.display=recs.length?'table':'none';
   if(count)count.textContent=`${recs.length} 筆紀錄${statusDetailUnit?` · ${statusDetailUnit}`:''}`;
+  const fc=document.getElementById('detailFilterCount'); if(fc) fc.textContent=`目前符合 ${recs.length} 筆`;
 }
 function setStatusDetailUnit(unit){statusDetailUnit=unit||"";renderStatusDetailModal();document.getElementById('statusDetailTableWrap')?.scrollTo({top:0,behavior:'smooth'});}
 function openStatusDetailModal(key){
-  statusDetailKey=key||"all";statusDetailUnit="";
+  statusDetailKey=key||"all";statusDetailUnit="";statusDetailAsset="";statusDetailDateStart="";statusDetailDateEnd="";statusDetailDateFilter="";
   const modal=document.getElementById("statusDetailBackdrop");if(!modal)return;
   modal.hidden=false;document.body.style.overflow="hidden";renderStatusDetailModal();
 }
@@ -3432,12 +3540,12 @@ function updateDamageDateOptions(){
   const current=quickDamageDate||sel.value||"";
   const dates=[...new Set(data.map(r=>r.damageDate||dateInputValue(r.createdAt)).filter(Boolean))]
     .sort((a,b)=>String(b).localeCompare(String(a)));
-  sel.innerHTML='<option value="">全部故障日期 / All Dates</option>'+dates.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  sel.innerHTML='<option value="">全部故障日期 / All Dates</option>'+dates.map(d=>`<option value="${esc(d)}">${esc(formatDamageDateDisplay(d))}</option>`).join('');
   if(current && dates.includes(current)){sel.value=current;quickDamageDate=current;}
   else {sel.value="";if(quickDamageDate && !dates.includes(quickDamageDate))quickDamageDate="";}
 }
 function setDamageDateFilter(v){
-  quickDamageDate=v||"";
+  quickDamageDate=normalizeDamageDateInput(v||"");
   quickTodayFaults=false;
   document.getElementById("todayFaultBtn")?.classList.remove("active-filter");
   applyQuickFilters();
@@ -4545,5 +4653,45 @@ button:disabled{opacity:.58!important;cursor:not-allowed!important;}
   supabaseClient.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){AUTH.user=null;AUTH.profile=null;AUTH.cloudStarted=false;lockApp();}else if(event==='TOKEN_REFRESHED'&&session){AUTH.user=session.user;}});
   boot();
 })();
+
+/* ===== V2.2 fix03: dynamic damage date range by selected Asset ===== */
+(function(){
+  function refreshDetailDateRange(){
+    const start=document.getElementById('detailDateStart');
+    const end=document.getElementById('detailDateEnd');
+    if(!start||!end||!window.data)return;
+    const rows=data.filter(r=>{
+      const statusOk=(typeof statusDetailKey==='undefined'||statusDetailKey==='all'||color(r.status)===statusDetailKey);
+      const unitOk=(!statusDetailUnit||getRecordUnit(r)===statusDetailUnit);
+      const asset=(r.assetType==='DK'?getDkCode(r.car):r.car);
+      const assetOk=(!statusDetailAsset||asset===statusDetailAsset);
+      return statusOk&&unitOk&&assetOk;
+    });
+    const dates=rows.map(r=>String(r.damageDate||dateInputValue(r.createdAt)||''))
+      .filter(d=>/^\\d{4}-\\d{2}-\\d{2}$/.test(d)).sort();
+    if(!dates.length){
+      start.min=start.max=end.min=end.max='';
+      return;
+    }
+    start.min=end.min=dates[0];
+    start.max=end.max=dates[dates.length-1];
+    if(start.value && start.value<dates[0]) start.value=dates[0];
+    if(end.value && end.value>dates[dates.length-1]) end.value=dates[dates.length-1];
+  }
+  window.addEventListener('load',refreshDetailDateRange);
+  window.refreshDetailDateRange=refreshDetailDateRange;
+  const oldApply=window.applyStatusDetailFilters;
+  window.applyStatusDetailFilters=function(){
+    if(oldApply)oldApply();
+    setTimeout(refreshDetailDateRange,0);
+  };
+  const oldUnit=window.setStatusDetailUnit;
+  window.setStatusDetailUnit=function(v){
+    if(oldUnit)oldUnit(v);
+    setTimeout(refreshDetailDateRange,0);
+  };
+})();
 </script>
 
+
+<!-- V2.2_fix07 date format update build placeholder -->
