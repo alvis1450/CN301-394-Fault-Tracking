@@ -1270,6 +1270,10 @@ textarea::placeholder,.tech::placeholder,.wit::placeholder,.location-detail::pla
  .status-detail-filter label{flex-wrap:wrap;}
 }
 
+
+.detail-search-label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#536b89;font-weight:700}
+.detail-search-label input{height:36px;min-width:260px;border:1px solid #d6e0eb;border-radius:10px;padding:0 10px;background:#fff}
+@media(max-width:800px){.detail-search-label input{min-width:0;width:100%}}
 </style>
 
 <style id="v2-core-styles">
@@ -1580,6 +1584,9 @@ body.role-viewer .savebar{display:none!important}
       <label><span class="filter-date-title">損壞日期<br><small>Damage Date</small></span><select id="detailDateFilter" onchange="setDetailDateFilter(this.value)"><option value="">全部日期</option></select></label>
       
       
+      <label class="detail-search-label">🔎 搜尋明細
+        <input id="detailSearchInput" placeholder="搜尋車號 / 車廂 / 設備 / 故障描述 / 人員 / 地點" oninput="setDetailSearch(this.value)">
+      </label>
       <span class="filter-count" id="detailFilterCount"></span>
     </div>
 
@@ -2931,7 +2938,16 @@ function assetSectionHtml(c,assetType){
   if(isDk && !isCnCar(c)) return "";
   const assetName=isDk?getDkCode(c):c;
   const loc=isDk?(dkLocations[c]||{type:"",detail:""}):(locations[c]||{type:"",detail:""});
-  const rows=data.filter(r=>r.car===c && (isDk?r.assetType==="DK":r.assetType!=="DK"));
+  const searchKey=(window.__mainSearchKey||"").toUpperCase();
+  const rows=data.filter(r=>{
+    if(!(r.car===c && (isDk?r.assetType==="DK":r.assetType!=="DK"))) return false;
+    if(!searchKey) return true;
+    return [
+      r.desc,r.tech,r.wit,r.category,r.damageDate,
+      r.equipmentCategory,r.equipmentType,r.equipmentName,
+      r.status,r.location
+    ].some(v=>String(v||"").toUpperCase().includes(searchKey));
+  });
   const dirtyKey=(isDk?'dk-location:':'location:')+c;
   const typeHandler=isDk?'updateDkLocationType':'updateCarLocationType';
   const detailHandler=isDk?'updateDkLocationDetail':'updateCarLocationDetail';
@@ -2952,6 +2968,7 @@ function assetSectionHtml(c,assetType){
 }
 function render(){
   const k=(document.getElementById("search").value||"").toUpperCase();
+  window.__mainSearchKey=k;
   let h="";
   cars.filter(c=>c.includes(k)||getDkCode(c).includes(k)||(units[c]||"").toUpperCase().includes(k)||(vehicleNos[c]||"").toUpperCase().includes(k)||[locations[c]?.type,locations[c]?.detail,dkLocations[c]?.type,dkLocations[c]?.detail].some(v=>String(v||"").toUpperCase().includes(k))||data.some(r=>r.car===c&&[r.desc,r.tech,r.wit,r.category,r.damageDate,r.equipmentCategory,r.equipmentType,r.equipmentName].some(v=>String(v||"").toUpperCase().includes(k)))).forEach((c,idx)=>{
     const vehicleValue=vehicleNos[c]||"";
@@ -3494,9 +3511,13 @@ function clearStatusDetailFilters(){
   statusDetailAsset='';statusDetailDateStart='';statusDetailDateEnd='';statusDetailDateFilter='';
   updateStatusDetailFilters();renderStatusDetailModal();
 }
+let statusDetailSearchText="";
+function setDetailSearch(v){statusDetailSearchText=String(v||"").trim().toLowerCase();renderStatusDetailModal();}
+
 function renderStatusDetailModal(){
   const title=document.getElementById("statusDetailTitle"),sub=document.getElementById("statusDetailSubtitle"),summary=document.getElementById("statusDetailUnitSummary"),body=document.getElementById("statusDetailTableBody"),empty=document.getElementById("statusDetailEmpty"),count=document.getElementById("statusDetailCount");
   if(!title||!summary||!body)return;
+  const si=document.getElementById("detailSearchInput"); if(si && si.value!==statusDetailSearchText) si.value=statusDetailSearchText;
   const allForStatus=data.filter(r=>statusDetailKey==="all"||color(r.status)===statusDetailKey);
   const label=STATUS_UNIT_LABELS[statusDetailKey]||"紀錄",icon=STATUS_UNIT_ICONS[statusDetailKey]||"📋";
   title.textContent=`${icon} ${label}明細`;
@@ -3506,7 +3527,19 @@ function renderStatusDetailModal(){
   allForStatus.forEach(r=>{const u=getRecordUnit(r);counts[u]=(counts[u]||0)+1;});
   summary.innerHTML=`<button type="button" class="status-detail-unit-chip${statusDetailUnit?'':' active'}" onclick="setStatusDetailUnit('')"><span>全部</span><b>${allForStatus.length}</b></button>`+order.map(u=>`<button type="button" class="status-detail-unit-chip${statusDetailUnit===u?' active':''}${(counts[u]||0)===0?' zero':''}" onclick="setStatusDetailUnit('${esc(u)}')"><span>${esc(u)}</span><b>${counts[u]||0}</b></button>`).join("");
   updateStatusDetailFilters();
-  const recs=statusDetailRecords().slice().sort((a,b)=>{const ua=getRecordUnit(a),ub=getRecordUnit(b);const ui=(UNIT_OPTIONS.indexOf(ua)<0?99:UNIT_OPTIONS.indexOf(ua))-(UNIT_OPTIONS.indexOf(ub)<0?99:UNIT_OPTIONS.indexOf(ub));if(ui)return ui;return String(a.car).localeCompare(String(b.car),'en',{numeric:true});});
+  let recs=statusDetailRecords();
+  if(statusDetailSearchText){
+    recs=recs.filter(r=>{
+      const unit=getRecordUnit(r);
+      const vehicle=r.vehicleNo||vehicleNos[r.car]||"";
+      const asset=r.assetType==="DK"?getDkCode(r.car):r.car;
+      const locMap=r.assetType==="DK"?(dkLocations[r.car]||{}):(locations[r.car]||{});
+      const loc=[locMap.type||r.locationType,locMap.detail||r.locationDetail].filter(Boolean).join(" ");
+      const hay=[unit,vehicle,asset,r.equipmentName,r.desc,r.tech,r.wit,loc,formatDamageDateDisplay(r.damageDate||dateInputValue(r.createdAt))].join(" ").toLowerCase();
+      return hay.includes(statusDetailSearchText);
+    });
+  }
+  recs=recs.slice().sort((a,b)=>{const ua=getRecordUnit(a),ub=getRecordUnit(b);const ui=(UNIT_OPTIONS.indexOf(ua)<0?99:UNIT_OPTIONS.indexOf(ua))-(UNIT_OPTIONS.indexOf(ub)<0?99:UNIT_OPTIONS.indexOf(ub));if(ui)return ui;return String(a.car).localeCompare(String(b.car),'en',{numeric:true});});
   body.innerHTML=recs.map(r=>{
     const unit=getRecordUnit(r),vehicle=r.vehicleNo||vehicleNos[r.car]||"—",asset=r.assetType==="DK"?getDkCode(r.car):r.car,locMap=r.assetType==="DK"?(dkLocations[r.car]||{}):(locations[r.car]||{}),loc=[locMap.type||r.locationType,locMap.detail||r.locationDetail].filter(Boolean).join("｜")||"—",st=color(r.status);
     return `<tr><td class="cell-unit">${esc(unit)}</td><td>${esc(vehicle)}</td><td class="cell-car">${esc(asset)}</td><td class="cell-date">${esc(formatDamageDateDisplay(r.damageDate||dateInputValue(r.createdAt))||"—")}</td><td><span class="status-detail-status ${st}">${esc(STATUS_LABEL[st]||statusText(r.status))}</span><div class="status-time">🕘 ${esc(formatRecordTime(r.statusAt||r.createdAt,true))}</div></td><td class="cell-equipment">${esc(r.equipmentName||"—")}</td><td class="cell-desc">${esc(r.desc||"—")}</td><td class="cell-person">${esc(r.tech||"—")}</td><td class="cell-person">${esc(r.wit||"—")}</td><td class="cell-location">${esc(loc)}</td></tr>`;
@@ -3518,7 +3551,7 @@ function renderStatusDetailModal(){
 }
 function setStatusDetailUnit(unit){statusDetailUnit=unit||"";renderStatusDetailModal();document.getElementById('statusDetailTableWrap')?.scrollTo({top:0,behavior:'smooth'});}
 function openStatusDetailModal(key){
-  statusDetailKey=key||"all";statusDetailUnit="";statusDetailAsset="";statusDetailDateStart="";statusDetailDateEnd="";statusDetailDateFilter="";
+  statusDetailKey=key||"all";statusDetailUnit="";statusDetailAsset="";statusDetailDateStart="";statusDetailDateEnd="";statusDetailDateFilter="";statusDetailSearchText="";
   const modal=document.getElementById("statusDetailBackdrop");if(!modal)return;
   modal.hidden=false;document.body.style.overflow="hidden";renderStatusDetailModal();
 }
