@@ -1633,14 +1633,14 @@ function render(){
        <div class="comp-head" onclick="toggleGroup(${gi})">
          <div class="comp-title"><span class="arrow">▶</span><div><div class="comp-name">${esc(g.name)}</div><div class="part">${esc(g.sourcePart||'')}</div></div></div>
          <span class="comp-count">${rows.length} 種 / ${rows.reduce((a,x)=>a+(Number(x.qty)||0),0)} 件</span>
-         <button class="mini-action" onclick="event.stopPropagation();addDevice(${gi})">＋ 新增設備</button>
+         <div style="display:flex;flex-direction:column;gap:5px" onclick="event.stopPropagation()"><button class="mini-action" onclick="addDevice(${gi})">＋ 新增設備</button><button class="mini-action" style="border-color:#e7bec4;background:#fff7f8;color:#a82433" onclick="toggleDeleteDeviceMode(${gi})">${deleteDeviceGroupIndex===gi?'✓ 完成刪除':'－ 刪除設備'}</button></div>
        </div>
-       <div class="comp-body">${rows.length?`<table><thead><tr><th style="width:125px">料號</th><th>設備名稱</th><th style="width:135px">庫存量</th><th style="width:330px">庫存序號</th><th style="width:110px">狀態</th><th style="width:170px">位置</th></tr></thead><tbody>`+rows.map(x=>{
+       <div class="comp-body">${rows.length?`<table><thead><tr><th style="width:125px">料號</th><th>設備名稱</th><th style="width:135px">庫存量</th><th style="width:330px">庫存序號</th><th style="width:110px">狀態</th><th style="width:170px">位置</th>${deleteDeviceGroupIndex===gi?'<th style="width:90px">操作</th>':''}</tr></thead><tbody>`+rows.map(x=>{
          const ii=g.items.indexOf(x), serial=(x.serials||[]).join(', '), st=itemStatus(x), qty=Number(x.qty)||0;
          return `<tr class="device-row state-${st} ${qty===0?'qty-zero':''}"><td>${esc(x.part)}</td><td class="device-name">${esc(x.name)}</td><td class="qty"><div class="qty-control"><span class="stock-qty-readonly" aria-label="目前庫存量">${qty}</span>${qty===0?'<span class="zero-stock-label">無庫存</span>':''}</div><div style="margin-top:6px"><button type="button" class="stock-in-btn" onclick="openStockIn(${gi},${ii})">＋ 新增庫存</button><button type="button" class="stock-in-btn" style="margin-left:5px" onclick="modifyStockQty(${gi},${ii})">✎ 修改庫存</button></div></td>
          <td>${serialTagEditor(x,gi,ii)}</td>
          <td><span class="inventory-status ${qty<=0?'empty':''}" title="庫存狀態由系統自動判定">${qty>0?'庫存':'無庫存'}</span></td>
-         <td><select class="loc" onchange="setLocation(${gi},${ii},this.value)">${locationOptions(x.location||'')}</select></td></tr>`}).join('')+`</tbody></table>`:`<div class="empty">沒有設備</div>`}</div>
+         <td><select class="loc" onchange="setLocation(${gi},${ii},this.value)">${locationOptions(x.location||'')}</select></td>${deleteDeviceGroupIndex===gi?`<td><button type="button" class="mini-action" style="border-color:#e7bec4;background:#fff5f6;color:#a82433" onclick="event.stopPropagation();deleteDeviceRow(${gi},${ii})">刪除</button></td>`:''}</tr>`}).join('')+`</tbody></table>`:`<div class="empty">沒有設備</div>`}</div>
      </section>`;
    });
    html+='</div></section>';
@@ -1856,6 +1856,19 @@ function setSerials(g,i,v){
 }
 function setState(g,i,v){showToast('庫存狀態由系統自動判定，無需手動修改');render()}
 function setLocation(g,i,v){store.groups[g].items[i].location=v.trim();markDirty();render()}
+let deleteDeviceGroupIndex=null;
+function toggleDeleteDeviceMode(g){
+ const role=window.AUTH_CONTEXT?.profile?.role;if(role!=='manager'&&role!=='admin'){showToast('只有 Manager / Admin 可以刪除設備。','error');return}
+ deleteDeviceGroupIndex=deleteDeviceGroupIndex===g?null:g;openSet.add(g);render();
+}
+function deleteDeviceRow(g,i){
+ const role=window.AUTH_CONTEXT?.profile?.role;if(role!=='manager'&&role!=='admin'){showToast('只有 Manager / Admin 可以刪除設備。','error');return}
+ const group=store.groups[g],x=group?.items?.[i];if(!group||!x)return;
+ const qty=Number(x.qty)||0,serialCount=(x.serials||[]).filter(Boolean).length;
+ if(qty>0||serialCount>0){showToast('此設備仍有庫存或庫存序號，為避免誤刪請先清空庫存資料。','error');return}
+ if(!confirm(`確定要刪除設備「${x.name}」？\n料號：${x.part||'N/A'}\n\n刪除後請按「儲存變更」才會同步。`))return;
+ group.items.splice(i,1);markDirty();openSet.add(g);render();showToast('設備已刪除，請記得儲存變更','success');
+}
 let addDeviceGroupIndex=null;
 function addDevice(g){addDeviceGroupIndex=g;aGroupName.value=store.groups[g]?.name||'';aName.value='';aPart.value='';document.getElementById('addDeviceModal').classList.add('show');setTimeout(()=>aName.focus(),80)}
 function closeAddDevice(){document.getElementById('addDeviceModal').classList.remove('show');addDeviceGroupIndex=null}
