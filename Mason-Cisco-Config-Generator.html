@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mason-Cisco 組態產生器｜Template 套用工具</title>
+<title>Mason-Cisco Config Generator｜Cisco Configuration & Network Planning Tool</title>
 <style>
 :root{
   --bg:#07111f;--side:#081522;--panel:#0e1d31;--panel2:#10243b;--line:#263f62;
@@ -740,6 +740,56 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
   .config-searchbar .btn{width:100%}
 }
 
+
+/* ===== Mason-Cisco Final UI Polish ===== */
+:root{
+  --mc-primary:#4cc9f0;
+  --mc-success:#79dfb2;
+  --mc-warning:#f5ca68;
+  --mc-danger:#ff7d8c;
+  --mc-line:#29455f;
+  --mc-text:#f3f7fb;
+  --mc-muted:#9eb2c5;
+}
+body{color:var(--mc-text)}
+.brand h1{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.hero h2{font-weight:800;letter-spacing:-.025em}
+.stitle h3,.output-title b,.plan-section-head b{font-weight:800}
+label{font-weight:650}
+.help,.desc,.note,.side-note,.plan-source{letter-spacing:.002em}
+.card,.hero,.plan-section{border-color:var(--mc-line)}
+.device-btn.active,.view-btn.active{box-shadow:inset 3px 0 0 var(--mc-primary)}
+.btn.primary{background:linear-gradient(135deg,#2fbce9,#4c75e8)}
+.btn.green{background:#10392f;border-color:#2d7158;color:#c9f6e2}
+.side-title{font-size:10.5px;letter-spacing:.12em}
+.badge,.chip,.plan-kicker,.config-search-status{letter-spacing:.01em}
+pre{font-variant-ligatures:none;tab-size:2}
+.config-search-status{font-variant-numeric:tabular-nums}
+.ref-table th,.plan-table thead th{letter-spacing:.025em;font-weight:750}
+.plan-table .copyable,.ref-table .copyable{text-underline-offset:3px}
+.footer{opacity:.82}
+.note,.plan-source{border-color:#294861}
+@media(max-width:900px){
+  .mobile-title b{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+  .mobile-title span{font-size:10.5px}
+  .mobile-version,.mobile-test{font-size:9.5px;padding:4px 7px}
+  .config-searchbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+  .config-searchbar input{grid-column:1/-1}
+  .config-search-status{justify-self:start;min-width:0;text-align:left}
+  .config-searchbar .btn{min-width:132px;white-space:nowrap}
+  .output-head>.actions{gap:7px}
+  .output-head>.actions .btn{min-height:44px}
+}
+@media(max-width:520px){
+  .config-searchbar{grid-template-columns:1fr}
+  .config-searchbar input,.config-search-status,.config-searchbar .btn{grid-column:1}
+  .config-searchbar .btn{width:100%;min-width:0}
+  .output-head>.actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .output-head>.actions .btn{width:100%;min-width:0}
+  .output-head>.actions .plan-kicker{grid-column:1/-1;justify-self:start}
+}
+@media(max-width:380px){.output-head>.actions{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -751,7 +801,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
   </button>
   <div class="mobile-title">
     <b>Mason-Cisco</b>
-    <span id="mobileViewTitle">單筆組態產製</span>
+    <span id="mobileViewTitle">單筆組態產生</span>
   </div>
   <span class="mobile-version">v1.5</span>
 </div>
@@ -761,23 +811,23 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
   <aside class="sidebar">
     <div class="brand">
       <div class="logo">CFG</div>
-      <div><h1>Mason-Cisco 組態產生器</h1><p>Template 套用 / 離線產製</p></div>
+      <div><h1>Mason-Cisco Config Generator</h1><p>Cisco Configuration &amp; Network Planning Tool</p></div>
     </div>
 
-    <div class="side-title">設備Template</div>
+    <div class="side-title">設備 Template</div>
     <div id="deviceNav" class="device-nav"></div>
 
     <div class="side-title">功能</div>
-    <button class="view-btn active" data-view="single">單筆組態產製</button>
-    <button class="view-btn" data-view="batch">批次組態產製</button>
-    <button class="view-btn" data-view="reference">IP 規劃資料查詢</button>
+    <button class="view-btn active" data-view="single">單筆組態產生</button>
+    <button class="view-btn" data-view="batch">批次組態產生</button>
+    <button class="view-btn" data-view="reference">IP / 電話規劃查詢</button>
     <button class="view-btn" data-view="cnplan">CN 規劃表</button>
     <button class="view-btn" data-view="dwbkplan">DWBK 規劃表</button>
     <button class="view-btn" data-view="nmsplan">NMS 規劃表</button>
-    <button class="view-btn" data-view="downloadall">全部下載</button>
+    <button class="view-btn" data-view="downloadall">全部組態下載</button>
 
     <div class="side-note">
-      本工具直接內建你提供的 Cisco Template與 Excel 預設資料。所有替換都在本機瀏覽器完成，不會將組態內容傳送到外部。
+      所有組態產生與參數替換皆於瀏覽器端執行，不會上傳組態內容至外部服務。
     </div>
   </aside>
 
@@ -785,83 +835,83 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
     <section class="hero">
       <div class="hero-top">
         <div>
-          <h2>Mason-Cisco 組態產生器</h2>
-          <p>沿用原 Excel 的使用方式：Template保持固定，只替換指定參數。選擇設備與資料列後，自動帶入站點參數並產生完整 CLI 組態。</p>
+          <h2>Mason-Cisco Config Generator</h2>
+          <p>依內建 Template 與設備預設資料產生完整 Cisco CLI 組態；產生前可檢查並調整站點參數。</p>
           <div class="badges">
-            <span class="badge">使用原始Template</span><span class="badge">沿用 Excel 資料</span><span class="badge">自動檢查未替換變數</span><span class="badge">TXT 匯出</span><span class="badge">完全離線</span>
+            <span class="badge">內建 Template</span><span class="badge">設備預設資料</span><span class="badge">必要變數檢查</span><span class="badge">TXT / ZIP 匯出</span><span class="badge">Client-side Processing</span>
           </div>
-          <div class="flow"><b>① 選Template</b><span class="arr">→</span><b>② 選 Excel 預設資料</b><span class="arr">→</span><b>③ 檢查 / 修改參數</b><span class="arr">→</span><b>④ 產生完整組態</b></div>
+          <div class="flow"><b>① 選擇 Template</b><span class="arr">→</span><b>② 選擇設備</b><span class="arr">→</span><b>③ 檢查 / 調整參數</b><span class="arr">→</span><b>④ 產生組態</b></div>
         </div>
-        <div class="ver">HTML v1.5 UI / PLAN</div>
+        <div class="ver">v1.5</div>
       </div>
     </section>
 
     <div class="tabs">
-      <button class="tab active" data-view="single">單筆產製</button>
-      <button class="tab" data-view="batch">批次產製</button>
-      <button class="tab" data-view="reference">IP 規劃查詢</button>
+      <button class="tab active" data-view="single">單筆組態</button>
+      <button class="tab" data-view="batch">批次組態</button>
+      <button class="tab" data-view="reference">IP / 電話規劃</button>
       <button class="tab" data-view="cnplan">CN 規劃</button>
       <button class="tab" data-view="dwbkplan">DWBK 規劃</button>
       <button class="tab" data-view="nmsplan">NMS 規劃</button>
-      <button class="tab" data-view="downloadall">全部下載</button>
+      <button class="tab" data-view="downloadall">全部組態下載</button>
     </div>
 
     <section id="view-single" class="view active">
       <div class="workspace">
         <div class="card left">
           <div class="section">
-            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">1</div><h3>選擇 Excel 預設資料</h3></div><span id="presetCountChip" class="chip"></span></div>
-            <p class="desc">資料來自你提供的 Excel 工作表。可先選群組，再選設備 / 車號；選取後會自動填入Template所需欄位。</p>
+            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">1</div><h3>選擇設備預設資料</h3></div><span id="presetCountChip" class="chip"></span></div>
+            <p class="desc">使用內建設備預設資料。可先選擇群組，再選擇設備 / 車號；選取後會自動帶入目前 Template 所需參數。</p>
             <div class="row">
               <div class="field"><label>群組 / 區域</label><select id="groupSelect"></select></div>
-              <div class="field"><label>設備 / Hostname</label><select id="presetSelect"></select></div>
-              <div class="field full"><label>快速搜尋 Hostname</label><input id="presetSearch" placeholder="例：CN301、NMS-1A"></div>
+              <div class="field"><label>設備 / Hostname 前綴</label><select id="presetSelect"></select></div>
+              <div class="field full"><label>搜尋設備 / Hostname</label><input id="presetSearch" placeholder="例：CN301、NMS-1A"></div>
             </div>
             <div class="status" id="presetStatus"></div>
           </div>
 
           <div class="section">
-            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">2</div><h3>組態變數</h3></div><span id="variableChip" class="chip"></span></div>
-            <p class="desc">只顯示目前Template中真正存在的 <code>{{變數}}</code>。你可以直接修改 Excel 帶入的值，右側 CLI 會即時更新。</p>
+            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">2</div><h3>Template 變數</h3></div><span id="variableChip" class="chip"></span></div>
+            <p class="desc">僅顯示目前 Template 實際使用的 <code>{{變數}}</code>。可直接調整預設值，右側 CLI 會即時更新。</p>
             <div id="variableFields" class="row"></div>
             <div class="status" id="variableStatus"></div>
           </div>
 
           <div class="section">
-            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">3</div><h3>Template 控制</h3></div><span id="templateNameChip" class="chip"></span></div>
-            <p class="desc">預設使用你上傳的Template。若日後Template有新版，也可以只在本機暫時載入新的 TXT，不需改 HTML 程式。</p>
+            <div class="stitle"><div style="display:flex;gap:9px;align-items:center"><div class="num">3</div><h3>Template 管理</h3></div><span id="templateNameChip" class="chip"></span></div>
+            <p class="desc">預設使用內建 Template；如需驗證或套用其他版本，可暫時載入自訂 TXT。重新整理頁面後會恢復內建版本。</p>
             <div class="actions">
-              <label class="btn" for="templateUpload">載入新版Template TXT</label>
+              <label class="btn" for="templateUpload">載入自訂 Template (.txt)</label>
               <input id="templateUpload" class="file-input" type="file" accept=".txt,text/plain">
-              <button class="btn ghost" onclick="restoreTemplate()">還原內建Template</button>
+              <button class="btn ghost" onclick="restoreTemplate()">還原內建 Template</button>
             </div>
             <div id="templateStatus" class="status"></div>
           </div>
 
           <div class="stats">
-            <div class="stat"><small>Template行數</small><b id="statLines">0</b></div>
+            <div class="stat"><small>Template 行數</small><b id="statLines">0</b></div>
             <div class="stat"><small>變數數量</small><b id="statVars">0</b></div>
             <div class="stat"><small>未填變數</small><b id="statMissing">0</b></div>
           </div>
-          <div class="note" style="margin-top:12px">正式套用設備前，仍建議由工程師檢查 hostname、IP、Routing、DHCP、Voice、介面狀態與平台版本差異。HTML 僅取代 Excel 套版與文字替換流程。</div>
+          <div class="note" style="margin-top:12px">正式部署前，請由工程師確認 Hostname、IP Addressing、Routing、DHCP、Voice、Interface 狀態及平台 / IOS 版本差異。本工具僅負責 Template 套用與參數替換。</div>
         </div>
 
         <div class="card right">
           <div class="output-head">
             <div class="output-title"><b id="outputTitle">CLI 預覽</b><span id="outputFileName">config.txt</span></div>
             <div class="actions">
-              <button class="btn" onclick="copyConfig()">複製全部</button>
-              <button class="btn green" onclick="downloadCurrent()">下載 TXT</button>
+              <button class="btn" onclick="copyConfig()">複製組態</button>
+              <button class="btn green" onclick="downloadCurrent()">下載組態 TXT</button>
             </div>
           </div>
           <div id="missingBox" class="missing-box"></div>
           <div class="searchbar config-searchbar">
             <input id="configSearch"
-                   placeholder="在組態內搜尋，例如：interface Vlan105、router ospf"
+                   placeholder="搜尋 CLI，例如：interface Vlan105、router ospf"
                    oninput="findInConfig(false)"
                    onkeydown="if(event.key==='Enter'){event.preventDefault();findInConfig(true)}">
             <span id="configSearchStatus" class="config-search-status">輸入文字即可搜尋</span>
-            <button class="btn ghost" onclick="findInConfig(true)">搜尋 / 下一筆</button>
+            <button class="btn ghost" onclick="findInConfig(true)">下一筆</button>
           </div>
           <pre id="configOutput"></pre>
         </div>
@@ -873,7 +923,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
         <div class="card">
           <div class="batch-tools">
             <h3 style="margin:0 0 6px;font-size:16px">批次選擇</h3>
-            <p class="desc">使用目前選取的Template，從 Excel 預設資料中勾選多筆產製。「下載勾選 TXT」只下載目前Template中你勾選的設備。若要下載所有Template、全部 1,000 多筆組態，請使用左側「全部下載」。</p>
+            <p class="desc">依目前 Template 批次產生已選取設備。下載時每台設備各輸出一個 TXT；如需產生全部設備組態，請使用「全部組態下載」。</p>
             <label>群組篩選</label><select id="batchGroup"></select>
             <div class="actions" style="margin-top:10px"><button class="btn" onclick="batchSelectAll(true)">全選</button><button class="btn ghost" onclick="batchSelectAll(false)">取消全選</button></div>
           </div>
@@ -881,10 +931,10 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
         </div>
         <div class="card">
           <div class="output-head">
-            <div class="output-title"><b>批次產製</b><span id="batchSummary">尚未選取</span></div>
-            <div class="actions"><button class="btn primary" onclick="generateBatch()">產生批次預覽</button><button class="btn green" onclick="downloadBatchFiles()">下載勾選 TXT</button></div>
+            <div class="output-title"><b>批次組態預覽</b><span id="batchSummary">尚未選取</span></div>
+            <div class="actions"><button class="btn primary" onclick="generateBatch()">產生批次預覽</button><button class="btn green" onclick="downloadBatchFiles()">下載已選 TXT</button></div>
           </div>
-          <div class="note" style="margin:12px 14px">批次預覽會把目前Template中勾選的多台設備顯示在同一畫面方便檢查；實際下載時，每台設備各自輸出 TXT。</div>
+          <div class="note" style="margin:12px 14px">批次預覽會將已選設備集中顯示以便檢查；下載時每台設備各自輸出一個 TXT。</div>
           <pre id="batchOutput">請先勾選設備，再按「產生批次預覽」。</pre>
         </div>
       </div>
@@ -894,7 +944,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
       <div class="card plan-shell">
         <div class="output-head">
           <div class="output-title">
-            <b>IP 規劃資料查詢</b>
+            <b>IP / 電話規劃查詢</b>
             <span>來源：IP規劃表.xlsm｜北部 / 中部 / 南部 / 電話號碼表</span>
           </div>
           <div class="actions">
@@ -932,7 +982,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
         <div id="ipPlanSummary" class="plan-summary"></div>
 
         <div class="plan-source">
-          資料依你最新提供的 <b style="color:var(--text)">IP規劃表.xlsm</b> 更新。
+          資料來源：內建 <b style="color:var(--text)">IP規劃表.xlsm</b>。
           「區域 IP 規劃」包含 Excel 內的 <b style="color:var(--text)">AP</b> 欄位；
           「電話號碼表」可依車廂編號、電話號碼或席位快速搜尋。
           IP、電話號碼、RF-9850 SVI 與 AP 欄位可點擊複製。手機可左右滑動資料表查看完整欄位。
@@ -981,7 +1031,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
 
         <div id="cnPlanSummary" class="plan-summary"></div>
         <div class="plan-source">
-          資料依你提供的 <b style="color:var(--text)">CN規劃表.xlsm</b> 原值呈現。
+          資料來源：內建 <b style="color:var(--text)">CN規劃表.xlsm</b>，依原始內容呈現。
           網頁只提供搜尋、VLAN 篩選與快速複製，不自行補值或重新計算。
           IP / CIDR / Subnet 可點擊複製；手機可左右滑動完整表格。
         </div>
@@ -1081,7 +1131,7 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
 
         <div id="nmsPlanSummary" class="plan-summary"></div>
         <div class="plan-source">
-          資料依你提供的 <b style="color:var(--text)">NMS規劃表 .xlsm</b> 原值呈現。
+          資料來源：內建 <b style="color:var(--text)">NMS規劃表 .xlsm</b>，依原始內容呈現。
           網頁保留 Excel 三個並排區塊的邏輯，並增加搜尋與 VLAN 篩選。
           IP / CIDR / Subnet 可點擊複製；手機可左右滑動完整表格。
         </div>
@@ -1103,14 +1153,13 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
         <div class="output-head">
           <div class="output-title">
             <b>全部組態下載</b>
-            <span>一次產製所有Template、所有預設設備，共 1,000 多筆組態</span>
+            <span>產生所有 Template 的設備組態，並依設備類型打包為 ZIP</span>
           </div>
         </div>
 
         <div style="padding:18px">
           <div class="note" style="margin-bottom:14px">
-            此功能會一次處理 <b style="color:var(--text)">CN Black Switch、CN Core Red Switch、CN Red Router、CN CP Switch、CN DWBK Switch、CN DWBK User Switch、NMS Red Switch</b>
-            的所有預設資料。由於總數超過一千筆，瀏覽器不適合直接觸發一千多次獨立下載，因此會先封裝成一個 ZIP；解壓縮後仍然是「一台設備一個 TXT」。
+            每台設備各輸出一個 TXT，並依 Template 分類後打包為單一 ZIP。下載前會先檢查必要變數是否完整。
           </div>
 
           <div id="allDownloadStats" class="stats"></div>
@@ -1132,13 +1181,13 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
           </div>
 
           <div class="note" style="margin-top:14px">
-            ZIP 會依Template分類資料夾，例如 <code>CN_Black_Switch/</code>、<code>CN_Red_Router/</code>。每份 TXT 檔名會依實際 hostname 自動命名，不會把所有 CLI 合併成一個文字檔。
+            ZIP 會依 Template 分類資料夾，例如 <code>CN_Black_Switch/</code>、<code>CN_Red_Router/</code>。每份 TXT 檔名會依實際 hostname 自動命名，不會把所有 CLI 合併成一個文字檔。
           </div>
         </div>
       </div>
     </section>
 
-    <div class="footer">Mason-Cisco 組態產生器｜使用使用者提供之 Excel 資料與 Cisco Template｜Local-only</div>
+    <div class="footer">Mason-Cisco Config Generator｜Client-side Processing｜Configuration data is not uploaded</div>
   </main>
 </div>
 
@@ -1154,13 +1203,13 @@ let currentValues = {};
 let batchText = '';
 
 const fieldHelp = {
-  'hostname':'Hostname 前綴；Template會自行加上設備角色後綴。',
+  'hostname':'Hostname 前綴；Template 會自行加上設備角色後綴。',
   'ip':'站點主要 IP 前綴，例如 10.211.1。',
-  'loopback ip':'Loopback 位址基底，依Template附加最後一段。',
+  'loopback ip':'Loopback 位址基底，依 Template 附加最後一段。',
   'INE CT IP':'INE CT 網段前綴，例如 192.30.1。',
-  'SVI IP':'SVI 使用的位址參數；依Template可能是最後一段。',
-  'ip name-server':'DNS / Name-server 參數；格式依目前Template。',
-  'router-id':'依現有Template欄位用途帶入；請確認值與設備實際規劃一致。',
+  'SVI IP':'SVI 使用的位址參數；依 Template 可能是最後一段。',
+  'ip name-server':'DNS / Name-server 參數；格式依目前 Template。',
+  'router-id':'依現有 Template 欄位用途帶入；請確認值與設備實際規劃一致。',
   'destination-pattern':'Voice dial-peer destination-pattern。',
   'POTS1':'POTS 號碼 1。',
   'POTS2':'POTS 號碼 2。',
@@ -1319,12 +1368,12 @@ function generateConfig(){
   document.querySelectorAll('[data-placeholder]').forEach(inp=>inp.classList.toggle('missing',!String(inp.value).trim()));
   if(miss.length){
     $('missingBox').classList.add('show');
-    $('missingBox').textContent='尚未替換： '+miss.join('、');
-    $('variableStatus').textContent='仍有Template 變數未完成，請確認紅框欄位。';
+    $('missingBox').textContent='未完成替換： '+miss.join('、');
+    $('variableStatus').textContent='仍有 Template 變數未完成替換，請確認紅框欄位。';
     $('variableStatus').className='status err';
   }else{
     $('missingBox').classList.remove('show');$('missingBox').textContent='';
-    $('variableStatus').textContent='所有Template 變數已完成替換。';
+    $('variableStatus').textContent='所有 Template 變數已完成替換。';
     $('variableStatus').className='status ok';
   }
   const fname=deriveFilename(txt);
@@ -1346,8 +1395,8 @@ async function copyConfig(){
   try{
     if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(txt);
     else{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}
-    flashOutput('已複製完整 CLI');
-  }catch(e){alert('無法自動複製，請手動選取右側 CLI。')}
+    flashOutput('已複製組態 CLI');
+  }catch(e){alert('無法自動複製，請手動選取 CLI 組態。')}
 }
 function downloadText(text,name){
   const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
@@ -1356,7 +1405,7 @@ function downloadText(text,name){
 }
 function downloadCurrent(){
   const txt=$('configOutput').textContent,miss=unresolved(txt);
-  if(miss.length&&!confirm('目前仍有未替換變數：\n'+miss.join('\n')+'\n\n仍要下載嗎？'))return;
+  if(miss.length&&!confirm('目前仍有 Template 變數未完成替換：\n'+miss.join('\n')+'\n\n仍要下載嗎？'))return;
   downloadText(txt,deriveFilename(txt));
 }
 function flashOutput(msg){
@@ -1369,7 +1418,7 @@ function resetConfigSearchState(){
   configSearchState={query:'',current:-1,count:0};
   const status=$('configSearchStatus');
   if(status){
-    status.textContent='輸入文字即可搜尋';
+    status.textContent='輸入即搜尋';
     status.className='config-search-status';
   }
 }
@@ -1459,7 +1508,7 @@ function findInConfig(next=false){
 function updateTemplateInfo(){
   const d=getDevice();
   $('templateNameChip').textContent=d.sub;
-  $('templateStatus').textContent=customTemplates[currentDevice]?'目前使用：本機載入的自訂Template':'目前使用：你提供的原始Template';
+  $('templateStatus').textContent=customTemplates[currentDevice]?'目前 Template：自訂版本':'目前 Template：內建版本';
   $('templateStatus').className='status ok';
 }
 function loadCustomTemplate(ev){
@@ -1471,7 +1520,7 @@ function loadCustomTemplate(ev){
     const found=[...new Set((String(reader.result).match(/\{\{([^{}]+)\}\}/g)||[]).map(x=>x.slice(2,-2)))].sort();
     DATA.devices[currentDevice].placeholders=found;
     renderVariableFields();applySelectedPreset();updateTemplateInfo();
-    $('templateStatus').textContent=`已載入 ${f.name}｜偵測 ${found.length} 個變數`;
+    $('templateStatus').textContent=`已載入自訂 Template：${f.name}｜偵測 ${found.length} 個變數`;
   };
   reader.readAsText(f,'utf-8');
 }
@@ -1614,7 +1663,7 @@ function renderAllDownloadInfo(){
   const stats=$('allDownloadStats');
   if(stats){
     stats.innerHTML=`
-      <div class="stat"><small>Template數量</small><b>${Object.keys(DATA.devices).length}</b></div>
+      <div class="stat"><small>Template 數量</small><b>${Object.keys(DATA.devices).length}</b></div>
       <div class="stat"><small>全部組態</small><b>${total.toLocaleString()}</b></div>
       <div class="stat"><small>輸出方式</small><b>ZIP / TXT</b></div>
     `;
@@ -1644,10 +1693,10 @@ function inspectAllConfigs(){
 
   if(incomplete){
     el.className='status warn';
-    el.textContent=`檢查完成：共 ${total.toLocaleString()} 份組態，其中 ${incomplete.toLocaleString()} 份仍有未替換變數。變數：${[...missingNames].join('、')}`;
+    el.textContent=`檢查完成：共 ${total.toLocaleString()} 份組態，其中 ${incomplete.toLocaleString()} 份仍有 Template 變數未完成替換。變數：${[...missingNames].join('、')}`;
   }else{
     el.className='status ok';
-    el.textContent=`檢查完成：共 ${total.toLocaleString()} 份組態，所有Template 變數皆已完成替換。`;
+    el.textContent=`檢查完成：共 ${total.toLocaleString()} 份組態，所有 Template 變數皆已完成替換。`;
   }
 }
 
@@ -1678,13 +1727,13 @@ async function downloadAllConfigsZip(){
   }
 
   if(!allJobs.length){
-    alert('目前沒有可產製的組態。');
+    alert('目前沒有可產生的組態。');
     return;
   }
 
-  let msg=`將產生全部 ${allJobs.length.toLocaleString()} 份組態，並打包成單一 ZIP。\n\nZIP 內仍是一台設備一個 TXT，並依Template分類資料夾。`;
+  let msg=`將產生全部 ${allJobs.length.toLocaleString()} 份組態，並打包成單一 ZIP。\n\nZIP 內每台設備各一個 TXT，並依 Template 分類資料夾。`;
   if(incomplete.length){
-    msg+=`\n\n注意：其中 ${incomplete.length.toLocaleString()} 份仍有未替換變數。`;
+    msg+=`\n\n注意：其中 ${incomplete.length.toLocaleString()} 份仍有 Template 變數未完成替換。`;
   }
   if(!confirm(msg+'\n\n是否繼續？'))return;
 
@@ -1742,7 +1791,7 @@ async function downloadBatchFiles(){
       .map(j=>`${j.rec._rowName}：${j.miss.join(', ')}`)
       .join('\n');
     const more=incomplete.length>8 ? `\n...另有 ${incomplete.length-8} 台` : '';
-    const msg=`有 ${incomplete.length} 台設備仍有未替換變數：\n\n${detail}${more}\n\n仍要繼續逐台下載嗎？`;
+    const msg=`有 ${incomplete.length} 台設備仍有 Template 變數未完成替換：\n\n${detail}${more}\n\n仍要繼續逐台下載嗎？`;
     if(!confirm(msg)) return;
   }
 
