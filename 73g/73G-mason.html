@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>73G裝備庫存管理</title>
+<!-- v47 CN.xlsx canonical catalog correction / preserve inventory linkage -->
 <!-- v46 delete linkage correction -->
 <!-- v39 per-record action buttons --><!-- v37 delete quantity linkage patch -->
 <!-- v36 stock quantity adjustment --><!-- v35 quantity-linkage review patch -->
@@ -246,6 +247,17 @@ input,textarea,select{
  font-size:14px!important;
 }
 
+
+/* ===== Independent damaged equipment return ===== */
+.btn.return-btn{background:#fff7e7;color:#80560c;border:1px solid #e7cf9a}
+.btn.return-btn:hover{background:#ffefcf}
+.damaged-return-history .history-arrow{background:#fff3dc;color:#8a5d12}
+.damaged-return-info{border:1px solid #d9e3ed;border-radius:10px;background:#f8fafc;padding:10px 11px;font-size:12px;line-height:1.6;color:#4f6882}
+.damaged-return-info b{color:#173f70}.damaged-return-info .serial{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;color:#9c2c38}
+#damagedReturnModal .dialog{max-height:calc(100vh - 36px);display:flex;flex-direction:column;overflow:hidden}
+#damagedReturnModal .form{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#damagedReturnModal .dialog-actions{flex:0 0 auto;background:#fff;border-top:1px solid #dfe7f0}
+@media(max-width:760px){.btn.return-btn{grid-column:1/-1}#damagedReturnModal{align-items:flex-end;padding:0}#damagedReturnModal .dialog{width:100%!important;max-height:92dvh;border-radius:18px 18px 0 0}.damaged-return-info{font-size:11.5px}}
 </style>
 
 <style>
@@ -991,7 +1003,7 @@ strong,b{font-weight:650}
   </div>
 </div>
 
-<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存與維修管理 <span>Equipment Inventory & Maintenance</span></h1><small>CN / NMS / SSS｜庫存・序號・維修更換・人員領用・簽收管理</small></div><div class="header-meta"><div class="today" id="today"></div><div class="auth-header-tools"><span class="auth-user-pill" id="authUserBadge" hidden>👤 <b id="authUserName">User</b> <span class="auth-role-badge" id="authRoleBadge">USER</span></span><button class="btn light admin-users-btn" id="adminUsersBtn" type="button" onclick="openUserAdmin()" hidden>👥 帳號</button><button class="btn light" id="changePasswordBtn" type="button" onclick="openChangePassword()" hidden>🔑 密碼</button><button class="btn light" id="authLogoutBtn" type="button" onclick="logoutSystem()" hidden>↪ 登出</button></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
+<header class="topbar"><div class="wrap"><div class="brand"><h1>73G裝備庫存與維修管理 <span>Equipment Inventory & Maintenance</span></h1><small>CN / NMS / SSS｜庫存・序號・維修更換・人員領用・損壞繳回・簽收管理</small></div><div class="header-meta"><div class="today" id="today"></div><div class="auth-header-tools"><span class="auth-user-pill" id="authUserBadge" hidden>👤 <b id="authUserName">User</b> <span class="auth-role-badge" id="authRoleBadge">USER</span></span><button class="btn light admin-users-btn" id="adminUsersBtn" type="button" onclick="openUserAdmin()" hidden>👥 帳號</button><button class="btn light" id="changePasswordBtn" type="button" onclick="openChangePassword()" hidden>🔑 密碼</button><button class="btn light" id="authLogoutBtn" type="button" onclick="logoutSystem()" hidden>↪ 登出</button></div><div class="saved-meta" id="lastSaved">尚未儲存變更</div><div id="cloudSyncBadge" class="cloud-sync-badge syncing" title="Supabase 多裝置同步狀態"><span class="cloud-sync-dot"></span><span id="cloudSyncText">雲端連線中…</span></div></div></div></header>
 <main>
 <section class="summary">
 <div class="card summary-card" role="button" tabindex="0" onclick="openSummaryDetail('groups')" onkeydown="summaryKey(event,'groups')"><b id="sGroups">0</b><span>組件分類</span><small class="card-sub">依 CN / NMS / SSS 分類查看</small></div>
@@ -1005,6 +1017,12 @@ strong,b{font-weight:650}
     <span id="historyCount" class="history-count">0 筆紀錄</span>
   </button>
 </section>
+<section class="history summary-card damaged-return-history" id="damagedReturnHistoryPanel" style="cursor:pointer;" onclick="openHistoryDetail('damagedReturn')">
+  <button class="history-toggle" type="button" aria-label="查看損壞裝備繳回紀錄">
+    <span class="history-head-left"><span class="history-arrow">▶</span><span class="history-title-wrap"><h3>↩ 損壞裝備繳回紀錄</h3><p>獨立管理已換下損壞裝備的繳回地點與繳回時間，不影響庫存。</p></span></span>
+    <span id="damagedReturnCount" class="history-count">0 筆繳回</span>
+  </button>
+</section>
 <section class="stock-history summary-card" id="stockHistoryPanel" style="cursor:pointer;" onclick="openHistoryDetail('movement')">
   <button class="stock-history-toggle" type="button" aria-label="查看庫存異動紀錄">
     <span class="stock-history-head"><span class="stock-history-arrow">▶</span><span class="stock-history-title"><h3>📦 庫存異動紀錄</h3><p>點擊查看完整異動明細（含更正、刪除）。</p></span></span>
@@ -1016,10 +1034,12 @@ strong,b{font-weight:650}
 <div class="action-group primary-actions">
 <button id="saveMainBtn" class="btn save-main" onclick="saveAll()" disabled>💾 已儲存</button>
 <button class="btn primary" onclick="openReplace()">🔄 設備維修更換／人員領用</button>
+<button class="btn return-btn" type="button" onclick="openDamagedReturn()">↩ 損壞裝備繳回</button>
 <select id="reportExportSelect" class="btn report-btn report-select" aria-label="選擇匯出報告" onchange="handleReportExportSelect(this)">
 <option value="" selected>📄 匯出報告 ▾</option>
 <option value="full">完整 Word 報告</option>
 <option value="replacement">設備維修更換／人員領用紀錄</option>
+<option value="damagedReturn">損壞裝備繳回紀錄</option>
 <option value="movement">庫存異動紀錄</option>
 </select>
 <button class="btn green" type="button" onclick="openIssueReceipt()">✍ 裝備領用簽收紀錄</button>
@@ -1068,7 +1088,17 @@ strong,b{font-weight:650}
 <label>備註<textarea id="rNote" placeholder="例如：無法開機、無網路、領用用途"></textarea></label>
 </div><div class="dialog-actions"><button class="btn light" onclick="closeModal()">取消</button><button id="saveReplaceBtn" class="btn primary" onclick="saveReplace()">💾 儲存維修更換紀錄</button></div></div></div>
 
-
+<!-- Independent damaged-equipment return workflow. This does NOT alter inventory quantity. -->
+<div class="modal" id="damagedReturnModal"><div class="dialog" style="width:min(680px,100%)"><h3 id="damagedReturnModalTitle">損壞裝備繳回</h3><div class="form">
+<div class="stock-in-help"><b>獨立作業：</b>請從「設備維修更換」產生的待繳回損壞裝備中選擇一筆，再設定繳回地點與繳回時間。本作業不會增加或扣除庫存。</div>
+<label>待繳回損壞裝備 <span class="required">必填</span><select id="drReplacement" onchange="updateDamagedReturnEquipmentInfo()"><option value="">請選擇待繳回裝備</option></select></label>
+<div id="drEquipmentInfo" class="damaged-return-info">請先選擇待繳回損壞裝備。</div>
+<label>損壞裝備繳回 <span class="required">必填</span><select id="drLocation">
+<option value="">請選擇繳回地點</option><option value="73G-FSR">73G-FSR</option><option value="74G-FSR">74G-FSR</option><option value="75G-FSR">75G-FSR</option><option value="基修中心">基修中心</option>
+</select></label>
+<label>繳回時間 <span class="required">必填</span><input id="drTime" type="datetime-local" step="60"></label>
+<label>備註<textarea id="drNote" placeholder="選填，例如：已交接、待送修、收件人員等"></textarea></label>
+</div><div class="dialog-actions"><button class="btn light" type="button" onclick="closeDamagedReturn()">取消</button><button id="saveDamagedReturnBtn" class="btn primary" type="button" onclick="saveDamagedReturn()">💾 儲存繳回紀錄</button></div></div></div>
 
 
 <div class="modal" id="issueReceiptModal"><div class="dialog" style="width:min(760px,100%)"><h3>裝備領用簽收紀錄</h3><div class="form">
@@ -1269,7 +1299,7 @@ strong,b{font-weight:650}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 保密器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]},{"part":"N/A","name":"TFE 無線電","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"n/a","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"n/a","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-Drawer","items":[{"part":"A30-2030-010","name":"筆電","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"N/A","name":"電源線","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"11457-2309-01","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"轉接器，支撐導軌，EATON UPS","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01 ","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 紅區交換器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線x1","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250手持話機x1","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051電源線x1","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"N/A","name":"市電轉換接頭（澳洲）x1","qty":0,"serials":[]},{"part":"10515-0607-4100*","name":"RF-7800W卡x1","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟x1","qty":0,"serials":[]},{"part":"N/A","name":"螺絲包x1 (4ea)","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"W95-0114-207","name":"單模光纖線纜，LC至ST，黃色，7公尺","qty":0,"serials":[]},{"part":"W98-0013-306","name":"光纖線纜組件，ST至LC，單模，長5公尺，黃色","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"ETHERNET ADAPTER POE INJECTOR 30W 56V SNGL PORT (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線 / 無線電配備","sourcePart":"11457-2042-01","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"天線桅桿與工具配備","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-0504","name":"電纜導引環","qty":0,"serials":[]},{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"N/A","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"N/A","name":"内六角板手組","qty":0,"serials":[]},{"part":"E75-0373-001","name":"10M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"鐵槌","qty":0,"serials":[]},{"part":"N/A","name":"量距繩(黃)","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"N/A","name":"地樁","qty":0,"serials":[]},{"part":"E75-0372-001","name":"25M 天線桅桿T型桿套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"E75-0376-001","name":"25M 天線桅杆T型桿控繩套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"N/A","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"E75-0377-001","name":"25M 天線桅杆手動天線定位器(MAP)套件","qty":0,"serials":[]},{"part":"N/A","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（內部）","sourcePart":"11457-2000-01","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"OMNI ANT HORZ(N)","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂（外部）","sourcePart":"11457-2000-01","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"N/A","name":"TOCNET P-case","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 RUGGED laptop GETAC S510 COMPUTER","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"CABLE ASSY, TOCNET AUDIO TO RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"Dual Radio 6-pin Generic Cable Assemblies","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB POWER SUPPLY KIT, AC TO 24VDC","qty":0,"serials":[]}]},{"name":"CN 其他組件","sourcePart":"CN-OTHER","items":[]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2592-001","name":"4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"11457-2307-01","name":"COMMAND POST INTERFACE PANEL ASSEMBLY","qty":0,"serials":[]},{"part":"N/A","name":"POWER CORD","qty":0,"serials":[]},{"part":"N/A","name":"USB","qty":0,"serials":[]},{"part":"N/A","name":"RS-232","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]},{"part":"11457-2309-01","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]},{"part":"11457-2309-02","name":"ADAPTER, SUPPORT RAIL, EATON UPS","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"N/A","name":"USB傳輸線x1","qty":0,"serials":[]},{"part":"N/A","name":"RS-232線x1","qty":0,"serials":[]},{"part":"N/A","name":"電源線x1","qty":0,"serials":[]},{"part":"A30-2262-001","name":"25Gbps, FIBER SFP TRANSCEIVER, 1000MB, 10KM, 1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"COPPER SFP TRANSCEIVER, 1000MB, 100M, RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ADAPTER FIBER ST MM/SM BH MNT BRASS/NICKEL PLATE, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W98-0002-606","name":"CABLE ASSY, FIBER FAN OUT 4-CH 0.3M, CN SIGNALS I/O PANEL","qty":0,"serials":[]},{"part":"W95-0114-207","name":"7-M SINGLE-MODE FIBER-OPTIC CABLE LC-ST, YLW","qty":0,"serials":[]},{"part":"W98-0013-306","name":"CABLE ASSY FIBER, ST-LC, SINGLE MODE, L=5M, YL","qty":0,"serials":[]},{"part":"J68-0027-001","name":"PANEL COUPLER, DELUXE, CAT 6 SHLD RJ45, COMMAND POST","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-Cabnet","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"n/a","name":"鉤環","qty":0,"serials":[]},{"part":"n/a","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"n/a","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"DY-HP/T-A00-01 ~ DY-HP/T-A00-11","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-Drawer","items":[{"part":"A30-2030-010","name":"筆電(1)","qty":0,"serials":[]},{"part":"A30-2030-010","name":"筆電(2)","qty":0,"serials":[]},{"part":"n/a","name":"電源線(筆電)","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]},{"part":"A30-0310-051","name":"帆布機械工具袋","qty":0,"serials":[]},{"part":"N/A","name":"LB8023潤滑膏*1","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"N/A","name":"固定夾及接地編織線*1","qty":0,"serials":[]},{"part":"12069-0040-01","name":"雷擊保護器*4,","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"N/A","name":"螺絲起子組*1","qty":0,"serials":[]},{"part":"N/A","name":"NIU序列線*4","qty":0,"serials":[]},{"part":"A30-2305-004","name":"HDT 帳篷套件，橄欖褐色","qty":0,"serials":[]},{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具包，橄欖褐色，標準款","qty":0,"serials":[]},{"part":"n/a","name":"螺絲起子x1","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"11457-3000-01","items":[{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"CRYSTAL","name":"火斧","qty":0,"serials":[]},{"part":"Yoke 8-211-040","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TAXX0112 05.15.1031.1","name":"積時表","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"11457-3000-01","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"ECU Canvas Cover","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"NO FUSE BREAKER, VEHICLE DC BATTERY","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]}]},{"name":"NMS 其他組件","sourcePart":"NMS-OTHER","items":[]}];
+const baseGroups=[{"name":"CN 網路機架組件","sourcePart":"11457-2100-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2109-01","name":"配線面板，迷你型","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]},{"part":"A30-1744-001","name":"機架電力分配單元","qty":0,"serials":[]},{"part":"A30-0697-031","name":"GPS 分頻器 1N 轉 4SMA 供電 24/5V DC 阻隔式","qty":0,"serials":[]},{"part":"A30-1993-001","name":"TM2000, GPS 網路時間協定伺服器","qty":0,"serials":[]},{"part":"A30-4204-001","name":"REDCOM SIGMA XRI-400 ROIP 伺服器","qty":0,"serials":[]},{"part":"11457-0510-01","name":"CN 紅區交換器 CISCO C9200L-24P-4G-E","qty":0,"serials":[]},{"part":"11457-0500-01","name":"CN 紅區路由器 CISCO C8300-1N1S-6T","qty":0,"serials":[]},{"part":"11457-0502-01","name":"CN 運算伺服器 HPE PROLIANT DL20 第11代","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]}]},{"name":"CN 無線電機架組件","sourcePart":"11457-2200-01","items":[{"part":"11457-1250-01","name":"空機架組件","qty":0,"serials":[]},{"part":"11457-2250-01","name":"5 路輸出 PDU 組件","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2382-001","name":"8埠 PoE 中跨供電器","qty":0,"serials":[]}]},{"name":"CN 工作站儲物櫃","sourcePart":"CN-CABINET","items":[{"part":"W90-0214-342","name":"同軸線纜，SMA公頭至TNC公頭，LMR-240，600吋 (GPS天線纜線)","qty":0,"serials":[]},{"part":"11457-2085-A12","name":"RJ11 4路組合轉接線纜","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"W90-0222-531","name":"同軸線纜，BNC公頭至標準BNC公頭（RP），RG223，長30吋 (TFE Radio)","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"TMP-CN-CAB-MASTCRANK-001","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"TMP-CN-CAB-TORX-001","name":"内六角板手組","qty":0,"serials":[]},{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"TMP-CN-CAB-ORING-001","name":"鉤環","qty":0,"serials":[]},{"part":"TMP-CN-CAB-STRETCH-001","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"TMP-CN-CAB-CONNKIT-001","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"TMP-COM-FIRSTAID-001","name":"急救包","qty":0,"serials":[]},{"part":"A30-9010-001","name":"KESTREL 2000 氣象儀","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]}]},{"name":"CN 工作站抽屜","sourcePart":"CN-DRAWER","items":[{"part":"A30-2030-010","name":"GETAC S510 強固型筆記型電腦","qty":0,"serials":[]},{"part":"TMP-CN-DRW-S510PWR-001","name":"GETAC S510 電源線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-005","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，5呎","qty":0,"serials":[]}]},{"name":"Band III / IV 天線組件","sourcePart":"11457-2042-01","items":[{"part":"SP02-A-N02A0-00","name":"車頂儲物箱","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"RF-7800W-AT206","name":"全向性天線","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"LMR-240-UF同軸電纜(無線電-雙工器)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"CABLE-025-2XTNC 同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動天線定位器（MAP）","qty":0,"serials":[]},{"part":"E75-0379-001","name":"手動天線定位器(MAP)延伸管","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"線纜組件，同軸 LMR400-UF，RA TNC/M 轉 N/M (全向性天線電纜)","qty":0,"serials":[]},{"part":"11457-4010-01","name":"全向性天線安裝支架","qty":0,"serials":[]},{"part":"E75-0374-001","name":"綠色桅桿天線控繩","qty":0,"serials":[]},{"part":"E75-0375-001","name":"黑色桅桿天線控繩","qty":0,"serials":[]}]},{"name":"旅級指揮所攜行箱","sourcePart":"11457-2300-01","items":[{"part":"10400-0425-04","name":"攜行箱，PELICAN Supermac 3U","qty":0,"serials":[]},{"part":"11457-2051-01","name":"1.5kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-0511-01","name":"CN 紅區交換器 CISCO C9200L-48P-4G-E","qty":0,"serials":[]},{"part":"11457-2307-01","name":"指揮所攜行箱介面面板組件","qty":0,"serials":[]},{"part":"TMP-CN-CMP-PWRCORD-001","name":"電源線","qty":0,"serials":[]},{"part":"TMP-CN-CMP-USBCBL-001","name":"USB傳輸線","qty":0,"serials":[]},{"part":"TMP-CN-CMP-RS232-001","name":"RS-232線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps, SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"DWBK 攜行箱組件","sourcePart":"11457-2400-01","items":[{"part":"10400-0425-02","name":"攜行箱，PELICAN Supermac 5U","qty":0,"serials":[]},{"part":"11457-0540-01","name":"CN 黑區路由器 CISCO C9200CX-8P-2X2G-A","qty":0,"serials":[]},{"part":"A30-2262-001","name":"SFP光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-0573-004","name":"4埠 RS-232 序列裝置伺服器(MOXA)","qty":0,"serials":[]},{"part":"12069-4200-01","name":"RF-7800W IU310 網路介面單元(NIU)","qty":0,"serials":[]},{"part":"A30-2038-003","name":"100–240VAC 轉 65W 19VDC 電源供應器","qty":0,"serials":[]},{"part":"G50-0015-101","name":"網路線突波保護器, CAT6 RJ45, 100A, 7.5V限壓保護 (DWBK & CN Signal  I/O panel, J1, J3, J5,  J7, J17 – J20)","qty":0,"serials":[]},{"part":"11457-2405-01","name":"組件，面板，介面，DWBK","qty":0,"serials":[]},{"part":"12069-3901-A006","name":"RF-7800W DB9 RS422  (NIU)序列控制連接線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"乙太網路雷擊保護器","qty":0,"serials":[]},{"part":"10537-0320-04","name":"16英寸接地編織線","qty":0,"serials":[]},{"part":"10075-1399","name":"H-250 手持話機","qty":0,"serials":[]},{"part":"10181-9831-009","name":"RF-5051 電源線","qty":0,"serials":[]},{"part":"J85-0022-001","name":"NEMA 5-15轉歐規Schuko轉接頭","qty":0,"serials":[]},{"part":"J85-0023-001","name":"英國區交流電插頭轉換器","qty":0,"serials":[]},{"part":"TMP-CN-DWBK-AUSADP-001","name":"市電轉換接頭（澳洲）","qty":0,"serials":[]},{"part":"10515-0657-4100","name":"RF-7850W 卡","qty":0,"serials":[]},{"part":"10515-0607-6001*","name":"操作與安裝光碟","qty":0,"serials":[]},{"part":"TMP-CN-DWBK-SCREWPK-001","name":"螺絲包（4只）","qty":0,"serials":[]},{"part":"J98-0011-001","name":"ST光纖面板轉接器（多模/單模），穿板式安裝，黃銅鍍鎳，用於CN Signals I/O面板","qty":0,"serials":[]},{"part":"W98-0002-606","name":"光纖線纜組件，4芯扇出型，0.3公尺，用於CN Signals I/O Panel","qty":0,"serials":[]},{"part":"J68-0027-001","name":"面板式耦合器（高階型），CAT6屏蔽型RJ45，用於指揮所","qty":0,"serials":[]}]},{"name":"CN 電話攜行箱組件","sourcePart":"11457-2600-01","items":[{"part":"11170-0467-01","name":"電話攜行箱，PELICAN PHONE CASE","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W80-0056-006","name":"電源線，IEC C13至NEMA 5-15P，14AWG，6呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"15英呎網路線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]}]},{"name":"碟型天線及無線電運輸總成","sourcePart":"CN-DISH-RADIO-TRANS-ASSY","items":[{"part":"11170-0464-01","name":"碟型天線攜行袋","qty":0,"serials":[]},{"part":"12286-7015-01","name":"碟形天線、3英尺碟形、MIMO、綠色","qty":0,"serials":[]},{"part":"11457-2043-01","name":"UHF1359P09-MI，導波管，綠色","qty":0,"serials":[]},{"part":"11457-2045-01","name":"雙無線電安裝支架","qty":0,"serials":[]},{"part":"11457-2044-01","name":"雙工器2744-雙通道，雙工器，綠色","qty":0,"serials":[]},{"part":"W90-0240-639","name":"同軸電纜(雙工器-導波管)","qty":0,"serials":[]},{"part":"11457-2046-01","name":"同軸電纜(雙工器-無線電)","qty":0,"serials":[]},{"part":"12286-2000-01","name":"RF-9850W無線電機（1.35-2.7GHZ）","qty":0,"serials":[]},{"part":"12286-2100-01","name":"RF-9850W無線電機（4.4-5.9GHZ）","qty":0,"serials":[]}]},{"name":"10M 伸縮式車輛天線桅杆（TVAM）系統 TM210/10-2.0","sourcePart":"E75-0381-001","items":[{"part":"A30-9888-508","name":"天線桿鎖定掛鉤","qty":0,"serials":[]},{"part":"A30-9888-501","name":"控制盒（24V）塗裝，軍綠色 383","qty":0,"serials":[]},{"part":"A30-9888-502","name":"天線桅杆遙控器，5米電纜，連接器DB3999，上/下/緊急停止","qty":0,"serials":[]},{"part":"A30-9888-503","name":"天線桅杆感測器線纜，連接器 DB3999","qty":0,"serials":[]},{"part":"A30-9888-505","name":"TVAM底座-滾珠螺桿","qty":0,"serials":[]},{"part":"A30-9888-506","name":"10M 天線桅杆馬達","qty":0,"serials":[]},{"part":"A30-9888-507","name":"TVAM底座-直流馬達皮帶","qty":0,"serials":[]},{"part":"TMP-CN-TVAM-MASTCRANK-001","name":"天線桅桿手動升降搖桿","qty":0,"serials":[]},{"part":"TMP-CN-TVAM-TORX-001","name":"内六角板手組","qty":0,"serials":[]}]},{"name":"25M 天線桅杆T型桿控繩套件","sourcePart":"E75-0373-001","items":[{"part":"TMP-CN-10MGUY-BAG-001","name":"10M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"TMP-CN-10MGUY-HAMMER-001","name":"鐵槌","qty":0,"serials":[]},{"part":"TMP-CN-10MGUY-MEASROPE-001","name":"量距繩（黃）","qty":0,"serials":[]},{"part":"TMP-CN-10MGUY-GUYWIRE-GRN-001","name":"風力控繩(綠)","qty":0,"serials":[]},{"part":"TMP-CN-10MGUY-STAKE-001","name":"地樁","qty":0,"serials":[]}]},{"name":"25M 天線桅桿T型桿套件","sourcePart":"E75-0372-001","items":[{"part":"TMP-CN-25MTBAR-BAG-001","name":"25M 天線桅杆T型桿套件攜行袋","qty":0,"serials":[]},{"part":"E75-0378-001","name":"折疊式T型桿（綠色）","qty":0,"serials":[]}]},{"name":"10M 天線桅杆T型桿控繩套件","sourcePart":"E75-0376-001","items":[{"part":"TMP-CN-25MGUY-BAG-001","name":"25M 天線桅杆T型桿控繩套件攜行袋","qty":0,"serials":[]},{"part":"TMP-CN-25MGUY-HAMMER-001","name":"鐵槌","qty":0,"serials":[]},{"part":"TMP-CN-25MGUY-MEASROPE-001","name":"量距繩（黃）","qty":0,"serials":[]},{"part":"TMP-CN-25MGUY-GUYWIRE-BLK-001","name":"風力控繩(黑)","qty":0,"serials":[]},{"part":"TMP-CN-25MGUY-STAKE-001","name":"地樁","qty":0,"serials":[]}]},{"name":"25M 天線桅杆手動天線定位器(MAP)套件","sourcePart":"E75-0377-001","items":[{"part":"TMP-CN-25MMAP-BAG-001","name":"25M 天線桅杆手動天線定位器(MAP)套件攜行袋","qty":0,"serials":[]},{"part":"E75-0375-001","name":"25M 天線 MAP 控繩 (黑)","qty":0,"serials":[]},{"part":"E75-0374-001","name":"25M 天線 MAP 控繩 (綠)","qty":0,"serials":[]},{"part":"E75-0380-001","name":"手動旋轉俯仰器","qty":0,"serials":[]},{"part":"E75-0379-001","name":"MAP 延伸桿","qty":0,"serials":[]}]},{"name":"帆布機械工具袋","sourcePart":"A30-0310-051","items":[{"part":"TMP-CN-TOOL-LB8023-001","name":"LB8023 潤滑膏","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"TMP-CN-TOOL-GNDCLAMP-001","name":"固定夾及接地編織線","qty":0,"serials":[]},{"part":"12069-0040-01","name":"乙太網路雷擊保護器","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"TMP-CN-TOOL-SCREWDRIVER-001","name":"螺絲起子組","qty":0,"serials":[]},{"part":"TMP-CN-TOOL-NIUSERIAL-001","name":"NIU 序列線","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂, 內部","sourcePart":"CNB-INT","items":[{"part":"W80-0116-001","name":"100呎户外型延長線","qty":0,"serials":[]},{"part":"11457-2074-01","name":"捲線盤(電源線)","qty":0,"serials":[]},{"part":"11457-2080-A050","name":"15公尺線纜組，資料與控制，(50 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A060","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2074-01","name":"組件，50英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"11457-2080-A100","name":"30公尺線纜組，資料與控制，(100 英尺)","qty":0,"serials":[]},{"part":"11457-2084-A110","name":"線纜組件，接地線，四部無線電","qty":0,"serials":[]},{"part":"11457-2075-01","name":"組件，100英尺捲線器，四部無線電","qty":0,"serials":[]},{"part":"W98-0002-615","name":"300公尺，光纖線纜組件，單模4芯，1310nm，防鼠咬型，捲盤式","qty":0,"serials":[]},{"part":"11457-2033-01","name":"光纖捲線器套件","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"12286-7952-A006","name":"全向性天線饋線","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"TMP-COM-FIREAXE-001","name":"火斧","qty":0,"serials":[]},{"part":"TMP-COM-FOLDCHAIR-001","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TMP-COM-HOURMETER-001","name":"積時表","qty":0,"serials":[]},{"part":"800300292","name":"緊急照明設備充電電池組","qty":0,"serials":[]},{"part":"TMP-COM-FIREEXT-001","name":"5磅乾粉滅火器","qty":0,"serials":[]}]},{"name":"CN-B 旅級通信節點車廂, 外部","sourcePart":"CNB-EXT","items":[{"part":"919-6224-06","name":"車載無線電天線安裝套件","qty":0,"serials":[]},{"part":"11457-0531-01","name":"ARUBA AP-565 無線存取點","qty":0,"serials":[]},{"part":"12006-4250-04","name":"L1/L2 車載 GPS 天線","qty":0,"serials":[]},{"part":"11457-4005-01","name":"ARUBA 無線存取點安裝基座","qty":0,"serials":[]},{"part":"11457-4004-01","name":"Wi-Fi 與 GPS 天線安裝支架","qty":0,"serials":[]},{"part":"11457-4003-01","name":"TFE天線安裝支架","qty":0,"serials":[]},{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"TMP-COM-ECUCOVER-001","name":"冷氣帆布蓋","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"無熔絲斷路器，車輛直流電池","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4100-01","name":"CN 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4200-01","name":"CN 車廂WiFi信號輸入輸出面板","qty":0,"serials":[]},{"part":"11457-4300-01","name":"CN 車廂RF信號輸入輸出面板組件","qty":0,"serials":[]},{"part":"TMP-COM-LEVELIND-001","name":"水平指示器","qty":0,"serials":[]}]},{"name":"CN TOCNET 組件","sourcePart":"11457-2500-01","items":[{"part":"TMP-TOCNET-PCASE-01","name":"TOCNET 攜行箱","qty":0,"serials":[]},{"part":"A30-9018-001","name":"TOCNET XPHUB RoIP 閘道器","qty":0,"serials":[]},{"part":"A30-2030-009","name":"GETAC S410G5 強固型筆記型電腦","qty":0,"serials":[]},{"part":"11457-2580-A39","name":"線纜組件，TOCNET 音頻轉 RJ45","qty":0,"serials":[]},{"part":"A30-9018-002","name":"XPHUB 電源纜線組件","qty":0,"serials":[]},{"part":"A30-9018-005","name":"TOCNET 乙太網路線","qty":0,"serials":[]},{"part":"A30-9018-003","name":"TOCNET 序列線組件","qty":0,"serials":[]},{"part":"A30-9018-006","name":"雙無線電 6-pin 通用纜線組件","qty":0,"serials":[]},{"part":"A30-9018-007","name":"TOCNET XPHUB 電源供應套件，交流轉 24VDC","qty":0,"serials":[]}]},{"name":"CN 其他組件","sourcePart":"CN-OTHER","items":[]},{"name":"NMS NAS 攜行箱","sourcePart":"11457-3100-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-0515-01","name":"伺服器，NMS NAS，HPE PROLIANT DL320","qty":0,"serials":[]},{"part":"11457-2052-01","name":"3kVA 不斷電系統","qty":0,"serials":[]},{"part":"11457-3110-01","name":"攜行箱組件，FICS NMS，NAS，硬體套件","qty":0,"serials":[]},{"part":"A30-2592-001","name":"2.4TB SAS 12G MISSION CRITICAL FIPS 硬碟","qty":0,"serials":[]},{"part":"TMP-NAS-USBCBL-001","name":"USB傳輸線","qty":0,"serials":[]},{"part":"TMP-NAS-PWRCORD-001","name":"電源線","qty":0,"serials":[]},{"part":"TMP-NAS-RS232-001","name":"RS-232線","qty":0,"serials":[]},{"part":"W90-0318-014","name":"電源線，NEMA 5-15 插頭至 IEC60320 C13，2呎，10A 125V","qty":0,"serials":[]},{"part":"W95-0019-010","name":"CAT6 網路線，屏蔽型，RJ45 對 RJ45，黑色，10呎","qty":0,"serials":[]}]},{"name":"NMS 紅區攜行箱","sourcePart":"11457-3200-01","items":[{"part":"10400-0425-01","name":"攜行箱，PELICAN Supermac 4U","qty":0,"serials":[]},{"part":"11457-3210-01","name":"攜行箱組件，FICS NMS，紅區，硬體套件","qty":0,"serials":[]},{"part":"11457-3250-01","name":"面板，介面，組件，NMS 紅區","qty":0,"serials":[]},{"part":"A05-0010-101","name":"配線架 1RU 24埠 CAT6 直通式","qty":0,"serials":[]},{"part":"11457-0513-01","name":"系統，NMS 紅區交換器，CISCO C9200L-24P-4G-A","qty":0,"serials":[]},{"part":"11457-0514-01","name":"伺服器，NMS 伺服器，HPE PROLIANT DL320 GEN11","qty":0,"serials":[]},{"part":"TMP-RED-USBCBL-001","name":"USB傳輸線","qty":0,"serials":[]},{"part":"TMP-RED-RS232-001","name":"RS-232線","qty":0,"serials":[]},{"part":"TMP-RED-PWRCORD-001","name":"電源線","qty":0,"serials":[]},{"part":"A30-2262-001","name":"1.25Gbps SFP 光纖收發器，1000MB，10KM，1310NM","qty":0,"serials":[]},{"part":"A30-2262-101","name":"SFP 銅纜收發器，1000MB，100M，RJ45","qty":0,"serials":[]}]},{"name":"NMS 工作站儲物櫃","sourcePart":"NMS-CABINET","items":[{"part":"Z90-8001-129","name":"數位三用電表","qty":0,"serials":[]},{"part":"TMP-NMS-CAB-ORING-001","name":"鉤環","qty":0,"serials":[]},{"part":"TMP-NMS-CAB-STRETCH-001","name":"彈力鉤繩","qty":0,"serials":[]},{"part":"W90-0318-018","name":"電源線，NEMA 5-15 插頭至 IEC60320 C13，6呎，10A 125V","qty":0,"serials":[]},{"part":"Z90-1021-001","name":"辣輪活動綁帶","qty":0,"serials":[]},{"part":"TMP-NMS-CAB-CONNKIT-001","name":"電纜接頭套件","qty":0,"serials":[]},{"part":"TMP-COM-FIRSTAID-001","name":"急救包","qty":0,"serials":[]}]},{"name":"NMS 工作站抽屜","sourcePart":"NMS-DRAWER","items":[{"part":"A30-2030-010","name":"GETAC S510 強固型筆記型電腦","qty":0,"serials":[]},{"part":"TMP-NMS-DRW-S510PWR-001","name":"GETAC S510 電源線","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"A30-3006-101","name":"POE 單埠供電器 30W 56V (CISCO PHONE)","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"TMP-NMS-TOOL-LB8023-001","name":"LB8023 潤滑膏","qty":0,"serials":[]},{"part":"H75-0011-013","name":"黑色尼龍魔鬼氈束帶，寬1吋，厚0.125吋，長36吋","qty":0,"serials":[]},{"part":"H75-0001-530","name":"背膠式黏扣帶，耐候型，寬1吋，長360吋","qty":0,"serials":[]},{"part":"H75-0001-914","name":"魔鬼氈帶，單圈式，0.75 x 8 英寸，黑色","qty":0,"serials":[]},{"part":"TMP-NMS-TOOL-GNDCLAMP-001","name":"固定夾及接地編織線","qty":0,"serials":[]},{"part":"12069-0030-A050","name":"直式線纜組件，含後殼","qty":0,"serials":[]},{"part":"A30-0325-010","name":"轉接頭 NEMA L5-30P 轉 NEMA 5-15/20R","qty":0,"serials":[]},{"part":"TMP-NMS-TOOL-SCREWDRIVER-001","name":"螺絲起子組","qty":0,"serials":[]},{"part":"TMP-NMS-TOOL-NIUSERIAL-001","name":"NIU 序列線","qty":0,"serials":[]},{"part":"11457-4009-01","name":"Cisco 8865 電話固定支架","qty":0,"serials":[]}]},{"name":"NMS HDT 帳篷套件，橄欖褐色","sourcePart":"A30-2305-004","items":[{"part":"A30-2305-005","name":"甬道帳篷，車輛，XPRESS 至 788 ，橄欖褐色","qty":0,"serials":[]},{"part":"A30-0310-050","name":"帆布軍用風格機械工具袋，橄欖綠，標準型","qty":0,"serials":[]},{"part":"TMP-NMS-TENT-FRAMEBAG-001","name":"骨架運輸袋","qty":0,"serials":[]},{"part":"TMP-NMS-TENT-LINERBAG-001","name":"內襯運輸袋","qty":0,"serials":[]},{"part":"TMP-NMS-TENT-REPAIR-001","name":"修理套件","qty":0,"serials":[]},{"part":"TMP-NMS-TENT-STAKE-001","name":"營釘套件","qty":0,"serials":[]}]},{"name":"NMS 車廂（內部）","sourcePart":"NMS-INT","items":[{"part":"11457-3010-01","name":"車廂組件，FICS NMS，硬體套件","qty":0,"serials":[]},{"part":"11457-3020-01","name":"車廂、組件、FICS NMS、線纜套件","qty":0,"serials":[]},{"part":"Z90-9621-001","name":"線纜收納捲線器，附支架","qty":0,"serials":[]},{"part":"W80-0117-001","name":"延長電源線，10/3，三插頭，NEMA L5-30，27A/125V，100呎","qty":0,"serials":[]},{"part":"A30-0375-121","name":"CISCO 7841 網路電話","qty":0,"serials":[]},{"part":"A30-4205-002","name":"CISCO 8865 視訊電話","qty":0,"serials":[]},{"part":"W95-0019-003","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，3呎","qty":0,"serials":[]},{"part":"W95-0019-015","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，15呎","qty":0,"serials":[]},{"part":"W95-0019-020","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，20呎","qty":0,"serials":[]},{"part":"800300291","name":"緊急照明組件","qty":0,"serials":[]},{"part":"800300290","name":"手電筒","qty":0,"serials":[]},{"part":"TMP-COM-FIREAXE-001","name":"火斧","qty":0,"serials":[]},{"part":"TMP-COM-FOLDCHAIR-001","name":"折疊椅","qty":0,"serials":[]},{"part":"201600046","name":"車廂突波保護裝置","qty":0,"serials":[]},{"part":"200200098","name":"低電壓斷路器，車輛電池","qty":0,"serials":[]},{"part":"TMP-COM-HOURMETER-001","name":"積時表","qty":0,"serials":[]},{"part":"200400269","name":"車廂頂部 LED 照明面板","qty":0,"serials":[]},{"part":"WNF1081W","name":"工作站 USB 牆面插座／充電器","qty":0,"serials":[]},{"part":"800300292","name":"緊急照明設備充電電池組","qty":0,"serials":[]},{"part":"TMP-NMS-ECUFILTER-001","name":"ECU 送風／回風濾網","qty":0,"serials":[]},{"part":"TMP-COM-FIREEXT-001","name":"5磅乾粉滅火器","qty":0,"serials":[]}]},{"name":"NMS 車廂（外部）","sourcePart":"NMS-EXT","items":[{"part":"101900030","name":"15Kw 發電機","qty":0,"serials":[]},{"part":"102800110","name":"冷氣","qty":0,"serials":[]},{"part":"TMP-COM-ECUCOVER-001","name":"ECU 帆布防護罩","qty":0,"serials":[]},{"part":"SP02-A-N0100-00","name":"門梯","qty":0,"serials":[]},{"part":"SP02-A-N01A0-06","name":"門梯腳","qty":0,"serials":[]},{"part":"4703-080B","name":"無熔絲斷路器，車輛直流電池","qty":0,"serials":[]},{"part":"11457-4000-01","name":"車輛直流電源入口面板","qty":0,"serials":[]},{"part":"11457-4400-01","name":"NMS 車廂信號輸入輸出面板","qty":0,"serials":[]},{"part":"W95-0019-002","name":"CAT6網路線，屏蔽型，RJ45對RJ45，PVC外被，黑色，2呎","qty":0,"serials":[]},{"part":"11457-4500-01","name":"輸入輸出面板，FICS，射頻，空白","qty":0,"serials":[]},{"part":"TMP-COM-LEVELIND-001","name":"水平指示器","qty":0,"serials":[]}]},{"name":"NMS 其他組件","sourcePart":"NMS-OTHER","items":[]}];
 // ===== Supabase multi-device cloud sync =====
 // Publishable keys are intended for browser-side use. Never put a service_role / secret key here.
 const SYSTEM_ID='73G-MASON';
@@ -1325,11 +1355,11 @@ async function ensureCloudRow(){
   const now=new Date().toISOString();
   const res=await fetch(cloudApiUrl(),{
     method:'POST',headers:{...cloudHeaders(),Prefer:'return=representation'},
-    body:JSON.stringify({id:CLOUD_ROW_ID,data:{groups:[],replacements:[],stockMovements:[]},updated_at:now})
+    body:JSON.stringify({id:CLOUD_ROW_ID,data:{groups:[],replacements:[],damagedReturns:[],stockMovements:[]},updated_at:now})
   });
   if(!res.ok)throw new Error(`建立雲端資料失敗 (${res.status})`);
   const rows=await res.json();
-  return rows?.[0]||{id:CLOUD_ROW_ID,data:{groups:[],replacements:[],stockMovements:[]},updated_at:now};
+  return rows?.[0]||{id:CLOUD_ROW_ID,data:{groups:[],replacements:[],damagedReturns:[],stockMovements:[]},updated_at:now};
 }
 async function pushCloudSnapshot(snapshot,{silent=false}={}){
   if(!navigator.onLine){cloudUnsynced=true;setCloudStatus('offline','離線｜待同步');return false}
@@ -1434,12 +1464,341 @@ function ensureOtherComponents(groups){
   return groups;
 }
 
-let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:JSON.parse(JSON.stringify(baseGroups)),replacements:[],stockMovements:[]};
+// ===== CN.xlsx canonical catalog migration (2026-09-04) =====
+// CN.xlsx is the authoritative CN catalog. This migration updates catalog part/name/group labels
+// while preserving existing inventory quantities, serial numbers, state/location and all histories.
+const CN_CATALOG_VERSION='2026-09-04-CN-XLSX-v2-18GROUPS';
+const CN_GROUP_LEGACY_NAMES={
+  'CN-DISH-RADIO-TRANS-ASSY':['碟型天線 / 無線電配備'],
+  'E75-0381-001':['天線桅桿與工具配備'],
+  'CNB-INT':['CN-B 旅級通信節點車廂（內部）'],
+  'CNB-EXT':['CN-B 旅級通信節點車廂（外部）']
+};
+const CN_ITEM_LEGACY_ALIASES={
+  'CN-DRAWER':[
+    {toPart:'TMP-CN-DRW-S510PWR-001',fromPart:'n/a',fromName:'電源線(筆電)'}
+  ],
+  '11457-2042-01':[
+    {toPart:'12286-2000-01',fromPart:'12286-2100-01',fromName:'RF-9850W無線電機（1.35-2.7GHZ）'}
+  ],
+  '11457-2400-01':[
+    {toPart:'TMP-CN-DWBK-AUSADP-001',fromPart:'N/A',fromName:'市電轉換接頭（澳洲）x1'},
+    {toPart:'10515-0657-4100',fromPart:'10515-0607-4100*',fromName:'RF-7800W卡x1'},
+    {toPart:'TMP-CN-DWBK-SCREWPK-001',fromPart:'N/A',fromName:'螺絲包x1 (4ea)'}
+  ],
+  'A30-0310-051':[
+    {toPart:'TMP-CN-TOOL-LB8023-001',fromPart:'N/A',fromName:'LB8023潤滑膏*1'},
+    {toPart:'TMP-CN-TOOL-GNDCLAMP-001',fromPart:'N/A',fromName:'固定夾及接地編織線*1'},
+    {toPart:'TMP-CN-TOOL-SCREWDRIVER-001',fromPart:'N/A',fromName:'螺絲起子組*1'},
+    {toPart:'TMP-CN-TOOL-NIUSERIAL-001',fromPart:'N/A',fromName:'NIU序列線*4'}
+  ],
+  '11457-2500-01':[
+    {toPart:'TMP-TOCNET-PCASE-01',fromPart:'N/A',fromName:'TOCNET P-case'}
+  ]
+};
+function cnCatalogNormPart(v){return String(v??'').trim().toLowerCase()}
+function cnCatalogNormName(v){
+  return String(v??'').trim().toLowerCase()
+    .replace(/[（]/g,'(').replace(/[）]/g,')')
+    .replace(/[，,]/g,'').replace(/\s+/g,'')
+    .replace(/\(4ea\)$/i,'').replace(/(?:x|\*)\d+$/i,'');
+}
+function cnCatalogHasPayload(x){
+  return !!(Math.max(0,Number(x?.qty)||0) || (Array.isArray(x?.serials)&&x.serials.some(v=>String(v??'').trim())) ||
+    (x?.state && x.state!=='stock') || String(x?.location??'').trim());
+}
+
+// v2: CN.xlsx defines 18 CN components. Older builds incorrectly merged five antenna/tool
+// subassemblies into the E75-0381-001 TVAM group. Split that legacy umbrella first so
+// existing quantities/serials/state/location follow their original item rows into the
+// correct new component instead of being archived or reset.
+function prepareCn18GroupSplit(target){
+  if(!target||!Array.isArray(target.groups))return false;
+  const normP=v=>cnCatalogNormPart(v);
+  const umbrellaIndex=target.groups.findIndex(g=>normP(g?.sourcePart)==='e75-0381-001'||cnCatalogNormName(g?.name)===cnCatalogNormName('天線桅桿與工具配備'));
+  if(umbrellaIndex<0)return false;
+  const umbrella=target.groups[umbrellaIndex];
+  const childParts=['E75-0373-001','E75-0372-001','E75-0376-001','E75-0377-001','A30-0310-051'];
+  // Already split: nothing to do.
+  if(childParts.every(p=>target.groups.some((g,gi)=>gi!==umbrellaIndex&&normP(g?.sourcePart)===normP(p))))return false;
+  const oldItems=Array.isArray(umbrella?.items)?umbrella.items:[];
+  const positions=childParts.map(p=>oldItems.findIndex(x=>normP(x?.part)===normP(p)));
+  if(positions.some(i=>i<0)||positions.some((v,i)=>i>0&&v<=positions[i-1]))return false;
+
+  let other=target.groups.find(g=>g?.name==='CN 其他組件'||normP(g?.sourcePart)==='cn-other');
+  if(!other){other={name:'CN 其他組件',sourcePart:'CN-OTHER',items:[]};target.groups.push(other)}
+  if(!Array.isArray(other.items))other.items=[];
+  const preserveHeaderPayload=x=>{
+    if(!cnCatalogHasPayload(x))return;
+    const copy={...JSON.parse(JSON.stringify(x)),legacyGroup:umbrella?.name||''};
+    const at=other.items.findIndex(y=>normP(y?.part)===normP(copy.part)&&cnCatalogNormName(y?.name)===cnCatalogNormName(copy.name));
+    if(at<0)other.items.push(copy);
+    else other.items[at]=cnCatalogMergeItem({part:other.items[at].part,name:other.items[at].name,qty:0,serials:[]},[other.items[at],copy]);
+  };
+
+  const parts=['E75-0381-001',...childParts];
+  const starts=[0,...positions];
+  const ends=[...positions,oldItems.length];
+  const splitGroups=[];
+  parts.forEach((part,i)=>{
+    const def=baseGroups.find(g=>normP(g?.sourcePart)===normP(part));
+    if(!def)return;
+    let seg=oldItems.slice(starts[i],ends[i]).map(x=>JSON.parse(JSON.stringify(x)));
+    if(i>0){const formerHeader=seg.shift();if(formerHeader)preserveHeaderPayload(formerHeader)}
+    splitGroups.push({name:def.name,sourcePart:def.sourcePart,items:seg});
+  });
+  if(splitGroups.length!==parts.length)return false;
+  target.groups.splice(umbrellaIndex,1,...splitGroups);
+  return true;
+}
+
+function cnCatalogMergeItem(baseItem,matches){
+  if(!matches.length)return JSON.parse(JSON.stringify(baseItem));
+  const score=x=>(Array.isArray(x?.serials)?x.serials.length:0)*1000+(Math.max(0,Number(x?.qty)||0))*100+(x?.state&&x.state!=='stock'?10:0)+(String(x?.location??'').trim()?5:0);
+  const dominant=matches.slice().sort((a,b)=>score(b)-score(a))[0]||{};
+  const merged={...JSON.parse(JSON.stringify(baseItem)),...JSON.parse(JSON.stringify(dominant))};
+  merged.part=baseItem.part;merged.name=baseItem.name;
+  merged.serials=[...new Set(matches.flatMap(x=>Array.isArray(x?.serials)?x.serials:[]).map(v=>String(v??'').trim()).filter(Boolean))];
+  merged.qty=matches.reduce((sum,x)=>sum+Math.max(0,Math.floor(Number(x?.qty)||0)),0);
+  if(merged.qty<merged.serials.length)merged.qty=merged.serials.length;
+  return merged;
+}
+function migrateCnCatalog(target){
+  if(!target||typeof target!=='object')return false;
+  target.catalogVersions=(target.catalogVersions&&typeof target.catalogVersions==='object')?target.catalogVersions:{};
+  if(!Array.isArray(target.groups))target.groups=[];
+  const preSplitChanged=prepareCn18GroupSplit(target);
+  if(target.catalogVersions.CN===CN_CATALOG_VERSION&&!preSplitChanged)return false;
+
+  const builtCn=baseGroups.filter(g=>!String(g?.name||'').trim().toUpperCase().startsWith('NMS') && !String(g?.name||'').trim().toUpperCase().startsWith('SSS') && g?.name!=='CN 其他組件');
+  const oldGroups=target.groups;
+  const consumedGroups=new Set();
+  const canonical=[];
+  const archive=[];
+  const ambiguousSourceParts=new Set(['11457-2042-01']);
+
+  const groupMatches=(bg,g)=>{
+    const bp=cnCatalogNormPart(bg?.sourcePart),gp=cnCatalogNormPart(g?.sourcePart);
+    const bn=cnCatalogNormName(bg?.name),gn=cnCatalogNormName(g?.name);
+    if(bn&&bn===gn)return true;
+    const legacy=(CN_GROUP_LEGACY_NAMES[String(bg?.sourcePart||'').trim()]||[]).some(n=>cnCatalogNormName(n)===gn);
+    if(legacy)return true;
+    return !!(bp&&bp===gp&&!ambiguousSourceParts.has(String(bg?.sourcePart||'').trim()));
+  };
+
+  builtCn.forEach(bg=>{
+    const matchedGroups=oldGroups.filter((g,gi)=>!consumedGroups.has(gi)&&groupMatches(bg,g));
+    oldGroups.forEach((g,gi)=>{if(matchedGroups.includes(g))consumedGroups.add(gi)});
+    const oldItems=matchedGroups.flatMap(g=>(Array.isArray(g?.items)?g.items:[]).map(x=>({item:x,group:g})));
+    const used=new Set();
+    const aliasRules=CN_ITEM_LEGACY_ALIASES[String(bg?.sourcePart||'').trim()]||[];
+    const takeAll=pred=>{const found=[];oldItems.forEach((entry,i)=>{if(!used.has(i)&&pred(entry.item)){used.add(i);found.push(entry.item)}});return found};
+    const takeOne=pred=>{for(let i=0;i<oldItems.length;i++){if(!used.has(i)&&pred(oldItems[i].item)){used.add(i);return [oldItems[i].item]}}return []};
+
+    const newItems=(bg.items||[]).map(bi=>{
+      let matches=takeAll(x=>cnCatalogNormPart(x?.part)===cnCatalogNormPart(bi.part)&&cnCatalogNormName(x?.name)===cnCatalogNormName(bi.name));
+      aliasRules.filter(r=>cnCatalogNormPart(r.toPart)===cnCatalogNormPart(bi.part)).forEach(r=>{
+        matches.push(...takeAll(x=>cnCatalogNormPart(x?.part)===cnCatalogNormPart(r.fromPart)&&cnCatalogNormName(x?.name)===cnCatalogNormName(r.fromName)));
+      });
+      if(!matches.length)matches=takeAll(x=>cnCatalogNormPart(x?.part)===cnCatalogNormPart(bi.part));
+      if(!matches.length)matches=takeOne(x=>cnCatalogNormName(x?.name)===cnCatalogNormName(bi.name));
+      return cnCatalogMergeItem(bi,matches);
+    });
+
+    oldItems.forEach((entry,i)=>{
+      if(!used.has(i)&&cnCatalogHasPayload(entry.item))archive.push({...JSON.parse(JSON.stringify(entry.item)),legacyGroup:entry.group?.name||''});
+    });
+    canonical.push({...JSON.parse(JSON.stringify(bg)),items:newItems});
+  });
+
+  const existingOther=oldGroups.find(g=>g?.name==='CN 其他組件'||cnCatalogNormPart(g?.sourcePart)==='cn-other');
+  const other={name:'CN 其他組件',sourcePart:'CN-OTHER',items:JSON.parse(JSON.stringify(existingOther?.items||[]))};
+  const mergeIntoOther=x=>{
+    const idx=other.items.findIndex(y=>cnCatalogNormPart(y?.part)===cnCatalogNormPart(x?.part)&&cnCatalogNormName(y?.name)===cnCatalogNormName(x?.name));
+    if(idx<0){other.items.push(x);return}
+    other.items[idx]=cnCatalogMergeItem({part:other.items[idx].part,name:other.items[idx].name,qty:0,serials:[]},[other.items[idx],x]);
+  };
+  archive.forEach(mergeIntoOther);
+
+  // Preserve NMS/SSS and other non-CN system groups exactly as stored.
+  const nonCn=oldGroups.filter((g,gi)=>{
+    if(consumedGroups.has(gi)||g===existingOther)return false;
+    const n=String(g?.name||'').trim().toUpperCase();
+    if(n.startsWith('NMS')||n.startsWith('SSS'))return true;
+    // Unknown CN groups are archived only when they contain live inventory payload.
+    (Array.isArray(g?.items)?g.items:[]).filter(cnCatalogHasPayload).forEach(x=>mergeIntoOther({...JSON.parse(JSON.stringify(x)),legacyGroup:g?.name||''}));
+    return false;
+  });
+
+  target.groups=[...canonical,other,...nonCn];
+  target.catalogVersions.CN=CN_CATALOG_VERSION;
+  return true;
+}
+
+
+
+// ===== NMS.xlsx canonical catalog migration (2026-09-04) =====
+// NMS.xlsx is the authoritative NMS catalog. The UI keeps the "NMS " prefix on component
+// names so existing system grouping/rendering continues to classify these rows as NMS.
+// Catalog changes preserve quantity, serials, state/location and all replacement/issue/history arrays.
+const NMS_CATALOG_VERSION='2026-09-04-NMS-XLSX-v1-7GROUPS';
+const NMS_GROUP_LEGACY_NAMES={
+  '11457-3100-01':['NMS NAS 攜行箱'],
+  '11457-3200-01':['NMS 紅區攜行箱'],
+  'NMS-CABINET':['NMS 工作站儲物櫃'],
+  'NMS-DRAWER':['NMS 工作站抽屜'],
+  'A30-2305-004':['NMS HDT 帳篷套件，橄欖褐色','HDT 帳篷套件，橄欖褐色'],
+  'NMS-INT':['NMS 車廂（內部）','NMS 車廂, 內部'],
+  'NMS-EXT':['NMS 車廂（外部）','NMS 車廂, 外部']
+};
+const NMS_ITEM_LEGACY_ALIASES={
+  '11457-3100-01':[
+    {toPart:'TMP-NAS-USBCBL-001',fromPart:'N/A',fromName:'USB'},
+    {toPart:'TMP-NAS-PWRCORD-001',fromPart:'N/A',fromName:'POWER CORD'},
+    {toPart:'TMP-NAS-RS232-001',fromPart:'N/A',fromName:'RS-232'}
+  ],
+  '11457-3200-01':[
+    {toPart:'TMP-RED-USBCBL-001',fromPart:'N/A',fromName:'USB傳輸線x1'},
+    {toPart:'TMP-RED-RS232-001',fromPart:'N/A',fromName:'RS-232線x1'},
+    {toPart:'TMP-RED-PWRCORD-001',fromPart:'N/A',fromName:'電源線x1'}
+  ],
+  'NMS-CABINET':[
+    {toPart:'TMP-NMS-CAB-ORING-001',fromPart:'n/a',fromName:'鉤環'},
+    {toPart:'TMP-NMS-CAB-STRETCH-001',fromPart:'n/a',fromName:'彈力鉤繩'},
+    {toPart:'TMP-NMS-CAB-CONNKIT-001',fromPart:'n/a',fromName:'電纜接頭套件'},
+    {toPart:'TMP-COM-FIRSTAID-001',fromPart:'DY-HP/T-A00-01 ~ DY-HP/T-A00-11',fromName:'急救包'}
+  ],
+  'NMS-DRAWER':[
+    {toPart:'TMP-NMS-DRW-S510PWR-001',fromPart:'n/a',fromName:'電源線(筆電)'},
+    {toPart:'TMP-NMS-TOOL-LB8023-001',fromPart:'N/A',fromName:'LB8023潤滑膏*1'},
+    {toPart:'TMP-NMS-TOOL-GNDCLAMP-001',fromPart:'N/A',fromName:'固定夾及接地編織線*1'},
+    {toPart:'TMP-NMS-TOOL-SCREWDRIVER-001',fromPart:'N/A',fromName:'螺絲起子組*1'},
+    {toPart:'TMP-NMS-TOOL-NIUSERIAL-001',fromPart:'N/A',fromName:'NIU序列線*4'}
+  ],
+  'NMS-INT':[
+    {toPart:'TMP-COM-FIREAXE-001',fromPart:'CRYSTAL',fromName:'火斧'},
+    {toPart:'TMP-COM-FOLDCHAIR-001',fromPart:'Yoke 8-211-040',fromName:'折疊椅'},
+    {toPart:'TMP-COM-HOURMETER-001',fromPart:'TAXX0112 05.15.1031.1',fromName:'積時表'}
+  ],
+  'NMS-EXT':[
+    {toPart:'TMP-COM-ECUCOVER-001',fromPart:'ECU Canvas Cover',fromName:'冷氣帆布蓋'}
+  ]
+};
+function nmsCatalogNormPart(v){return String(v??'').trim().toLowerCase()}
+function nmsCatalogNormName(v){
+  return String(v??'').trim().toLowerCase()
+    .replace(/[（]/g,'(').replace(/[）]/g,')')
+    .replace(/[，,]/g,'').replace(/\s+/g,'')
+    .replace(/(?:x|\*)\d+$/i,'').replace(/\(\d+\)$/,'');
+}
+function nmsCatalogHasPayload(x){
+  return !!(Math.max(0,Number(x?.qty)||0) || (Array.isArray(x?.serials)&&x.serials.some(v=>String(v??'').trim())) ||
+    (x?.state && x.state!=='stock') || String(x?.location??'').trim());
+}
+function nmsCatalogMergeItem(baseItem,matches){
+  if(!matches.length)return JSON.parse(JSON.stringify(baseItem));
+  const score=x=>(Array.isArray(x?.serials)?x.serials.length:0)*1000+(Math.max(0,Number(x?.qty)||0))*100+(x?.state&&x.state!=='stock'?10:0)+(String(x?.location??'').trim()?5:0);
+  const dominant=matches.slice().sort((a,b)=>score(b)-score(a))[0]||{};
+  const merged={...JSON.parse(JSON.stringify(baseItem)),...JSON.parse(JSON.stringify(dominant))};
+  merged.part=baseItem.part;merged.name=baseItem.name;
+  merged.serials=[...new Set(matches.flatMap(x=>Array.isArray(x?.serials)?x.serials:[]).map(v=>String(v??'').trim()).filter(Boolean))];
+  merged.qty=matches.reduce((sum,x)=>sum+Math.max(0,Math.floor(Number(x?.qty)||0)),0);
+  if(merged.qty<merged.serials.length)merged.qty=merged.serials.length;
+  return merged;
+}
+function migrateNmsCatalog(target){
+  if(!target||typeof target!=='object')return false;
+  target.catalogVersions=(target.catalogVersions&&typeof target.catalogVersions==='object')?target.catalogVersions:{};
+  if(!Array.isArray(target.groups))target.groups=[];
+  if(target.catalogVersions.NMS===NMS_CATALOG_VERSION)return false;
+
+  const builtNms=baseGroups.filter(g=>String(g?.name||'').trim().toUpperCase().startsWith('NMS') && g?.name!=='NMS 其他組件');
+  const oldGroups=target.groups;
+  const existingOther=oldGroups.find(g=>g?.name==='NMS 其他組件'||nmsCatalogNormPart(g?.sourcePart)==='nms-other');
+  const other={name:'NMS 其他組件',sourcePart:'NMS-OTHER',items:JSON.parse(JSON.stringify(existingOther?.items||[]))};
+  const used=new Set();
+  const canonical=[];
+
+  const oldNmsIndexes=oldGroups.map((g,gi)=>({g,gi})).filter(({g})=>{
+    const n=String(g?.name||'').trim().toUpperCase();
+    const p=nmsCatalogNormPart(g?.sourcePart);
+    return n.startsWith('NMS') || ['11457-3100-01','11457-3200-01','nms-cabnet','nms-cabinet','nms-drawer','11457-3000-01','nms-int','nms-ext','a30-2305-004'].includes(p);
+  });
+
+  const groupMatches=(bg,g)=>{
+    const bp=nmsCatalogNormPart(bg?.sourcePart),gp=nmsCatalogNormPart(g?.sourcePart);
+    const bn=nmsCatalogNormName(bg?.name),gn=nmsCatalogNormName(g?.name);
+    if(bn&&bn===gn)return true;
+    if((NMS_GROUP_LEGACY_NAMES[String(bg?.sourcePart||'').trim()]||[]).some(n=>nmsCatalogNormName(n)===gn))return true;
+    if(bp==='nms-cabinet'&&gp==='nms-cabnet')return true;
+    if(bp==='nms-drawer'&&gp==='nms-drawer')return true;
+    // Old internal/external groups shared 11457-3000-01, so never match that ambiguous part alone.
+    if(['nms-int','nms-ext'].includes(bp))return false;
+    return !!(bp&&bp===gp);
+  };
+
+  builtNms.forEach(bg=>{
+    let matched=oldNmsIndexes.filter(({g})=>groupMatches(bg,g));
+    // The old build incorrectly stored the tent assembly as tail rows inside NMS 工作站抽屜.
+    // Let the new tent component source matching rows from that legacy drawer without consuming
+    // unrelated drawer rows; item-level `used` keys prevent duplicates.
+    if(nmsCatalogNormPart(bg?.sourcePart)==='a30-2305-004'){
+      oldNmsIndexes.filter(({g})=>nmsCatalogNormName(g?.name)===nmsCatalogNormName('NMS 工作站抽屜')).forEach(e=>{
+        if(!matched.some(x=>x.gi===e.gi))matched.push(e);
+      });
+    }
+    const entries=[];
+    matched.forEach(({g,gi})=>(Array.isArray(g?.items)?g.items:[]).forEach((item,ii)=>entries.push({item,gi,ii,key:`${gi}:${ii}`})));
+    const aliasRules=NMS_ITEM_LEGACY_ALIASES[String(bg?.sourcePart||'').trim()]||[];
+    const takeAll=pred=>{const found=[];entries.forEach(e=>{if(!used.has(e.key)&&pred(e.item)){used.add(e.key);found.push(e.item)}});return found};
+    const takeOne=pred=>{for(const e of entries){if(!used.has(e.key)&&pred(e.item)){used.add(e.key);return [e.item]}}return []};
+
+    const newItems=(bg.items||[]).map(bi=>{
+      let matches=takeAll(x=>nmsCatalogNormPart(x?.part)===nmsCatalogNormPart(bi.part)&&nmsCatalogNormName(x?.name)===nmsCatalogNormName(bi.name));
+      aliasRules.filter(r=>nmsCatalogNormPart(r.toPart)===nmsCatalogNormPart(bi.part)).forEach(r=>{
+        matches.push(...takeAll(x=>nmsCatalogNormPart(x?.part)===nmsCatalogNormPart(r.fromPart)&&nmsCatalogNormName(x?.name)===nmsCatalogNormName(r.fromName)));
+      });
+      if(!matches.length)matches=takeAll(x=>nmsCatalogNormPart(x?.part)===nmsCatalogNormPart(bi.part));
+      if(!matches.length)matches=takeOne(x=>nmsCatalogNormName(x?.name)===nmsCatalogNormName(bi.name));
+      return nmsCatalogMergeItem(bi,matches);
+    });
+    canonical.push({...JSON.parse(JSON.stringify(bg)),items:newItems});
+  });
+
+  const mergeIntoOther=x=>{
+    const idx=other.items.findIndex(y=>nmsCatalogNormPart(y?.part)===nmsCatalogNormPart(x?.part)&&nmsCatalogNormName(y?.name)===nmsCatalogNormName(x?.name));
+    if(idx<0){other.items.push(x);return}
+    other.items[idx]=nmsCatalogMergeItem({part:other.items[idx].part,name:other.items[idx].name,qty:0,serials:[]},[other.items[idx],x]);
+  };
+  oldNmsIndexes.forEach(({g,gi})=>{
+    if(g===existingOther)return;
+    (Array.isArray(g?.items)?g.items:[]).forEach((item,ii)=>{
+      if(!used.has(`${gi}:${ii}`)&&nmsCatalogHasPayload(item))mergeIntoOther({...JSON.parse(JSON.stringify(item)),legacyGroup:g?.name||''});
+    });
+  });
+
+  // Preserve every non-NMS system group (including the verified CN 18 groups) exactly.
+  const firstNms=oldGroups.findIndex(g=>oldNmsIndexes.some(e=>e.g===g));
+  const isOldNms=g=>oldNmsIndexes.some(e=>e.g===g)||g===existingOther;
+  if(firstNms<0){target.groups=[...oldGroups.filter(g=>g!==existingOther),...canonical,other]}
+  else{
+    const before=oldGroups.slice(0,firstNms).filter(g=>!isOldNms(g));
+    const after=oldGroups.slice(firstNms).filter(g=>!isOldNms(g));
+    target.groups=[...before,...canonical,other,...after];
+  }
+  target.catalogVersions.NMS=NMS_CATALOG_VERSION;
+  return true;
+}
+
+let store=JSON.parse(localStorage.getItem('nmsInventoryV2')||'null') || {groups:JSON.parse(JSON.stringify(baseGroups)),replacements:[],damagedReturns:[],stockMovements:[]};
 store.groups=ensureOtherComponents(store.groups);
+migrateCnCatalog(store);
+migrateNmsCatalog(store);
 /* Built-in catalog migration: add new catalog groups/items without overwriting user-entered data. */
 (function mergeBuiltInCatalog(){
-  if(!store || !Array.isArray(store.groups)) store={groups:[],replacements:[],stockMovements:[]};
+  if(!store || !Array.isArray(store.groups)) store={groups:[],replacements:[],damagedReturns:[],stockMovements:[]};
   if(!Array.isArray(store.replacements)) store.replacements=[];
+  if(!Array.isArray(store.damagedReturns)) store.damagedReturns=[];
   if(!Array.isArray(store.stockMovements)) store.stockMovements=[];
   const groupKey=g=>`${String(g.name||'').trim()}||${String(g.sourcePart||'').trim()}`;
   const itemKey=x=>`${String(x.part||'').trim().toLowerCase()}||${String(x.name||'').trim().toLowerCase()}`;
@@ -1485,11 +1844,113 @@ function normalizeInventoryItem(x){
   x.location=String(x.location??'').trim();
   return x;
 }
+
+// ===== History catalog label linkage (2026-09-04) =====
+// Historical rows keep operational facts (date/qty/serial/location/person/note) unchanged,
+// but their catalog labels are resolved against the latest CN/NMS catalog on every load.
+// This prevents old snapshot names from remaining after Excel catalog corrections.
+function historyCatalogNorm(v){
+  return String(v??'').trim().toLowerCase()
+    .replace(/[（]/g,'(').replace(/[）]/g,')')
+    .replace(/[，,]/g,'').replace(/[／/]/g,'')
+    .replace(/[－–—-]/g,'').replace(/\s+/g,'')
+    .replace(/(?:x|\*)\d+$/i,'').replace(/\(\d+\)$/,'');
+}
+function historyCatalogPartNorm(v){return String(v??'').trim().toLowerCase()}
+function historyCatalogGenericPart(v){
+  const p=historyCatalogPartNorm(v);
+  return !p||p==='n/a'||p==='na'||p==='—'||p==='-';
+}
+function historyCatalogEntries(target=store){
+  const entries=[];
+  (target.groups||[]).forEach(g=>{
+    const sourcePart=String(g?.sourcePart||'').trim();
+    const sys=String(g?.name||'').trim().toUpperCase().startsWith('NMS')?'NMS':String(g?.name||'').trim().toUpperCase().startsWith('SSS')?'SSS':'CN';
+    const groupAliases=[g?.name||''];
+    if(sys==='CN')groupAliases.push(...(CN_GROUP_LEGACY_NAMES[sourcePart]||[]));
+    if(sys==='NMS')groupAliases.push(...(NMS_GROUP_LEGACY_NAMES[sourcePart]||[]));
+    const rules=sys==='CN'?(CN_ITEM_LEGACY_ALIASES[sourcePart]||[]):sys==='NMS'?(NMS_ITEM_LEGACY_ALIASES[sourcePart]||[]):[];
+    (g.items||[]).forEach(item=>{
+      const aliases=[{part:item?.part||'',name:item?.name||''}];
+      rules.filter(r=>historyCatalogPartNorm(r.toPart)===historyCatalogPartNorm(item?.part)).forEach(r=>aliases.push({part:r.fromPart||'',name:r.fromName||''}));
+      entries.push({
+        system:sys,group:g?.name||'',sourcePart,part:item?.part||'',name:item?.name||'',
+        groupAliases:[...new Set(groupAliases.map(historyCatalogNorm).filter(Boolean))],
+        aliases
+      });
+    });
+  });
+  return entries;
+}
+function resolveHistoryCatalogRecord(rec,target=store,entries=null){
+  if(!rec||typeof rec!=='object')return null;
+  entries=entries||historyCatalogEntries(target);
+  const rp=historyCatalogPartNorm(rec.part),rn=historyCatalogNorm(rec.device),rg=historyCatalogNorm(rec.group);
+  const groupPool=rg?entries.filter(e=>e.groupAliases.includes(rg)):[];
+  const exactAlias=(pool)=>pool.filter(e=>e.aliases.some(a=>historyCatalogPartNorm(a.part)===rp && historyCatalogNorm(a.name)===rn));
+  const exactCurrent=(pool)=>pool.filter(e=>historyCatalogPartNorm(e.part)===rp && historyCatalogNorm(e.name)===rn);
+  const byPart=(pool)=>pool.filter(e=>!historyCatalogGenericPart(rp)&&historyCatalogPartNorm(e.part)===rp);
+  const byName=(pool)=>pool.filter(e=>rn&&historyCatalogNorm(e.name)===rn);
+  const chooseSameName=(rows)=>{
+    if(!rows.length)return null;
+    const names=[...new Set(rows.map(e=>historyCatalogNorm(e.name)))];
+    return names.length===1?rows[0]:null;
+  };
+  let hit=null;
+  // Strongest match: current/legacy group + exact old/current part and name.
+  hit=exactAlias(groupPool)[0]||exactCurrent(groupPool)[0]||null;
+  // Same group + same part is safe when that part maps to one current name in the group.
+  if(!hit)hit=chooseSameName(byPart(groupPool));
+  // For N/A / temporary legacy rows, group + exact legacy/current name is the safe fallback.
+  if(!hit&&historyCatalogGenericPart(rp)){
+    const legacyByName=groupPool.filter(e=>e.aliases.some(a=>historyCatalogNorm(a.name)===rn));
+    hit=legacyByName.length===1?legacyByName[0]:null;
+    if(!hit){const rows=byName(groupPool);hit=rows.length===1?rows[0]:null;}
+  }
+  // Old umbrella groups (for example the former CN antenna/tool group) may have been split.
+  // In that case allow a global exact part+name / legacy alias match.
+  if(!hit)hit=exactAlias(entries)[0]||exactCurrent(entries)[0]||null;
+  // If a part number is reused in multiple components but all uses now share the same name,
+  // updating the device label is still unambiguous. Prefer the matching group when available.
+  if(!hit){
+    const rows=byPart(entries);
+    const same=chooseSameName(rows);
+    if(same)hit=(groupPool.find(e=>historyCatalogPartNorm(e.part)===historyCatalogPartNorm(same.part))||same);
+  }
+  // Last safe fallback: exact current name when it identifies only one catalog row.
+  if(!hit&&rn){const rows=byName(entries);if(rows.length===1)hit=rows[0];}
+  return hit;
+}
+function syncHistoryCatalogLabels(target=store){
+  if(!target||typeof target!=='object')return 0;
+  if(!Array.isArray(target.replacements))target.replacements=[];
+  if(!Array.isArray(target.damagedReturns))target.damagedReturns=[];
+  if(!Array.isArray(target.stockMovements))target.stockMovements=[];
+  const entries=historyCatalogEntries(target);let changed=0;
+  const apply=(r)=>{
+    const hit=resolveHistoryCatalogRecord(r,target,entries);if(!hit)return;
+    const next={device:hit.name,part:hit.part,group:hit.group};
+    if('system' in r)next.system=hit.system;
+    Object.entries(next).forEach(([k,v])=>{if(String(r[k]??'')!==String(v??'')){r[k]=v;changed++;}});
+  };
+  target.replacements.forEach(apply);
+  target.damagedReturns.forEach(apply);
+  target.stockMovements.forEach(apply);
+  return changed;
+}
+
 function normalizeInventoryStore(target=store){
   if(!target||!Array.isArray(target.groups))return target;
+  migrateCnCatalog(target);
+  migrateNmsCatalog(target);
   target.groups.forEach(g=>{if(!Array.isArray(g.items))g.items=[];(g.items||[]).forEach(normalizeInventoryItem)});
   if(!Array.isArray(target.replacements))target.replacements=[];
+  if(!Array.isArray(target.damagedReturns))target.damagedReturns=[];
   if(!Array.isArray(target.stockMovements))target.stockMovements=[];
+  normalizeReplacementHistory(target);
+  normalizeDamagedReturns(target);
+  normalizeStockMovements(target);
+  syncHistoryCatalogLabels(target);
   return target;
 }
 normalizeInventoryStore();
@@ -1648,6 +2109,7 @@ function render(){
  components.innerHTML=html||'<div class="empty">找不到符合資料</div>';
  const fc=document.getElementById('filterCount');if(fc)fc.textContent=`顯示 ${shownGroups} / ${store.groups.length} 個組件`;
  const replacementRows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();const historyList=document.getElementById('history');if(historyList)historyList.innerHTML=replacementRows.map(({r,sourceIndex})=>{const when=r.dateTime||r.date||'—',isPersonnel=r.actionType==='personnel_issue'||r.cn==='人員領用';return `<div class="history-item"><button type="button" class="history-edit-btn" onclick="editReplacementRecord(${sourceIndex})" title="更正此筆紀錄">✏️ 更正</button><button type="button" class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})" title="刪除此筆紀錄">刪除</button><b>${esc(when)}｜${esc(isPersonnel?'人員領用':'設備維修更換')}｜${esc(r.cn||'—')}｜${esc(r.group)}</b><br><b>設備：</b>${esc(r.device)}${r.part?`｜${esc(r.part)}`:''}<br>${isPersonnel?`<b>領用人員：</b>${esc(r.personnelName||'—')}${r.personnelUnit?`｜<b>單位：</b>${esc(r.personnelUnit)}`:''}<br><b>領用設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已領用')}</span>`:`<b>故障設備序號：</b><span class="detail-serial">${esc(r.old)}</span> <span class="badge broken">${esc(r.damagedStatus||'故障／已換下')}</span>　→　<b>替換設備序號：</b><span class="detail-serial">${esc(r.next)}</span> <span class="badge installed">${esc(r.newStatus||'已安裝／使用')}</span>`}${r.note?'<br><b>備註：</b>'+esc(r.note):''}${Array.isArray(r.corrections)&&r.corrections.length?`<div class="correction-note">✏️ 已更正 ${r.corrections.length} 次｜最後更正：${esc(r.corrections[r.corrections.length-1].correctedAt||'—')}</div>`:''}</div>`}).join('')||'<div class="empty">尚無維修更換／領用紀錄</div>';const hc=document.getElementById('historyCount');if(hc)hc.textContent=`${replacementRows.length} 筆紀錄`;
+ updateDamagedReturnSummary();
  renderStockHistory();
  updateSummary();
 }
@@ -2022,6 +2484,7 @@ function saveReplace(){
  });
  const changedAt=new Date();
  store.replacements.push({
+  id:'R'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),
   timestamp:changedAt.toISOString(),
   date:changedAt.toLocaleDateString('zh-TW'),
   dateTime:changedAt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
@@ -2051,6 +2514,7 @@ function normalizeReplacementRecord(r={}){
  const legacyPersonnel=(String(r.actionType||'').trim()==='personnel_issue')||!!personnelName||String(r.newStatus||'').trim()==='已領用';
  const actionType=legacyPersonnel?'personnel_issue':'replacement';
  return {
+  id:String(r.id||('R'+Date.now().toString(36)+Math.random().toString(36).slice(2,8))),
   timestamp:dt?dt.toISOString():rawTs,
   date:date||(dt?dt.toLocaleDateString('zh-TW'):''),
   dateTime:dateTime||(dt?dt.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):date),
@@ -2067,22 +2531,112 @@ function normalizeReplacementHistory(target=store){
  target.replacements=target.replacements.map(normalizeReplacementRecord);
  return target.replacements;
 }
+
+// ===== Independent damaged-equipment return records =====
+let damagedReturnEditIndex=null;
+function localDateTimeInputValue(value=new Date()){
+ const d=value instanceof Date?value:new Date(value);if(Number.isNaN(d.getTime()))return '';
+ const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function damagedReturnDateTimeText(value){
+ const d=new Date(value);return Number.isNaN(d.getTime())?String(value||''):d.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+function normalizeDamagedReturnRecord(d={},target=store){
+ const raw=String(d.returnTimestamp||d.timestamp||'').trim();let dt=null;if(raw){const x=new Date(raw);if(!Number.isNaN(x.getTime()))dt=x}
+ let returnTimeInput=String(d.returnTimeInput||'').trim();if(!returnTimeInput&&dt)returnTimeInput=localDateTimeInputValue(dt);
+ const repId=String(d.replacementId||'').trim();
+ const rep=(target.replacements||[]).find(r=>String(r.id||'')===repId);
+ return {
+  id:String(d.id||('DR'+Date.now().toString(36)+Math.random().toString(36).slice(2,8))),replacementId:repId,
+  returnTimestamp:dt?dt.toISOString():(returnTimeInput&& !Number.isNaN(new Date(returnTimeInput).getTime())?new Date(returnTimeInput).toISOString():raw),
+  returnTimeInput,returnDateTime:String(d.returnDateTime||'').trim()||(returnTimeInput?damagedReturnDateTimeText(returnTimeInput):''),
+  returnLocation:String(d.returnLocation||d.location||'').trim(),note:String(d.note||'').trim(),
+  repairDateTime:rep?(rep.dateTime||rep.date||''):String(d.repairDateTime||'').trim(),repairLocation:rep?(rep.cn||''):String(d.repairLocation||'').trim(),
+  group:rep?(rep.group||''):String(d.group||'').trim(),device:rep?(rep.device||''):String(d.device||'').trim(),part:rep?(rep.part||''):String(d.part||'').trim(),
+  oldSerial:rep?(rep.old||''):String(d.oldSerial||d.serial||'').trim(),system:String(d.system||'').trim()
+ };
+}
+function normalizeDamagedReturns(target=store){
+ if(!Array.isArray(target.damagedReturns))target.damagedReturns=[];
+ target.damagedReturns=target.damagedReturns.map(d=>normalizeDamagedReturnRecord(d,target));
+ return target.damagedReturns;
+}
+function damagedReturnForReplacement(repId){return (store.damagedReturns||[]).find(d=>String(d.replacementId||'')===String(repId||''))||null}
+function pendingDamagedReplacementRows(){
+ normalizeReplacementHistory();normalizeDamagedReturns();
+ const returned=new Set((store.damagedReturns||[]).map(d=>String(d.replacementId||'')).filter(Boolean));
+ return (store.replacements||[]).map((r,index)=>({r,index})).filter(({r})=>r.actionType!=='personnel_issue'&&String(r.old||'').trim()&&!returned.has(String(r.id||''))).reverse();
+}
+function updateDamagedReturnSummary(){
+ normalizeReplacementHistory();normalizeDamagedReturns();
+ const done=(store.damagedReturns||[]).length,pending=pendingDamagedReplacementRows().length,el=document.getElementById('damagedReturnCount');
+ if(el)el.textContent=`${done} 筆繳回｜待繳回 ${pending}`;
+}
+function fillDamagedReturnSelect(selectedId=''){
+ const sel=document.getElementById('drReplacement');if(!sel)return;
+ let rows=pendingDamagedReplacementRows();
+ if(selectedId){const rep=(store.replacements||[]).find(r=>String(r.id||'')===String(selectedId));if(rep&&!rows.some(x=>x.r.id===rep.id))rows=[{r:rep,index:(store.replacements||[]).indexOf(rep)},...rows]}
+ sel.innerHTML='<option value="">請選擇待繳回裝備</option>'+rows.map(({r})=>`<option value="${esc(r.id)}">${esc(r.dateTime||r.date||'—')}｜${esc(r.device||'設備')}｜損壞序號 ${esc(r.old||'—')}</option>`).join('');
+ sel.value=selectedId||'';
+}
+function updateDamagedReturnEquipmentInfo(){
+ const id=document.getElementById('drReplacement')?.value||'',box=document.getElementById('drEquipmentInfo');if(!box)return;
+ const r=(store.replacements||[]).find(x=>String(x.id||'')===String(id));
+ if(!r){box.textContent='請先選擇待繳回損壞裝備。';return}
+ box.innerHTML=`<b>設備：</b>${esc(r.device||'—')} ${r.part?`｜${esc(r.part)}`:''}<br><b>組件：</b>${esc(r.group||'—')}<br><b>損壞設備序號：</b><span class="serial">${esc(r.old||'—')}</span><br><b>原設備維修更換：</b>${esc(r.dateTime||r.date||'—')}｜${esc(r.cn||'—')}`;
+}
+function openDamagedReturn(){
+ damagedReturnEditIndex=null;normalizeInventoryStore();const rows=pendingDamagedReplacementRows();
+ if(!rows.length){showToast('目前沒有待繳回的損壞裝備','success');return}
+ const title=document.getElementById('damagedReturnModalTitle'),btn=document.getElementById('saveDamagedReturnBtn'),sel=document.getElementById('drReplacement');
+ if(title)title.textContent='損壞裝備繳回';if(btn)btn.textContent='💾 儲存繳回紀錄';fillDamagedReturnSelect('');if(sel)sel.disabled=false;
+ document.getElementById('drLocation').value='';document.getElementById('drTime').value=localDateTimeInputValue(new Date());document.getElementById('drNote').value='';updateDamagedReturnEquipmentInfo();
+ document.getElementById('damagedReturnModal')?.classList.add('show');document.body.style.overflow='hidden';
+}
+function closeDamagedReturn(){document.getElementById('damagedReturnModal')?.classList.remove('show');damagedReturnEditIndex=null;const sel=document.getElementById('drReplacement');if(sel)sel.disabled=false;document.body.style.overflow=''}
+function saveDamagedReturn(){
+ normalizeReplacementHistory();normalizeDamagedReturns();
+ const repId=document.getElementById('drReplacement')?.value||'',location=document.getElementById('drLocation')?.value||'',timeInput=document.getElementById('drTime')?.value||'',note=document.getElementById('drNote')?.value.trim()||'';
+ const rep=(store.replacements||[]).find(r=>String(r.id||'')===String(repId));
+ if(!rep)return showToast('請選擇待繳回的損壞裝備','error');if(!location)return showToast('請選擇損壞裝備繳回地點','error');if(!timeInput||Number.isNaN(new Date(timeInput).getTime()))return showToast('請設定有效的繳回時間','error');
+ const returnTimestamp=new Date(timeInput).toISOString(),returnDateTime=damagedReturnDateTimeText(timeInput);
+ if(damagedReturnEditIndex!==null){
+  const d=(store.damagedReturns||[])[damagedReturnEditIndex];if(!d)return showToast('找不到要更正的繳回紀錄','error');
+  d.returnLocation=location;d.returnTimeInput=timeInput;d.returnTimestamp=returnTimestamp;d.returnDateTime=returnDateTime;d.note=note;normalizeDamagedReturns();
+  save();closeDamagedReturn();render();openHistoryDetail('damagedReturn');showToast('損壞裝備繳回紀錄已更正','success');return;
+ }
+ if(damagedReturnForReplacement(repId))return showToast('此損壞裝備已經有繳回紀錄','error');
+ store.damagedReturns.push(normalizeDamagedReturnRecord({id:'DR'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),replacementId:repId,returnTimestamp,returnTimeInput:timeInput,returnDateTime,returnLocation:location,note},store));
+ save();closeDamagedReturn();render();document.getElementById('damagedReturnHistoryPanel')?.scrollIntoView({behavior:'smooth',block:'start'});showToast(`損壞裝備已登記繳回：${location}`,'success');
+}
+function editDamagedReturnRecord(index){
+ normalizeDamagedReturns();const d=(store.damagedReturns||[])[index];if(!d)return;damagedReturnEditIndex=index;
+ fillDamagedReturnSelect(d.replacementId||'');const sel=document.getElementById('drReplacement');if(sel)sel.disabled=true;updateDamagedReturnEquipmentInfo();
+ document.getElementById('drLocation').value=d.returnLocation||'';document.getElementById('drTime').value=d.returnTimeInput||localDateTimeInputValue(d.returnTimestamp||new Date());document.getElementById('drNote').value=d.note||'';
+ const title=document.getElementById('damagedReturnModalTitle'),btn=document.getElementById('saveDamagedReturnBtn');if(title)title.textContent='更正損壞裝備繳回紀錄';if(btn)btn.textContent='💾 儲存更正';
+ document.getElementById('summaryDetailModal')?.classList.remove('show');document.getElementById('damagedReturnModal')?.classList.add('show');document.body.style.overflow='hidden';
+}
+function deleteDamagedReturnRecord(index){
+ normalizeDamagedReturns();const d=(store.damagedReturns||[])[index];if(!d)return;
+ if(!confirm(`確定刪除此筆損壞裝備繳回紀錄？\n${d.device||'設備'}｜${d.oldSerial||'—'}\n刪除後該損壞裝備會重新列為「待繳回」，庫存數量不受影響。`))return;
+ store.damagedReturns.splice(index,1);save();render();openHistoryDetail('damagedReturn');showToast('繳回紀錄已刪除，設備恢復為待繳回','success');
+}
 function inventoryStats(target=store){
  const all=(target.groups||[]).flatMap(g=>g.items||[]);
  const bySystem={CN:{groups:0,types:0,qty:0,serials:0},NMS:{groups:0,types:0,qty:0,serials:0},SSS:{groups:0,types:0,qty:0,serials:0}};
  (target.groups||[]).forEach(g=>{const t=systemType(g),items=g.items||[];bySystem[t].groups++;bySystem[t].types+=items.length;bySystem[t].qty+=items.reduce((a,x)=>a+(Number(x.qty)||0),0);bySystem[t].serials+=items.reduce((a,x)=>a+(x.serials||[]).filter(Boolean).length,0)});
- return {groups:(target.groups||[]).length,types:all.length,qty:all.reduce((a,x)=>a+(Number(x.qty)||0),0),serials:all.reduce((a,x)=>a+(x.serials||[]).filter(Boolean).length,0),replacements:(target.replacements||[]).length,stockMovements:(target.stockMovements||[]).length,bySystem};
+ return {groups:(target.groups||[]).length,types:all.length,qty:all.reduce((a,x)=>a+(Number(x.qty)||0),0),serials:all.reduce((a,x)=>a+(x.serials||[]).filter(Boolean).length,0),replacements:(target.replacements||[]).length,damagedReturns:(target.damagedReturns||[]).length,stockMovements:(target.stockMovements||[]).length,bySystem};
 }
 function exportBackup(){
- normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeDamagedReturns();normalizeStockMovements();
  const stats=inventoryStats();
  const payload={
-  schema:'equipment-inventory-v4',version:4,appVersion:'4.0',exportedAt:new Date().toISOString(),
-  description:'V4 庫存、序號、庫存異動、設備維修更換、人員領用與簽收管理資料完整備份',stats,data:store
+  schema:'equipment-inventory-v5',version:5,appVersion:'5.0',exportedAt:new Date().toISOString(),
+  description:'V5 庫存、序號、庫存異動、設備維修更換、人員領用、損壞裝備繳回與簽收管理資料完整備份',stats,data:store
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v4_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
- showToast(`完整備份已匯出：庫存 ${stats.qty} 件 / 庫存異動 ${stats.stockMovements} 筆 / 更換紀錄 ${stats.replacements} 筆`,'success');
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v5_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+ showToast(`完整備份已匯出：庫存 ${stats.qty} 件 / 庫存異動 ${stats.stockMovements} 筆 / 更換紀錄 ${stats.replacements} 筆 / 損壞繳回 ${stats.damagedReturns} 筆`,'success');
 }
 function importBackup(ev){
  const f=ev.target.files&&ev.target.files[0];if(!f)return;
@@ -2092,13 +2646,14 @@ function importBackup(ev){
   const obj=JSON.parse(r.result),incoming=obj.data||obj;
   if(!incoming||!Array.isArray(incoming.groups))throw new Error('備份格式不正確：找不到 groups 庫存資料');
   if(!Array.isArray(incoming.replacements))incoming.replacements=[];
+  if(!Array.isArray(incoming.damagedReturns))incoming.damagedReturns=[];
   if(!Array.isArray(incoming.stockMovements))incoming.stockMovements=[];
   normalizeInventoryStore(incoming);normalizeReplacementHistory(incoming);normalizeStockMovements(incoming);
   // 匯入前檢查「目前庫存序號」不可重複；歷史更換序號不視為目前庫存，不參與重複判斷。
   const oldStore=store;store=incoming;const dups=findDuplicateSerials();
   if(dups.length){store=oldStore;throw new Error('備份內有重複的目前庫存序號：'+dups.slice(0,5).join(''))}
   save();render();toggleHistoryPanel(false);toggleStockHistoryPanel(false);
-  const st=inventoryStats();showToast(`備份匯入完成：庫存 ${st.qty} 件 / 庫存異動 ${st.stockMovements} 筆 / 更換紀錄 ${st.replacements} 筆`,'success');
+  const st=inventoryStats();showToast(`備份匯入完成：庫存 ${st.qty} 件 / 庫存異動 ${st.stockMovements} 筆 / 更換紀錄 ${st.replacements} 筆 / 損壞繳回 ${st.damagedReturns} 筆`,'success');
  }catch(e){alert('匯入失敗：'+e.message)}finally{ev.target.value=''}};
  r.readAsText(f,'utf-8');
 }
@@ -2113,8 +2668,8 @@ function reportSystemSection(type,rows){
  return `<section style="margin:16px 0 20px"><h4 style="margin:0 0 8px;color:#173b70">${type} 庫存明細 <span style="font-size:11px;color:#71849c;font-weight:600">${data.length} 種設備 / ${qty} 件庫存 / ${sns} 個庫存序號</span></h4><div style="overflow:auto"><table><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>庫存位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td>${esc(x.part)}</td><td>${esc(x.name)}</td><td>${x.qty}</td><td>${esc(x.serial||'—')}</td><td>${esc(x.state)}</td><td>${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 function openReport(){
- normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
- const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeDamagedReturns();normalizeStockMovements();
+ const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse(),returns=(store.damagedReturns||[]).slice().reverse();
  let html=`<div style="display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px;margin-bottom:14px">
  <div class="card"><b>${st.groups}</b><span>組件分類</span></div><div class="card"><b>${st.types}</b><span>設備種類</span></div><div class="card"><b>${st.qty}</b><span>新設備庫存</span></div><div class="card"><b>${st.serials}</b><span>庫存序號</span></div><div class="card"><b>${st.replacements}</b><span>維修更換 / 領用紀錄</span></div></div>`;
  html+=`<div style="font-size:12px;color:#61758f;margin-bottom:10px">產生時間：${new Date().toLocaleString('zh-TW')}　｜　<strong>庫存量與庫存序號只代表尚未領出的新設備</strong>；已更換領出的新序號會保留於下方更換紀錄，不再計入庫存。</div>`;
@@ -2122,6 +2677,8 @@ function openReport(){
  ['CN','NMS','SSS'].forEach(t=>html+=reportSystemSection(t,rows));
  html+=`<h4 style="margin:20px 0 8px;color:#9c2c38">設備維修更換 / 人員領用紀錄 <span style="font-size:11px;color:#71849c;font-weight:600">${reps.length} 筆</span></h4>`;
  html+=reps.length?`<div style="overflow:auto"><table><thead><tr><th>更換時間</th><th>位置</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換設備序號</th><th>損壞設備狀態</th><th>新設備狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>`<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.old||'—')}</td><td class="detail-serial">${esc(r.next||'—')}</td><td>${esc(r.damagedStatus||'損壞／已換下')}</td><td>${esc(r.newStatus||'已安裝／使用')}</td><td>${esc(r.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無設備維修更換 / 人員領用紀錄</div>`;
+ html+=`<h4 style="margin:20px 0 8px;color:#845400">損壞裝備繳回紀錄 <span style="font-size:11px;color:#71849c;font-weight:600">${returns.length} 筆</span></h4>`;
+ html+=returns.length?`<div style="overflow:auto"><table><thead><tr><th>繳回時間</th><th>設備</th><th>料號</th><th>損壞設備序號</th><th>原更換位置</th><th>損壞裝備繳回</th><th>原維修時間</th><th>備註</th></tr></thead><tbody>${returns.map(d=>`<tr><td>${esc(d.returnDateTime||'—')}</td><td>${esc(d.device||'—')}</td><td>${esc(d.part||'—')}</td><td class="detail-serial">${esc(d.oldSerial||'—')}</td><td>${esc(d.repairLocation||'—')}</td><td>${esc(d.returnLocation||'—')}</td><td>${esc(d.repairDateTime||'—')}</td><td>${esc(d.note||'')}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">尚無損壞裝備繳回紀錄</div>`;
  reportContent.innerHTML=html;reportModal.classList.add('show');
 }
 function handleReportExportSelect(el){
@@ -2131,8 +2688,8 @@ function handleReportExportSelect(el){
  exportReportWord(mode);
 }
 function exportReportWord(mode='full'){
- normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
- const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse();
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeDamagedReturns();normalizeStockMovements();
+ const rows=reportRows(),st=inventoryStats(),reps=(store.replacements||[]).slice().reverse(),returns=(store.damagedReturns||[]).slice().reverse();
  const now=new Date(),generated=now.toLocaleString('zh-TW');
  const summaryRows=['CN','NMS','SSS'].map(t=>{const x=st.bySystem[t];return `<tr><td><b>${t}</b></td><td>${x.groups}</td><td>${x.types}</td><td>${x.qty}</td><td>${x.serials}</td></tr>`}).join('');
  const inStockRows=rows.filter(x=>x.qty>0);
@@ -2144,6 +2701,7 @@ function exportReportWord(mode='full'){
    return `<h2>${type} 庫存明細</h2><p class="meta">${data.length} 種設備｜${qty} 件庫存｜${sns} 個庫存序號</p><table class="inventory-table"><colgroup><col style="width:14%"><col style="width:14%"><col style="width:23%"><col style="width:7%"><col style="width:25%"><col style="width:7%"><col style="width:10%"></colgroup><thead><tr><th>組件</th><th>料號</th><th>設備名稱</th><th>庫存量</th><th>庫存序號</th><th>狀態</th><th>位置</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.group)}</td><td class="part-cell">${esc(x.part)}</td><td>${esc(x.name)}</td><td class="num qty-cell">${x.qty}</td><td class="serial-cell">${esc(x.serial||'—')}</td><td class="center-cell">${esc(x.state)}</td><td class="center-cell location-cell">${esc(x.location||'—')}</td></tr>`).join('')}</tbody></table>`;
  }).join('');
  const replacementTable=reps.length?`<table class="replacement-table"><colgroup><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:10%"><col style="width:7%"><col style="width:6%"></colgroup><thead><tr><th>作業時間</th><th>作業類型</th><th>位置</th><th>領用人員／單位</th><th>組件</th><th>設備</th><th>料號</th><th>故障設備序號</th><th>替換／領用序號</th><th>狀態</th><th>備註</th></tr></thead><tbody>${reps.map(r=>{const isPersonnel=r.actionType==='personnel_issue'||!!String(r.personnelName||'').trim()||r.newStatus==='已領用';const who=isPersonnel?[r.personnelName||'',r.personnelUnit||''].filter(Boolean).join('／'):'—';const status=isPersonnel?(r.newStatus||'已領用'):(r.newStatus||'已安裝／使用');return `<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${isPersonnel?'人員領用':'設備維修更換'}</td><td>${esc(r.cn||'—')}</td><td>${esc(who)}</td><td>${esc(r.group||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td>${esc(isPersonnel?'—':(r.old||'—'))}</td><td>${esc(r.next||'—')}</td><td>${esc(status)}</td><td>${esc(r.note||'')}</td></tr>`}).join('')}</tbody></table>`:'<p>尚無設備維修更換／人員領用紀錄。</p>';
+ const returnTable=returns.length?`<table class="replacement-table"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:12%"><col style="width:13%"><col style="width:11%"><col style="width:11%"><col style="width:13%"><col style="width:12%"></colgroup><thead><tr><th>繳回時間</th><th>設備</th><th>料號</th><th>損壞設備序號</th><th>原更換位置</th><th>損壞裝備繳回</th><th>原維修時間</th><th>備註</th></tr></thead><tbody>${returns.map(d=>`<tr><td>${esc(d.returnDateTime||'—')}</td><td>${esc(d.device||'—')}</td><td>${esc(d.part||'—')}</td><td>${esc(d.oldSerial||'—')}</td><td>${esc(d.repairLocation||'—')}</td><td>${esc(d.returnLocation||'—')}</td><td>${esc(d.repairDateTime||'—')}</td><td>${esc(d.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無損壞裝備繳回紀錄。</p>';
  const movementRows=(store.stockMovements||[]).slice().reverse();
  const movementTable=movementRows.length?`<table class="movement-table"><colgroup><col style="width:10%"><col style="width:7%"><col style="width:5%"><col style="width:10%"><col style="width:13%"><col style="width:9%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:14%"><col style="width:7%"><col style="width:6%"><col style="width:4%"></colgroup><thead><tr><th>異動時間</th><th>類型</th><th>系統</th><th>組件</th><th>設備</th><th>料號</th><th>數量異動</th><th>異動前</th><th>異動後</th><th>本次序號</th><th>位置</th><th>來源</th><th>備註</th></tr></thead><tbody>${movementRows.map(m=>`<tr><td>${esc(m.dateTime||'—')}</td><td>${esc(stockMovementTypeText(m.type))}</td><td>${esc(m.system||'—')}</td><td>${esc(m.group||'—')}</td><td>${esc(m.device||'—')}</td><td>${esc(m.part||'—')}</td><td class="num">${m.qtyChange>0?'+'+m.qtyChange:m.qtyChange}</td><td class="num">${m.beforeQty}</td><td class="num">${m.afterQty}</td><td>${esc((m.serials||[]).join('、')||'—')}</td><td>${esc(m.location||'—')}</td><td>${esc(m.reference||'')}</td><td>${esc(m.note||'')}</td></tr>`).join('')}</tbody></table>`:'<p>尚無庫存異動紀錄。</p>';
  const wordHead=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="73G裝備庫存管理"><style>
@@ -2162,12 +2720,16 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;table-layout:fixed}t
    reportTitle='設備維修更換／人員領用紀錄';
    fileLabel='維修更換_人員領用紀錄';
    reportBody=`${reportHeader(reportTitle,'設備維修更換／人員領用歷史')}<div class="meta">紀錄筆數：<b>${reps.length}</b> 筆</div><div class="notice"><b>報告說明：</b>本報告僅列出設備維修更換與人員領用歷史紀錄，供設備追溯與管理查核使用。</div>${replacementTable}`;
+ }else if(mode==='damagedReturn'){
+   reportTitle='損壞裝備繳回紀錄';
+   fileLabel='損壞裝備繳回紀錄';
+   reportBody=`${reportHeader(reportTitle,'損壞裝備繳回明細')}<div class="meta">繳回筆數：<b>${returns.length}</b> 筆｜待繳回：<b>${pendingDamagedReplacementRows().length}</b> 筆</div><div class="notice"><b>報告說明：</b>本報告獨立記錄已換下損壞裝備的繳回地點與繳回時間，不影響目前庫存數量。</div>${returnTable}`;
  }else if(mode==='movement'){
    reportTitle='庫存異動紀錄';
    fileLabel='庫存異動紀錄';
    reportBody=`${reportHeader(reportTitle,'庫存異動明細')}<div class="meta">異動筆數：<b>${movementRows.length}</b> 筆</div><div class="notice"><b>報告說明：</b>本報告列出新增庫存、設備維修更換領出及人員領用等庫存異動，供庫存帳務追溯與查核使用。</div>${movementTable}`;
  }else{
-   reportBody=`${reportHeader('73G裝備庫存與維修管理','庫存・序號・維修更換・人員領用綜合報告')}<div class="notice"><b>報告說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}`;
+   reportBody=`${reportHeader('73G裝備庫存與維修管理','庫存・序號・維修更換・人員領用綜合報告')}<div class="notice"><b>報告說明：</b>庫存量與庫存序號代表目前尚未領出的新設備；設備維修更換後領出的新設備序號會自庫存移除，並保留於設備維修更換／人員領用紀錄。</div><table class="summary"><tr><td><b>${st.groups}</b><span>組件分類</span></td><td><b>${st.types}</b><span>設備種類</span></td><td><b>${st.qty}</b><span>新設備庫存</span></td><td><b>${st.serials}</b><span>庫存序號</span></td><td><b>${st.replacements}</b><span>維修更換／領用紀錄</span></td></tr></table><p class="meta">庫存異動紀錄：${st.stockMovements} 筆</p>${inStockSummary}<h2>CN / NMS / SSS 統計</h2><table><thead><tr><th>系統</th><th>組件數</th><th>設備種類</th><th>新設備庫存</th><th>庫存序號</th></tr></thead><tbody>${summaryRows}</tbody></table>${inventorySections}<h2>庫存異動紀錄</h2><p class="meta">共 ${movementRows.length} 筆｜目前正式流程包含新設備入庫與設備維修更換領出</p>${movementTable}<h2>設備維修更換／人員領用紀錄</h2><p class="meta">共 ${reps.length} 筆</p>${replacementTable}<h2>損壞裝備繳回紀錄</h2><p class="meta">共 ${returns.length} 筆｜待繳回 ${pendingDamagedReplacementRows().length} 筆</p>${returnTable}`;
  }
  const html=wordHead+reportBody+`<div class="footer"><strong>73G裝備庫存與維修管理</strong>｜System Generated Report｜本文件由系統自動產生</div>
 <style>
@@ -2247,7 +2809,7 @@ tr:hover td{background:#f7fbff}
 function closeReport(){reportModal.classList.remove('show')}
 function csvCell(v){v=String(v??'');return '"'+v.replace(/"/g,'""')+'"'}
 function exportReportCSV(){
- normalizeInventoryStore();normalizeReplacementHistory();normalizeStockMovements();
+ normalizeInventoryStore();normalizeReplacementHistory();normalizeDamagedReturns();normalizeStockMovements();
  const rows=reportRows(),st=inventoryStats();let csv='\ufeff';
  csv+=['裝備庫存 Report','產生時間',new Date().toLocaleString('zh-TW')].map(csvCell).join(',')+'';
  csv+=['統計','組件分類',st.groups,'設備種類',st.types,'新設備庫存',st.qty,'庫存序號',st.serials,'損壞/更換紀錄',st.replacements].map(csvCell).join(',')+'';
@@ -2262,6 +2824,9 @@ function exportReportCSV(){
  csv+=''+['設備維修更換 / 人員領用紀錄'].map(csvCell).join(',')+'';
  csv+=['更換時間','位置','組件','設備','料號','故障設備序號','替換設備序號','損壞狀態','備註'].map(csvCell).join(',')+'';
  csv+=(store.replacements||[]).slice().reverse().map(r=>[r.dateTime||r.date||'',r.cn,r.group,r.device,r.part||'',r.old,r.next,r.damagedStatus||'損壞／已換下',r.note||''].map(csvCell).join(',')).join('');
+ csv+=''+['損壞裝備繳回紀錄'].map(csvCell).join(',')+'';
+ csv+=['繳回時間','設備','料號','損壞設備序號','原更換位置','損壞裝備繳回','原維修時間','備註'].map(csvCell).join(',')+'';
+ csv+=(store.damagedReturns||[]).slice().reverse().map(d=>[d.returnDateTime||'',d.device||'',d.part||'',d.oldSerial||'',d.repairLocation||'',d.returnLocation||'',d.repairDateTime||'',d.note||''].map(csvCell).join(',')).join('');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`equipment_inventory_v3_report_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('Report CSV 已匯出','success');
 }
 function printReport(){
@@ -2895,6 +3460,10 @@ function openHistoryDetail(type){
   heading.textContent='設備維修更換／人員領用紀錄明細';
   const rows=(store.replacements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();
   html=`<div class="detail-toolbar"><div class="detail-title">維修更換／領用紀錄</div><div class="detail-count">${rows.length} 筆</div></div><div class="detail-table-wrap"><table><thead><tr><th>日期</th><th>類型</th><th>設備</th><th>序號</th><th>位置</th><th>人員</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,sourceIndex})=>{const personnel=r.actionType==='personnel_issue'||r.newStatus==='已領用';return `<tr><td>${esc(r.dateTime||r.date||'—')}</td><td>${esc(personnel?'人員領用':'設備維修更換')}</td><td>${esc(r.device||'—')}</td><td>${esc(personnel?(r.next||'—'):(r.old||'—')+' → '+(r.next||'—'))}</td><td>${esc(r.cn||'—')}</td><td>${esc(r.personnelName||'—')}</td><td>${esc(r.note||'')}</td><td><button class="mini-action" onclick="editReplacementRecord(${sourceIndex})">更正</button> <button class="history-delete-btn" onclick="deleteReplacementRecord(${sourceIndex})">刪除</button></td></tr>`}).join('')}</tbody></table></div>`;
+ }else if(type==='damagedReturn'){
+  normalizeDamagedReturns();heading.textContent='損壞裝備繳回紀錄明細';
+  const rows=(store.damagedReturns||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();
+  html=`<div class="detail-toolbar"><div class="detail-title">損壞裝備繳回</div><div class="detail-count">${rows.length} 筆｜待繳回 ${pendingDamagedReplacementRows().length} 筆</div></div><div class="detail-table-wrap"><table><thead><tr><th>繳回時間</th><th>設備</th><th>料號</th><th>損壞設備序號</th><th>原更換位置</th><th>損壞裝備繳回</th><th>原維修時間</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows.map(({r,sourceIndex})=>`<tr><td>${esc(r.returnDateTime||'—')}</td><td>${esc(r.device||'—')}</td><td>${esc(r.part||'—')}</td><td class="detail-serial">${esc(r.oldSerial||'—')}</td><td>${esc(r.repairLocation||'—')}</td><td><b>${esc(r.returnLocation||'—')}</b></td><td>${esc(r.repairDateTime||'—')}</td><td>${esc(r.note||'')}</td><td><button class="mini-action" onclick="editDamagedReturnRecord(${sourceIndex})">更正</button> <button class="history-delete-btn" onclick="deleteDamagedReturnRecord(${sourceIndex})">刪除</button></td></tr>`).join('')}</tbody></table></div>`;
  }else{
   heading.textContent='庫存異動紀錄明細';
   const rows=(store.stockMovements||[]).map((r,sourceIndex)=>({r,sourceIndex})).reverse();
