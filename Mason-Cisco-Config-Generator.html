@@ -790,6 +790,204 @@ pre{font-variant-ligatures:none;tab-size:2}
 }
 @media(max-width:380px){.output-head>.actions{grid-template-columns:1fr}}
 
+
+/* =========================================================
+   Network Engineering Tools
+   IPv4 Subnet / VLSM / Protocol & Port Reference
+   ========================================================= */
+.tool-shell{margin-top:12px}
+.tool-body{padding:15px}
+.tool-grid{
+  display:grid;
+  grid-template-columns:minmax(300px,.82fr) minmax(360px,1.18fr);
+  gap:12px;
+}
+.tool-panel{
+  border:1px solid #294965;
+  border-radius:12px;
+  background:#091827;
+  padding:14px;
+}
+.tool-panel h3{margin:0 0 6px;font-size:15px}
+.tool-panel p{margin:0 0 12px;color:var(--muted);font-size:11.8px;line-height:1.65}
+.tool-result-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-top:12px;
+}
+.tool-stat{
+  min-width:0;
+  border:1px solid #294965;
+  border-radius:11px;
+  background:#091827;
+  padding:10px 11px;
+}
+.tool-stat small{display:block;color:#839eb8;font-size:10.5px;margin-bottom:3px}
+.tool-stat b{
+  display:block;
+  font-size:14px;
+  word-break:break-word;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+.tool-stat.copyable{cursor:pointer}
+.tool-stat.copyable:hover{border-color:#4c88aa;background:#0d2132}
+.tool-code-list{display:grid;gap:8px}
+.tool-code-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  border:1px solid #274560;
+  border-radius:9px;
+  background:#06131f;
+  padding:8px 9px;
+}
+.tool-code-row code{
+  min-width:0;
+  overflow:auto;
+  white-space:nowrap;
+  color:#c3f5de;
+  font:12px/1.55 "SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+.tool-code-row .btn{min-height:34px;padding:6px 9px}
+.tool-status{min-height:20px;margin-top:9px;font-size:11.5px;color:var(--muted)}
+.tool-status.ok{color:var(--green)}
+.tool-status.err{color:var(--red)}
+.tool-status.warn{color:var(--yellow)}
+.tool-table-wrap{
+  margin-top:12px;
+  overflow:auto;
+  max-height:64vh;
+  border:1px solid #294965;
+  border-radius:12px;
+  background:#081622;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.tool-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:920px;
+  font-size:12px;
+}
+.tool-table th,.tool-table td{
+  padding:8px 9px;
+  border-right:1px solid #183450;
+  border-bottom:1px solid #17314c;
+  text-align:left;
+  white-space:nowrap;
+}
+.tool-table th{
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:#112942;
+  color:#b2c8db;
+  font-size:10.7px;
+  letter-spacing:.02em;
+}
+.tool-table tbody tr:nth-child(even) td{background:rgba(255,255,255,.012)}
+.tool-table tbody tr:hover td{background:#10283b}
+.tool-table .copyable{
+  color:#89dcf6;
+  cursor:pointer;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+.tool-table .copyable:hover{text-decoration:underline;text-underline-offset:3px}
+.tool-toolbar{
+  display:grid;
+  grid-template-columns:minmax(240px,1fr) 180px auto;
+  gap:10px;
+  align-items:end;
+}
+.tool-note{
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid #294861;
+  border-radius:10px;
+  background:#091827;
+  color:#93abc0;
+  font-size:11.5px;
+  line-height:1.65;
+}
+.tool-textarea{min-height:170px;resize:vertical;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+.tool-mini-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tool-mini-actions .btn{min-width:92px}
+.tool-badge{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid #315a78;
+  border-radius:999px;
+  padding:4px 7px;
+  color:#8ddfff;
+  font-size:10px;
+  white-space:nowrap;
+}
+@media(max-width:1180px){
+  .tool-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .tool-grid{grid-template-columns:1fr}
+  .tool-toolbar{grid-template-columns:1fr}
+  .tool-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tool-table-wrap{max-height:62vh}
+}
+@media(max-width:560px){
+  .tool-body{padding:11px}
+  .tool-panel{padding:12px}
+  .tool-result-grid{grid-template-columns:1fr}
+  .tool-mini-actions .btn{flex:1 1 120px}
+  .tool-code-row{grid-template-columns:1fr}
+  .tool-code-row .btn{width:100%}
+}
+
+
+/* =========================================================
+   Network Toolkit - Phase 2
+   IP/Subnet Validator / Route Summary / Wildcard ACL / VLAN SVI DHCP
+   ========================================================= */
+.validator-textarea{min-height:190px;resize:vertical;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+.tool-alert-list{display:grid;gap:8px;margin-top:12px}
+.tool-alert{
+  border:1px solid #294965;border-radius:10px;padding:10px 11px;
+  background:#091827;font-size:11.8px;line-height:1.6
+}
+.tool-alert.ok{border-color:#2d7158;color:#bff2d9;background:#0d2b24}
+.tool-alert.warn{border-color:#6d5b2d;color:#f5d78a;background:#292313}
+.tool-alert.err{border-color:#71404a;color:#ffb5bf;background:#2e1820}
+.tool-alert b{color:inherit}
+.tool-kv{
+  display:grid;grid-template-columns:180px minmax(0,1fr);
+  gap:0;border:1px solid #294965;border-radius:11px;overflow:hidden;margin-top:12px
+}
+.tool-kv div{padding:9px 11px;border-bottom:1px solid #203b55}
+.tool-kv div:nth-last-child(-n+2){border-bottom:0}
+.tool-kv .k{background:#0d2132;color:#91abc3;font-size:11px;font-weight:800}
+.tool-kv .v{background:#081622;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12px}
+.tool-inline-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tool-inline-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tool-cli-preview{
+  margin-top:12px;border:1px solid #294965;border-radius:11px;overflow:hidden;background:#050d15
+}
+.tool-cli-preview .head{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:9px 11px;background:#10243b;border-bottom:1px solid #294965
+}
+.tool-cli-preview pre{
+  min-height:0;max-height:340px;padding:13px;font-size:12px;line-height:1.6;
+  white-space:pre;word-break:normal
+}
+@media(max-width:900px){
+  .tool-inline-grid,.tool-inline-grid.two{grid-template-columns:1fr}
+  .tool-kv{grid-template-columns:130px minmax(0,1fr)}
+}
+@media(max-width:520px){
+  .tool-kv{grid-template-columns:1fr}
+  .tool-kv .k{border-bottom:0}
+}
+
 </style>
 </head>
 <body>
@@ -826,6 +1024,15 @@ pre{font-variant-ligatures:none;tab-size:2}
     <button class="view-btn" data-view="nmsplan">NMS 規劃表</button>
     <button class="view-btn" data-view="downloadall">全部組態下載</button>
 
+    <div class="side-title">網路工具</div>
+    <button class="view-btn" data-view="subnetcalc">IPv4 子網路計算</button>
+    <button class="view-btn" data-view="vlsm">IPv4 子網路切割</button>
+    <button class="view-btn" data-view="portref">Protocol / Port</button>
+    <button class="view-btn" data-view="ipcheck">IP / Subnet 檢查</button>
+    <button class="view-btn" data-view="routesummary">Route Summary</button>
+    <button class="view-btn" data-view="wildcard">Wildcard / ACL</button>
+    <button class="view-btn" data-view="vlandhcp">VLAN / SVI / DHCP</button>
+
     <div class="side-note">
       所有組態產生與參數替換皆於瀏覽器端執行，不會上傳組態內容至外部服務。
     </div>
@@ -853,6 +1060,13 @@ pre{font-variant-ligatures:none;tab-size:2}
       <button class="tab" data-view="cnplan">CN 規劃</button>
       <button class="tab" data-view="dwbkplan">DWBK 規劃</button>
       <button class="tab" data-view="nmsplan">NMS 規劃</button>
+      <button class="tab" data-view="subnetcalc">IPv4 計算</button>
+      <button class="tab" data-view="vlsm">子網路切割</button>
+      <button class="tab" data-view="portref">Port / Protocol</button>
+      <button class="tab" data-view="ipcheck">IP 檢查</button>
+      <button class="tab" data-view="routesummary">Summary</button>
+      <button class="tab" data-view="wildcard">Wildcard / ACL</button>
+      <button class="tab" data-view="vlandhcp">VLAN / DHCP</button>
       <button class="tab" data-view="downloadall">全部組態下載</button>
     </div>
 
@@ -1143,6 +1357,325 @@ pre{font-variant-ligatures:none;tab-size:2}
               <span id="nmsPlanStatus"></span>
             </div>
             <div id="nmsPlanTableWrap" class="plan-table-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="view-subnetcalc" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>IPv4 子網路計算器</b>
+            <span>Network / Mask / Wildcard / Broadcast / Host Range / Cisco Quick Copy</span>
+          </div>
+          <span class="tool-badge">IPv4 Only</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>IPv4 / CIDR</h3>
+              <p>輸入 IPv4 Address 與 Prefix Length，例如 <b>10.211.1.130/25</b>。若省略 CIDR，預設使用 /24。</p>
+              <label>IPv4 Address / CIDR</label>
+              <input id="subnetInput" value="10.211.1.130/25" placeholder="例：10.211.1.130/25" oninput="calcSubnetTool()">
+              <div class="tool-mini-actions">
+                <button class="btn primary" onclick="calcSubnetTool()">計算</button>
+                <button class="btn ghost" onclick="setSubnetExample()">載入範例</button>
+              </div>
+              <div id="subnetStatus" class="tool-status"></div>
+            </div>
+
+            <div class="tool-panel">
+              <h3>Cisco Quick Copy</h3>
+              <p>依目前 Network / Wildcard 自動產生常用 OSPF Network Statement 與 Standard ACL 範例。</p>
+              <div id="subnetCiscoQuick" class="tool-code-list"></div>
+            </div>
+          </div>
+
+          <div id="subnetResult" class="tool-result-grid"></div>
+
+          <div class="tool-note">
+            /31 依 Point-to-Point 使用方式顯示 2 個可用位址；/32 視為單一 Host Route。實際部署仍應依設備平台、Routing Design 與組織 Addressing Policy 確認。
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="view-vlsm" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>IPv4 子網路切割</b>
+            <span>依指定 Prefix 將母網段等分為多個 IPv4 Subnet</span>
+          </div>
+          <span class="tool-badge">Subnet Splitter</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>母網段</h3>
+              <p>輸入要切割的 IPv4 Network，例如 <b>10.211.20.0/24</b>。</p>
+              <label>Parent Network / CIDR</label>
+              <input id="vlsmParent" value="10.211.20.0/24" placeholder="例：10.211.20.0/24" oninput="calcVlsmTool()">
+            </div>
+
+            <div class="tool-panel">
+              <h3>切割後 Prefix</h3>
+              <p>輸入切割後的 CIDR Prefix，例如將 /24 切成 /27。</p>
+              <label>Target Prefix</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span style="font-weight:900;color:var(--muted)">/</span>
+                <input id="vlsmTargetPrefix" type="number" min="1" max="32" value="27" oninput="calcVlsmTool()">
+              </div>
+              <div class="tool-mini-actions">
+                <button class="btn primary" onclick="calcVlsmTool()">重新計算</button>
+                <button class="btn ghost" onclick="setVlsmExample()">載入範例</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="vlsmStatus" class="tool-status"></div>
+          <div id="vlsmSummary" class="tool-result-grid"></div>
+          <div id="vlsmTableWrap" class="tool-table-wrap"></div>
+
+          <div class="tool-note">
+            此工具採固定 Prefix 等分子網路，不依 Host 需求做 VLSM 配置。切割後每個 Subnet 大小相同；實際部署仍請依 Addressing Policy 與 Routing Design 確認。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-portref" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>Protocol / Port 參考</b>
+            <span>常用 TCP / UDP Port 與 IP Protocol Number 快速查詢</span>
+          </div>
+          <span class="tool-badge">Network Reference</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-toolbar">
+            <div>
+              <label>快速搜尋</label>
+              <input id="portSearch" placeholder="例：OSPF、BGP、443、SNMP、GRE" oninput="renderPortReference()">
+            </div>
+            <div>
+              <label>類型</label>
+              <select id="portType" onchange="renderPortReference()">
+                <option value="all">全部</option>
+                <option value="tcp">TCP</option>
+                <option value="udp">UDP</option>
+                <option value="ip">IP Protocol</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn ghost" onclick="clearPortReference()">清除篩選</button>
+            </div>
+          </div>
+
+          <div id="portRefStatus" class="tool-status"></div>
+          <div id="portRefTableWrap" class="tool-table-wrap"></div>
+
+          <div class="tool-note">
+            <b style="color:var(--text)">重要：</b>OSPF、EIGRP、ICMP、GRE、ESP 等不是 TCP/UDP Application Port，而是直接使用 IP Protocol Number。RTP Port Range、Syslog Transport 等項目可能依平台或組織設定不同，表內標示為常見值時應以實際設備設定為準。
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="view-ipcheck" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>IP / Subnet 檢查</b>
+            <span>Membership / Duplicate / Overlap / Network & Broadcast Validation</span>
+          </div>
+          <span class="tool-badge">IPv4 Validation</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>單一 IP / Subnet 檢查</h3>
+              <p>確認某個 IP 是否位於指定 Subnet，並判斷是否為 Network Address 或 Broadcast Address。</p>
+              <div class="tool-inline-grid two">
+                <div>
+                  <label>IP Address</label>
+                  <input id="ipCheckAddress" value="10.211.1.190" placeholder="例：10.211.1.190" oninput="runIpMembershipCheck()">
+                </div>
+                <div>
+                  <label>Network / CIDR</label>
+                  <input id="ipCheckSubnet" value="10.211.1.128/26" placeholder="例：10.211.1.128/26" oninput="runIpMembershipCheck()">
+                </div>
+              </div>
+              <div id="ipMembershipResult" class="tool-alert-list"></div>
+            </div>
+
+            <div class="tool-panel">
+              <h3>批次 IP / Subnet 檢查</h3>
+              <p>每行可輸入 Host IP 或 CIDR。系統會檢查 Duplicate IP、Duplicate Network 與 Subnet Overlap。</p>
+              <label>IPv4 / CIDR List</label>
+              <textarea id="ipCheckList" class="validator-textarea" oninput="runIpBatchCheck()">10.211.1.10
+10.211.1.0/25
+10.211.1.128/26
+10.211.1.192/27
+10.211.1.200/28</textarea>
+              <div class="tool-mini-actions">
+                <button class="btn primary" onclick="runIpBatchCheck()">執行檢查</button>
+                <button class="btn ghost" onclick="setIpCheckExample()">載入範例</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="ipBatchStatus" class="tool-status"></div>
+          <div id="ipBatchAlerts" class="tool-alert-list"></div>
+          <div id="ipBatchTableWrap" class="tool-table-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-routesummary" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>Route Summary</b>
+            <span>多個 IPv4 Network 自動計算最小可涵蓋 Summary CIDR</span>
+          </div>
+          <span class="tool-badge">CIDR Aggregation</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>輸入 Networks</h3>
+              <p>每行輸入一個 IPv4 Network / CIDR。可輸入 Host Address / CIDR，系統會先正規化成 Network Address。</p>
+              <label>Network List</label>
+              <textarea id="summaryInput" class="validator-textarea" oninput="calcRouteSummary()">10.211.0.0/24
+10.211.1.0/24
+10.211.2.0/24
+10.211.3.0/24</textarea>
+              <div class="tool-mini-actions">
+                <button class="btn primary" onclick="calcRouteSummary()">計算 Summary</button>
+                <button class="btn ghost" onclick="setSummaryExample()">載入範例</button>
+              </div>
+              <div id="summaryStatus" class="tool-status"></div>
+            </div>
+
+            <div class="tool-panel">
+              <h3>Cisco Quick Copy</h3>
+              <p>依 Summary Network 產生常用 Static Null0 與 OSPF Network Statement 範例。</p>
+              <div id="summaryQuick" class="tool-code-list"></div>
+            </div>
+          </div>
+
+          <div id="summaryResult" class="tool-result-grid"></div>
+          <div id="summaryCoverage" class="tool-alert-list"></div>
+          <div id="summaryTableWrap" class="tool-table-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-wildcard" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>Wildcard / ACL 工具</b>
+            <span>CIDR / Subnet Mask / Wildcard Mask / Cisco OSPF & ACL</span>
+          </div>
+          <span class="tool-badge">Cisco Quick Copy</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>Network / CIDR</h3>
+              <p>輸入 IPv4 Address / CIDR，例如 <b>10.211.1.128/27</b>。</p>
+              <label>IPv4 / CIDR</label>
+              <input id="wildcardInput" value="10.211.1.128/27" placeholder="例：10.211.1.128/27" oninput="calcWildcardTool()">
+
+              <label style="margin-top:11px">OSPF Area</label>
+              <input id="wildcardArea" value="0" placeholder="例：0" oninput="calcWildcardTool()">
+
+              <div id="wildcardStatus" class="tool-status"></div>
+            </div>
+
+            <div class="tool-panel">
+              <h3>Quick Copy</h3>
+              <p>產生 OSPF Network Statement、Standard ACL 與 Extended ACL Source 範例。</p>
+              <div id="wildcardQuick" class="tool-code-list"></div>
+            </div>
+          </div>
+
+          <div id="wildcardResult" class="tool-result-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-vlandhcp" class="view">
+      <div class="card tool-shell">
+        <div class="output-head">
+          <div class="output-title">
+            <b>VLAN / SVI / DHCP 規劃</b>
+            <span>VLAN ID / SVI Gateway / DHCP Pool / Cisco CLI Generator</span>
+          </div>
+          <span class="tool-badge">Planning Helper</span>
+        </div>
+        <div class="tool-body">
+          <div class="tool-grid">
+            <div class="tool-panel">
+              <h3>Network Parameters</h3>
+              <div class="tool-inline-grid">
+                <div>
+                  <label>VLAN ID</label>
+                  <input id="vlanToolId" type="number" min="1" max="4094" value="105" oninput="calcVlanDhcpTool()">
+                </div>
+                <div>
+                  <label>VLAN Name</label>
+                  <input id="vlanToolName" value="DATA" placeholder="例：DATA" oninput="calcVlanDhcpTool()">
+                </div>
+                <div>
+                  <label>Network / CIDR</label>
+                  <input id="vlanToolNetwork" value="10.211.1.128/25" placeholder="例：10.211.1.128/25" oninput="calcVlanDhcpTool()">
+                </div>
+              </div>
+
+              <div class="tool-inline-grid two" style="margin-top:10px">
+                <div>
+                  <label>Gateway</label>
+                  <select id="vlanGatewayMode" onchange="calcVlanDhcpTool()">
+                    <option value="first">第一個可用 IP</option>
+                    <option value="last">最後一個可用 IP</option>
+                  </select>
+                </div>
+                <div>
+                  <label>DHCP Pool Name</label>
+                  <input id="vlanDhcpPoolName" value="VLAN105-DATA" oninput="calcVlanDhcpTool()">
+                </div>
+              </div>
+
+              <div id="vlanToolStatus" class="tool-status"></div>
+            </div>
+
+            <div class="tool-panel">
+              <h3>DHCP Range</h3>
+              <p>預設排除 Gateway，DHCP Range 由下一個可用位址開始至最後一個可用位址。</p>
+              <div id="vlanDhcpKv" class="tool-kv"></div>
+            </div>
+          </div>
+
+          <div id="vlanToolResult" class="tool-result-grid"></div>
+
+          <div class="tool-cli-preview">
+            <div class="head">
+              <b>Cisco CLI Preview</b>
+              <button class="btn ghost" onclick="copyVlanCli(this)">複製 CLI</button>
+            </div>
+            <pre id="vlanCliOutput"></pre>
+          </div>
+
+          <div class="tool-note">
+            此頁為規劃輔助工具。DHCP Excluded Address、Default Router、DNS Server 與設備語法仍應依現場設計、IOS / IOS-XE 版本與組織標準確認。
           </div>
         </div>
       </div>
@@ -2186,8 +2719,706 @@ function initMobileUI(){
   });
 }
 
+
+const NETWORK_PORT_REFERENCE = [
+  {type:'TCP',service:'FTP Data',value:'20',purpose:'FTP 資料通道',note:'Active FTP data channel'},
+  {type:'TCP',service:'FTP Control',value:'21',purpose:'FTP 控制通道',note:''},
+  {type:'TCP',service:'SSH',value:'22',purpose:'Secure Shell / CLI 管理',note:'Cisco Device Management 常用'},
+  {type:'TCP',service:'Telnet',value:'23',purpose:'明文遠端 CLI',note:'不建議於未受保護網路使用'},
+  {type:'TCP',service:'SMTP',value:'25',purpose:'Mail Transfer',note:''},
+  {type:'TCP',service:'TACACS+',value:'49',purpose:'AAA Authentication / Authorization / Accounting',note:'Cisco 管理環境常用'},
+  {type:'TCP/UDP',service:'DNS',value:'53',purpose:'Domain Name System',note:'Query 常見 UDP；大型回應 / Zone Transfer 可使用 TCP'},
+  {type:'UDP',service:'DHCP Server',value:'67',purpose:'DHCP Server',note:'IPv4'},
+  {type:'UDP',service:'DHCP Client',value:'68',purpose:'DHCP Client',note:'IPv4'},
+  {type:'UDP',service:'TFTP',value:'69',purpose:'Trivial File Transfer',note:'設備 Image / Config 傳輸常見'},
+  {type:'TCP',service:'HTTP',value:'80',purpose:'Web',note:''},
+  {type:'TCP',service:'POP3',value:'110',purpose:'Mail Retrieval',note:''},
+  {type:'UDP',service:'NTP',value:'123',purpose:'Network Time Protocol',note:'網路設備時間同步'},
+  {type:'TCP',service:'IMAP',value:'143',purpose:'Mail Access',note:''},
+  {type:'UDP',service:'SNMP',value:'161',purpose:'SNMP Polling / Query',note:'NMS Monitoring'},
+  {type:'UDP',service:'SNMP Trap',value:'162',purpose:'SNMP Trap / Inform',note:'NMS Event Notification'},
+  {type:'TCP',service:'BGP',value:'179',purpose:'Border Gateway Protocol',note:'BGP 使用 TCP Session'},
+  {type:'TCP/UDP',service:'LDAP',value:'389',purpose:'Directory Service',note:''},
+  {type:'TCP',service:'HTTPS',value:'443',purpose:'Secure Web / REST API',note:'RESTCONF 常見 HTTPS Transport'},
+  {type:'TCP',service:'SMB',value:'445',purpose:'Microsoft SMB / CIFS',note:''},
+  {type:'UDP',service:'IKE / ISAKMP',value:'500',purpose:'IPsec Key Exchange',note:'IKE'},
+  {type:'UDP/TCP',service:'Syslog',value:'514',purpose:'System Logging',note:'傳統網路設備常見 UDP 514；也可使用 TCP'},
+  {type:'TCP',service:'LDAPS',value:'636',purpose:'LDAP over TLS',note:''},
+  {type:'TCP',service:'NETCONF over SSH',value:'830',purpose:'NETCONF Management',note:'Automation / Programmability'},
+  {type:'TCP',service:'IMAPS',value:'993',purpose:'IMAP over TLS',note:''},
+  {type:'TCP',service:'POP3S',value:'995',purpose:'POP3 over TLS',note:''},
+  {type:'UDP',service:'L2TP',value:'1701',purpose:'Layer 2 Tunneling Protocol',note:''},
+  {type:'UDP',service:'RADIUS Authentication',value:'1812',purpose:'RADIUS Authentication',note:'AAA'},
+  {type:'UDP',service:'RADIUS Accounting',value:'1813',purpose:'RADIUS Accounting',note:'AAA'},
+  {type:'UDP',service:'HSRP',value:'1985',purpose:'Hot Standby Router Protocol',note:'Cisco First Hop Redundancy'},
+  {type:'TCP/UDP',service:'RDP',value:'3389',purpose:'Remote Desktop Protocol',note:''},
+  {type:'UDP',service:'IPsec NAT-T',value:'4500',purpose:'IPsec NAT Traversal',note:''},
+  {type:'UDP',service:'VXLAN',value:'4789',purpose:'Virtual Extensible LAN',note:'IANA VXLAN UDP Port'},
+  {type:'TCP/UDP',service:'SIP',value:'5060',purpose:'Session Initiation Protocol',note:'Voice Signaling'},
+  {type:'TCP',service:'SIP TLS',value:'5061',purpose:'SIP over TLS',note:'Secure Voice Signaling'},
+  {type:'UDP',service:'CAPWAP Control',value:'5246',purpose:'CAPWAP Control Channel',note:'Wireless Controller / AP'},
+  {type:'UDP',service:'CAPWAP Data',value:'5247',purpose:'CAPWAP Data Channel',note:'Wireless Controller / AP'},
+  {type:'TCP',service:'Syslog over TLS',value:'6514',purpose:'Secure Syslog',note:'TLS Transport'},
+  {type:'UDP',service:'RTP (Common Range)',value:'16384-32767',purpose:'Real-time Transport Protocol',note:'常見 Voice RTP Range；實際範圍依平台設定'},
+  {type:'IP',service:'ICMP',value:'1',purpose:'Internet Control Message Protocol',note:'Ping 等控制訊息；不是 TCP/UDP Port'},
+  {type:'IP',service:'IGMP',value:'2',purpose:'Internet Group Management Protocol',note:'Multicast Group Management'},
+  {type:'IP',service:'IP-in-IP',value:'4',purpose:'IPv4 Encapsulation',note:''},
+  {type:'IP',service:'TCP',value:'6',purpose:'Transmission Control Protocol',note:'IP Protocol Number'},
+  {type:'IP',service:'UDP',value:'17',purpose:'User Datagram Protocol',note:'IP Protocol Number'},
+  {type:'IP',service:'GRE',value:'47',purpose:'Generic Routing Encapsulation',note:'Tunnel Encapsulation；不是 TCP/UDP Port'},
+  {type:'IP',service:'ESP',value:'50',purpose:'IPsec Encapsulating Security Payload',note:'不是 TCP/UDP Port'},
+  {type:'IP',service:'AH',value:'51',purpose:'IPsec Authentication Header',note:'不是 TCP/UDP Port'},
+  {type:'IP',service:'EIGRP',value:'88',purpose:'Enhanced Interior Gateway Routing Protocol',note:'直接使用 IP Protocol 88'},
+  {type:'IP',service:'OSPF',value:'89',purpose:'Open Shortest Path First',note:'直接使用 IP Protocol 89'},
+  {type:'IP',service:'PIM',value:'103',purpose:'Protocol Independent Multicast',note:'Multicast Routing'},
+  {type:'IP',service:'VRRP',value:'112',purpose:'Virtual Router Redundancy Protocol',note:'First Hop Redundancy'},
+  {type:'IP',service:'SCTP',value:'132',purpose:'Stream Control Transmission Protocol',note:'IP Protocol Number'}
+];
+
+const IPV4_SPACE = 4294967296;
+
+function ipv4ToInt(ip){
+  const parts=String(ip).trim().split('.');
+  if(parts.length!==4)return null;
+  const nums=parts.map(x=>Number(x));
+  if(nums.some((n,i)=>!Number.isInteger(n)||n<0||n>255||String(parts[i]).trim()===''))return null;
+  return nums[0]*16777216+nums[1]*65536+nums[2]*256+nums[3];
+}
+
+function intToIpv4(n){
+  n=Math.floor(Number(n));
+  if(!Number.isFinite(n)||n<0||n>4294967295)return '';
+  const a=Math.floor(n/16777216);
+  n-=a*16777216;
+  const b=Math.floor(n/65536);
+  n-=b*65536;
+  const c=Math.floor(n/256);
+  const d=n-c*256;
+  return `${a}.${b}.${c}.${d}`;
+}
+
+function prefixMaskInt(prefix){
+  return prefix===0?0:IPV4_SPACE-Math.pow(2,32-prefix);
+}
+
+function maskFromPrefix(prefix){
+  return intToIpv4(prefixMaskInt(prefix));
+}
+
+function wildcardFromPrefix(prefix){
+  return intToIpv4(4294967295-prefixMaskInt(prefix));
+}
+
+function parseIpv4Cidr(value){
+  const s=String(value??'').trim();
+  const m=s.match(/^(\d{1,3}(?:\.\d{1,3}){3})(?:\/(\d{1,2}))?$/);
+  if(!m)return {error:'格式錯誤，請輸入例如 10.211.1.130/25'};
+  const ipInt=ipv4ToInt(m[1]);
+  if(ipInt===null)return {error:'IPv4 Address 不正確'};
+  const hasPrefix=m[2]!==undefined;
+  const prefix=hasPrefix?Number(m[2]):24;
+  if(!Number.isInteger(prefix)||prefix<0||prefix>32)return {error:'CIDR Prefix 必須介於 /0 至 /32'};
+  const blockSize=Math.pow(2,32-prefix);
+  const networkInt=Math.floor(ipInt/blockSize)*blockSize;
+  const broadcastInt=networkInt+blockSize-1;
+  const mask=maskFromPrefix(prefix);
+  const wildcard=wildcardFromPrefix(prefix);
+
+  let firstInt,lastInt,usable,broadcastText=intToIpv4(broadcastInt);
+  if(prefix<=30){
+    firstInt=networkInt+1;
+    lastInt=broadcastInt-1;
+    usable=Math.max(0,blockSize-2);
+  }else if(prefix===31){
+    firstInt=networkInt;
+    lastInt=broadcastInt;
+    usable=2;
+    broadcastText='N/A (/31 Point-to-Point)';
+  }else{
+    firstInt=networkInt;
+    lastInt=networkInt;
+    usable=1;
+    broadcastText='N/A (/32 Host Route)';
+  }
+
+  return {
+    input:s,ip:m[1],ipInt,prefix,hasPrefix,blockSize,networkInt,broadcastInt,
+    network:intToIpv4(networkInt),broadcast:broadcastText,
+    first:intToIpv4(firstInt),last:intToIpv4(lastInt),
+    mask,wildcard,total:blockSize,usable
+  };
+}
+
+function toolNumber(n){
+  return Number(n).toLocaleString('en-US');
+}
+
+async function copyToolValue(text,el){
+  if(text==null||text==='')return;
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      await navigator.clipboard.writeText(String(text));
+    }else{
+      const ta=document.createElement('textarea');
+      ta.value=String(text);
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    if(el){
+      const old=el.dataset.oldText||el.textContent;
+      el.dataset.oldText=old;
+      el.textContent='已複製';
+      setTimeout(()=>{el.textContent=old},650);
+    }
+  }catch(e){}
+}
+
+function bindToolCopies(root){
+  if(!root)return;
+  root.querySelectorAll('[data-tool-copy]').forEach(el=>{
+    el.onclick=()=>copyToolValue(el.dataset.toolCopy,el);
+  });
+}
+
+function toolStat(label,value,copy=false){
+  return `<div class="tool-stat${copy?' copyable':''}"${copy?` data-tool-copy="${esc(value)}" title="點擊複製"`:''}><small>${esc(label)}</small><b>${esc(value)}</b></div>`;
+}
+
+function calcSubnetTool(){
+  const input=$('subnetInput');
+  if(!input)return;
+  const r=parseIpv4Cidr(input.value);
+  const status=$('subnetStatus');
+  const result=$('subnetResult');
+  const quick=$('subnetCiscoQuick');
+
+  if(r.error){
+    status.textContent=r.error;
+    status.className='tool-status err';
+    result.innerHTML='';
+    quick.innerHTML='';
+    return;
+  }
+
+  status.textContent=r.hasPrefix?'計算完成':'未輸入 CIDR，已使用預設 /24';
+  status.className=r.hasPrefix?'tool-status ok':'tool-status warn';
+
+  result.innerHTML=[
+    toolStat('IP Address',r.ip,true),
+    toolStat('CIDR',`/${r.prefix}`,false),
+    toolStat('Subnet Mask',r.mask,true),
+    toolStat('Wildcard Mask',r.wildcard,true),
+    toolStat('Network Address',r.network,true),
+    toolStat('First Host',r.first,true),
+    toolStat('Last Host',r.last,true),
+    toolStat('Broadcast',r.broadcast,!r.broadcast.startsWith('N/A')),
+    toolStat('Total Addresses',toolNumber(r.total),false),
+    toolStat('Usable Hosts',toolNumber(r.usable),false)
+  ].join('');
+  bindToolCopies(result);
+
+  const ospf=`network ${r.network} ${r.wildcard} area 0`;
+  const acl=`access-list 10 permit ${r.network} ${r.wildcard}`;
+  quick.innerHTML=`
+    <div class="tool-code-row"><code>${esc(ospf)}</code><button class="btn ghost" data-tool-copy="${esc(ospf)}">複製</button></div>
+    <div class="tool-code-row"><code>${esc(acl)}</code><button class="btn ghost" data-tool-copy="${esc(acl)}">複製</button></div>
+  `;
+  bindToolCopies(quick);
+}
+
+function setSubnetExample(){
+  $('subnetInput').value='10.211.1.130/25';
+  calcSubnetTool();
+}
+
+
+function calcVlsmTool(){
+  const parentEl=$('vlsmParent');
+  if(!parentEl)return;
+
+  const status=$('vlsmStatus');
+  const summary=$('vlsmSummary');
+  const wrap=$('vlsmTableWrap');
+
+  const parent=parseIpv4Cidr(parentEl.value);
+  const targetPrefix=Number($('vlsmTargetPrefix')?.value);
+
+  if(parent.error||!parent.hasPrefix){
+    status.textContent=parent.error||'母網段必須包含 CIDR Prefix，例如 10.211.20.0/24';
+    status.className='tool-status err';
+    summary.innerHTML='';
+    wrap.innerHTML='';
+    return;
+  }
+
+  if(!Number.isInteger(targetPrefix)||targetPrefix<0||targetPrefix>32){
+    status.textContent='Target Prefix 必須介於 /0 至 /32';
+    status.className='tool-status err';
+    summary.innerHTML='';
+    wrap.innerHTML='';
+    return;
+  }
+
+  if(targetPrefix<parent.prefix){
+    status.textContent=`Target Prefix /${targetPrefix} 不可小於母網段 /${parent.prefix}`;
+    status.className='tool-status err';
+    summary.innerHTML='';
+    wrap.innerHTML='';
+    return;
+  }
+
+  const subnetCount=Math.pow(2,targetPrefix-parent.prefix);
+  const blockSize=Math.pow(2,32-targetPrefix);
+
+  if(subnetCount>4096){
+    status.textContent=`切割結果為 ${toolNumber(subnetCount)} 個 Subnet，數量過多。請使用較小的 Target Prefix。`;
+    status.className='tool-status warn';
+    summary.innerHTML='';
+    wrap.innerHTML='';
+    return;
+  }
+
+  status.textContent=`切割完成：${parent.network}/${parent.prefix} → /${targetPrefix}，共 ${toolNumber(subnetCount)} 個 Subnet`;
+  status.className='tool-status ok';
+
+  const usablePerSubnet = targetPrefix<=30 ? Math.max(0,blockSize-2) : (targetPrefix===31 ? 2 : 1);
+
+  summary.innerHTML=[
+    toolStat('Parent Network',`${parent.network}/${parent.prefix}`,true),
+    toolStat('Target Prefix',`/${targetPrefix}`,false),
+    toolStat('Subnet Count',toolNumber(subnetCount),false),
+    toolStat('Addresses / Subnet',toolNumber(blockSize),false)
+  ].join('');
+  bindToolCopies(summary);
+
+  let out='<table class="tool-table"><thead><tr>'
+    +'<th>#</th><th>Network / CIDR</th><th>Subnet Mask</th><th>First Host</th><th>Last Host</th><th>Broadcast</th>'
+    +'</tr></thead><tbody>';
+
+  for(let i=0;i<subnetCount;i++){
+    const start=parent.networkInt+i*blockSize;
+    const end=start+blockSize-1;
+
+    let first,last,broadcast;
+    if(targetPrefix<=30){
+      first=intToIpv4(start+1);
+      last=intToIpv4(end-1);
+      broadcast=intToIpv4(end);
+    }else if(targetPrefix===31){
+      first=intToIpv4(start);
+      last=intToIpv4(end);
+      broadcast='N/A (/31)';
+    }else{
+      first=intToIpv4(start);
+      last=intToIpv4(start);
+      broadcast='N/A (/32)';
+    }
+
+    const networkCidr=`${intToIpv4(start)}/${targetPrefix}`;
+    const mask=maskFromPrefix(targetPrefix);
+
+    out+='<tr>'
+      +`<td>${i+1}</td>`
+      +`<td class="copyable" data-tool-copy="${esc(networkCidr)}">${esc(networkCidr)}</td>`
+      +`<td class="copyable" data-tool-copy="${esc(mask)}">${esc(mask)}</td>`
+      +`<td class="copyable" data-tool-copy="${esc(first)}">${esc(first)}</td>`
+      +`<td class="copyable" data-tool-copy="${esc(last)}">${esc(last)}</td>`
+      +`<td${broadcast.startsWith('N/A')?'':` class="copyable" data-tool-copy="${esc(broadcast)}"`}>${esc(broadcast)}</td>`
+      +'</tr>';
+  }
+
+  out+='</tbody></table>';
+  wrap.innerHTML=out;
+  bindToolCopies(wrap);
+}
+
+function setVlsmExample(){
+  $('vlsmParent').value='10.211.20.0/24';
+  $('vlsmTargetPrefix').value='27';
+  calcVlsmTool();
+}
+
+
+function renderPortReference(){
+  const search=$('portSearch');
+  if(!search)return;
+  const q=search.value.trim().toLowerCase();
+  const type=$('portType').value;
+  const rows=NETWORK_PORT_REFERENCE.filter(r=>{
+    const typeOk=type==='all'
+      ||(type==='ip'&&r.type==='IP')
+      ||(type==='tcp'&&r.type.includes('TCP'))
+      ||(type==='udp'&&r.type.includes('UDP'));
+    const qOk=!q||[r.type,r.service,r.value,r.purpose,r.note].some(v=>String(v).toLowerCase().includes(q));
+    return typeOk&&qOk;
+  });
+
+  $('portRefStatus').textContent=`顯示 ${rows.length} / ${NETWORK_PORT_REFERENCE.length} 筆`;
+  $('portRefStatus').className='tool-status ok';
+
+  let out='<table class="tool-table"><thead><tr>'
+    +'<th>Type</th><th>Service / Protocol</th><th>Port / Protocol No.</th><th>用途</th><th>Engineering Note</th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length){
+    out+='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">沒有符合條件的資料</td></tr>';
+  }else{
+    rows.forEach(r=>{
+      out+='<tr>'
+        +`<td>${esc(r.type==='IP'?'IP Protocol':r.type)}</td>`
+        +`<td><b>${esc(r.service)}</b></td>`
+        +`<td class="copyable" data-tool-copy="${esc(r.value)}">${esc(r.value)}</td>`
+        +`<td>${esc(r.purpose)}</td>`
+        +`<td>${esc(r.note)}</td>`
+        +'</tr>';
+    });
+  }
+  out+='</tbody></table>';
+  const wrap=$('portRefTableWrap');
+  wrap.innerHTML=out;
+  bindToolCopies(wrap);
+}
+
+function clearPortReference(){
+  $('portSearch').value='';
+  $('portType').value='all';
+  renderPortReference();
+}
+
+function initNetworkTools(){
+  calcSubnetTool();
+  calcVlsmTool();
+  renderPortReference();
+  document.querySelectorAll('.tool-table-wrap').forEach(el=>{
+    el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label','網路工具資料表，可左右滑動查看更多欄位');
+  });
+}
+
+
+
+function rangesOverlap(aStart,aEnd,bStart,bEnd){
+  return aStart<=bEnd && bStart<=aEnd;
+}
+
+function runIpMembershipCheck(){
+  const ipEl=$('ipCheckAddress');
+  if(!ipEl)return;
+  const root=$('ipMembershipResult');
+  const ipInt=ipv4ToInt(ipEl.value);
+  const subnet=parseIpv4Cidr($('ipCheckSubnet').value);
+
+  if(ipInt===null){
+    root.innerHTML='<div class="tool-alert err"><b>Invalid IP：</b>IPv4 Address 格式不正確。</div>';
+    return;
+  }
+  if(subnet.error||!subnet.hasPrefix){
+    root.innerHTML=`<div class="tool-alert err"><b>Invalid Subnet：</b>${esc(subnet.error||'請輸入 Network / CIDR')}</div>`;
+    return;
+  }
+
+  const inside=ipInt>=subnet.networkInt && ipInt<=subnet.broadcastInt;
+  const alerts=[];
+  alerts.push(`<div class="tool-alert ${inside?'ok':'err'}"><b>${inside?'✓ In Subnet':'✕ Not in Subnet'}</b>｜${esc(intToIpv4(ipInt))} ${inside?'位於':'不位於'} ${esc(`${subnet.network}/${subnet.prefix}`)}</div>`);
+
+  if(inside && subnet.prefix<=30){
+    if(ipInt===subnet.networkInt){
+      alerts.push('<div class="tool-alert warn"><b>Network Address</b>｜此 IP 為 Subnet Network Address，不應配置給一般 Host。</div>');
+    }else if(ipInt===subnet.broadcastInt){
+      alerts.push('<div class="tool-alert warn"><b>Broadcast Address</b>｜此 IP 為 Broadcast Address，不應配置給一般 Host。</div>');
+    }else{
+      alerts.push(`<div class="tool-alert ok"><b>Usable Host</b>｜可用 Host Range：${esc(subnet.first)} - ${esc(subnet.last)}</div>`);
+    }
+  }
+  root.innerHTML=alerts.join('');
+}
+
+function parseIpCheckList(){
+  const rows=[];
+  const invalid=[];
+  String($('ipCheckList')?.value||'').split(/\r?\n/).forEach((raw,idx)=>{
+    const s=raw.trim();
+    if(!s)return;
+    if(s.includes('/')){
+      const r=parseIpv4Cidr(s);
+      if(r.error||!r.hasPrefix){
+        invalid.push({line:idx+1,text:s});
+      }else{
+        rows.push({
+          line:idx+1,input:s,type:'Subnet',
+          canonical:`${r.network}/${r.prefix}`,
+          start:r.networkInt,end:r.broadcastInt,prefix:r.prefix,
+          network:r.network,broadcast:intToIpv4(r.broadcastInt)
+        });
+      }
+    }else{
+      const ip=ipv4ToInt(s);
+      if(ip===null)invalid.push({line:idx+1,text:s});
+      else rows.push({line:idx+1,input:s,type:'Host',canonical:intToIpv4(ip),start:ip,end:ip});
+    }
+  });
+  return {rows,invalid};
+}
+
+function runIpBatchCheck(){
+  if(!$('ipCheckList'))return;
+  const parsed=parseIpCheckList();
+  const alerts=[];
+  const duplicateMap=new Map();
+
+  parsed.rows.forEach(r=>{
+    const key=`${r.type}:${r.canonical}`;
+    if(!duplicateMap.has(key))duplicateMap.set(key,[]);
+    duplicateMap.get(key).push(r.line);
+  });
+
+  for(const [key,lines] of duplicateMap){
+    if(lines.length>1){
+      const label=key.split(':').slice(1).join(':');
+      alerts.push(`<div class="tool-alert err"><b>Duplicate</b>｜${esc(label)} 重複出現在第 ${lines.join(', ')} 行。</div>`);
+    }
+  }
+
+  const subnets=parsed.rows.filter(r=>r.type==='Subnet');
+  for(let i=0;i<subnets.length;i++){
+    for(let j=i+1;j<subnets.length;j++){
+      const a=subnets[i],b=subnets[j];
+      if(a.canonical===b.canonical)continue;
+      if(rangesOverlap(a.start,a.end,b.start,b.end)){
+        alerts.push(`<div class="tool-alert warn"><b>Subnet Overlap</b>｜${esc(a.canonical)} 與 ${esc(b.canonical)} 網段重疊。</div>`);
+      }
+    }
+  }
+
+  parsed.invalid.forEach(x=>{
+    alerts.push(`<div class="tool-alert err"><b>Invalid Entry</b>｜第 ${x.line} 行：${esc(x.text)}</div>`);
+  });
+
+  if(!alerts.length){
+    alerts.push('<div class="tool-alert ok"><b>✓ Validation Passed</b>｜未發現 Duplicate IP、Duplicate Network 或 Subnet Overlap。</div>');
+  }
+
+  $('ipBatchAlerts').innerHTML=alerts.join('');
+  $('ipBatchStatus').textContent=`有效資料 ${parsed.rows.length} 筆｜問題 ${alerts.filter(x=>!x.includes('Validation Passed')).length} 項`;
+  $('ipBatchStatus').className=alerts.length===1&&alerts[0].includes('Validation Passed')?'tool-status ok':'tool-status warn';
+
+  let out='<table class="tool-table"><thead><tr><th>Line</th><th>Type</th><th>Input</th><th>Canonical</th><th>Range Start</th><th>Range End</th></tr></thead><tbody>';
+  parsed.rows.forEach(r=>{
+    out+='<tr>'
+      +`<td>${r.line}</td><td>${esc(r.type)}</td><td>${esc(r.input)}</td>`
+      +`<td class="copyable" data-tool-copy="${esc(r.canonical)}">${esc(r.canonical)}</td>`
+      +`<td>${esc(intToIpv4(r.start))}</td><td>${esc(intToIpv4(r.end))}</td></tr>`;
+  });
+  if(!parsed.rows.length)out+='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">沒有有效資料</td></tr>';
+  out+='</tbody></table>';
+  $('ipBatchTableWrap').innerHTML=out;
+  bindToolCopies($('ipBatchTableWrap'));
+}
+
+function setIpCheckExample(){
+  $('ipCheckAddress').value='10.211.1.190';
+  $('ipCheckSubnet').value='10.211.1.128/26';
+  $('ipCheckList').value='10.211.1.10\n10.211.1.0/25\n10.211.1.128/26\n10.211.1.192/27\n10.211.1.200/28';
+  runIpMembershipCheck();
+  runIpBatchCheck();
+}
+
+function commonPrefixLength(a,b){
+  let x=(a^b)>>>0;
+  if(x===0)return 32;
+  let n=0;
+  for(let bit=31;bit>=0;bit--){
+    if((x & Math.pow(2,bit))!==0)break;
+    n++;
+  }
+  return n;
+}
+
+function calcRouteSummary(){
+  if(!$('summaryInput'))return;
+  const items=[];
+  const invalid=[];
+  String($('summaryInput').value||'').split(/\r?\n/).forEach((raw,idx)=>{
+    const s=raw.trim();
+    if(!s)return;
+    const r=parseIpv4Cidr(s);
+    if(r.error||!r.hasPrefix)invalid.push(`第 ${idx+1} 行：${s}`);
+    else items.push(r);
+  });
+
+  const status=$('summaryStatus'),result=$('summaryResult'),coverage=$('summaryCoverage'),quick=$('summaryQuick'),wrap=$('summaryTableWrap');
+  if(invalid.length){
+    status.textContent=`無效資料：${invalid[0]}`;
+    status.className='tool-status err';
+    result.innerHTML='';coverage.innerHTML='';quick.innerHTML='';wrap.innerHTML='';
+    return;
+  }
+  if(!items.length){
+    status.textContent='請至少輸入一個 Network / CIDR';
+    status.className='tool-status warn';
+    result.innerHTML='';coverage.innerHTML='';quick.innerHTML='';wrap.innerHTML='';
+    return;
+  }
+
+  const minStart=Math.min(...items.map(x=>x.networkInt));
+  const maxEnd=Math.max(...items.map(x=>x.broadcastInt));
+  const prefix=commonPrefixLength(minStart,maxEnd);
+  const block=Math.pow(2,32-prefix);
+  const summaryStart=Math.floor(minStart/block)*block;
+  const summaryEnd=summaryStart+block-1;
+  const summaryCidr=`${intToIpv4(summaryStart)}/${prefix}`;
+  const exactInputCoverage=items.reduce((sum,x)=>sum+x.blockSize,0);
+  const extra=Math.max(0,block-exactInputCoverage);
+
+  status.textContent=`Summary：${summaryCidr}`;
+  status.className='tool-status ok';
+
+  result.innerHTML=[
+    toolStat('Summary CIDR',summaryCidr,true),
+    toolStat('Subnet Mask',maskFromPrefix(prefix),true),
+    toolStat('Wildcard Mask',wildcardFromPrefix(prefix),true),
+    toolStat('Summary Addresses',toolNumber(block),false)
+  ].join('');
+  bindToolCopies(result);
+
+  coverage.innerHTML=extra===0
+    ? '<div class="tool-alert ok"><b>Exact Coverage</b>｜Summary Address Space 與輸入網段總位址數相同。</div>'
+    : `<div class="tool-alert warn"><b>Additional Coverage</b>｜Summary 會額外涵蓋約 ${toolNumber(extra)} 個位址。請確認是否可接受。</div>`;
+
+  const null0=`ip route ${intToIpv4(summaryStart)} ${maskFromPrefix(prefix)} Null0`;
+  const ospf=`network ${intToIpv4(summaryStart)} ${wildcardFromPrefix(prefix)} area 0`;
+  quick.innerHTML=`
+    <div class="tool-code-row"><code>${esc(null0)}</code><button class="btn ghost" data-tool-copy="${esc(null0)}">複製</button></div>
+    <div class="tool-code-row"><code>${esc(ospf)}</code><button class="btn ghost" data-tool-copy="${esc(ospf)}">複製</button></div>`;
+  bindToolCopies(quick);
+
+  let out='<table class="tool-table"><thead><tr><th>#</th><th>Input</th><th>Normalized Network</th><th>Range Start</th><th>Range End</th></tr></thead><tbody>';
+  items.forEach((r,i)=>{
+    out+=`<tr><td>${i+1}</td><td>${esc(r.input)}</td><td class="copyable" data-tool-copy="${esc(`${r.network}/${r.prefix}`)}">${esc(`${r.network}/${r.prefix}`)}</td><td>${esc(r.network)}</td><td>${esc(intToIpv4(r.broadcastInt))}</td></tr>`;
+  });
+  out+='</tbody></table>';
+  wrap.innerHTML=out;
+  bindToolCopies(wrap);
+}
+
+function setSummaryExample(){
+  $('summaryInput').value='10.211.0.0/24\n10.211.1.0/24\n10.211.2.0/24\n10.211.3.0/24';
+  calcRouteSummary();
+}
+
+function calcWildcardTool(){
+  if(!$('wildcardInput'))return;
+  const r=parseIpv4Cidr($('wildcardInput').value);
+  const status=$('wildcardStatus'),result=$('wildcardResult'),quick=$('wildcardQuick');
+  if(r.error||!r.hasPrefix){
+    status.textContent=r.error||'請輸入 IPv4 / CIDR';
+    status.className='tool-status err';
+    result.innerHTML='';quick.innerHTML='';
+    return;
+  }
+  const area=String($('wildcardArea').value||'0').trim()||'0';
+  status.textContent=`${r.network}/${r.prefix}｜Mask ${r.mask}｜Wildcard ${r.wildcard}`;
+  status.className='tool-status ok';
+
+  result.innerHTML=[
+    toolStat('Network',r.network,true),
+    toolStat('CIDR',`/${r.prefix}`,false),
+    toolStat('Subnet Mask',r.mask,true),
+    toolStat('Wildcard Mask',r.wildcard,true)
+  ].join('');
+  bindToolCopies(result);
+
+  const ospf=`network ${r.network} ${r.wildcard} area ${area}`;
+  const std=`access-list 10 permit ${r.network} ${r.wildcard}`;
+  const ext=`permit ip ${r.network} ${r.wildcard} any`;
+  quick.innerHTML=`
+    <div class="tool-code-row"><code>${esc(ospf)}</code><button class="btn ghost" data-tool-copy="${esc(ospf)}">複製</button></div>
+    <div class="tool-code-row"><code>${esc(std)}</code><button class="btn ghost" data-tool-copy="${esc(std)}">複製</button></div>
+    <div class="tool-code-row"><code>${esc(ext)}</code><button class="btn ghost" data-tool-copy="${esc(ext)}">複製</button></div>`;
+  bindToolCopies(quick);
+}
+
+function calcVlanDhcpTool(){
+  if(!$('vlanToolNetwork'))return;
+  const vlan=Number($('vlanToolId').value);
+  const name=String($('vlanToolName').value||'VLAN').trim()||'VLAN';
+  const pool=String($('vlanDhcpPoolName').value||`VLAN${vlan}`).trim()||`VLAN${vlan}`;
+  const r=parseIpv4Cidr($('vlanToolNetwork').value);
+  const status=$('vlanToolStatus'),result=$('vlanToolResult'),kv=$('vlanDhcpKv');
+
+  if(!Number.isInteger(vlan)||vlan<1||vlan>4094){
+    status.textContent='VLAN ID 必須介於 1 至 4094';
+    status.className='tool-status err';
+    result.innerHTML='';kv.innerHTML='';$('vlanCliOutput').textContent='';
+    return;
+  }
+  if(r.error||!r.hasPrefix||r.prefix>30){
+    status.textContent=r.error||'此工具需要 /0 至 /30 的一般 IPv4 LAN Subnet';
+    status.className='tool-status err';
+    result.innerHTML='';kv.innerHTML='';$('vlanCliOutput').textContent='';
+    return;
+  }
+
+  const first=r.networkInt+1,last=r.broadcastInt-1;
+  const gateway=$('vlanGatewayMode').value==='last'?last:first;
+  const dhcpStart=$('vlanGatewayMode').value==='first'?Math.min(first+1,last):first;
+  const dhcpEnd=$('vlanGatewayMode').value==='last'?Math.max(last-1,first):last;
+  const gw=intToIpv4(gateway);
+
+  status.textContent=`VLAN ${vlan}｜${r.network}/${r.prefix}｜Gateway ${gw}`;
+  status.className='tool-status ok';
+
+  result.innerHTML=[
+    toolStat('VLAN ID',String(vlan),false),
+    toolStat('Network / CIDR',`${r.network}/${r.prefix}`,true),
+    toolStat('SVI Gateway',gw,true),
+    toolStat('Subnet Mask',r.mask,true),
+    toolStat('Broadcast',intToIpv4(r.broadcastInt),true),
+    toolStat('Usable Hosts',toolNumber(r.usable),false)
+  ].join('');
+  bindToolCopies(result);
+
+  kv.innerHTML=`
+    <div class="k">Excluded Address</div><div class="v">${esc(gw)}</div>
+    <div class="k">DHCP Start</div><div class="v">${esc(intToIpv4(dhcpStart))}</div>
+    <div class="k">DHCP End</div><div class="v">${esc(intToIpv4(dhcpEnd))}</div>
+    <div class="k">Default Router</div><div class="v">${esc(gw)}</div>`;
+
+  const cli=[
+    `vlan ${vlan}`,
+    ` name ${name}`,
+    `!`,
+    `interface Vlan${vlan}`,
+    ` description ${name}`,
+    ` ip address ${gw} ${r.mask}`,
+    ` no shutdown`,
+    `!`,
+    `ip dhcp excluded-address ${gw}`,
+    `!`,
+    `ip dhcp pool ${pool}`,
+    ` network ${r.network} ${r.mask}`,
+    ` default-router ${gw}`
+  ].join('\n');
+  $('vlanCliOutput').textContent=cli;
+}
+
+async function copyVlanCli(btn){
+  await copyToolValue($('vlanCliOutput')?.textContent||'',btn);
+}
+
+function initNetworkToolkitPhase2(){
+  runIpMembershipCheck();
+  runIpBatchCheck();
+  calcRouteSummary();
+  calcWildcardTool();
+  calcVlanDhcpTool();
+}
+
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 init();
+initNetworkTools();
+initNetworkToolkitPhase2();
 </script>
 </body>
 </html>
