@@ -988,6 +988,44 @@ pre{font-variant-ligatures:none;tab-size:2}
   .tool-kv .k{border-bottom:0}
 }
 
+
+/* =========================================================
+   Sidebar Section Readability Polish
+   ========================================================= */
+.sidebar .side-title{
+  font-size:12px;
+  font-weight:800;
+  color:#9fb8d0;
+  letter-spacing:.10em;
+  text-transform:none;
+  margin:20px 10px 8px;
+  padding-top:14px;
+  border-top:1px solid rgba(94,137,173,.22);
+}
+.sidebar .side-title:first-of-type{
+  margin-top:13px;
+  padding-top:0;
+  border-top:0;
+}
+.sidebar .device-btn,
+.sidebar .view-btn{
+  color:#cedceb;
+}
+.sidebar .device-btn small{
+  color:#8ea6be;
+}
+.sidebar .device-btn.active,
+.sidebar .view-btn.active{
+  color:#fff;
+}
+@media(max-width:900px){
+  .sidebar .side-title{
+    font-size:12px;
+    margin:18px 9px 8px;
+    padding-top:13px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1015,7 +1053,7 @@ pre{font-variant-ligatures:none;tab-size:2}
     <div class="side-title">設備 Template</div>
     <div id="deviceNav" class="device-nav"></div>
 
-    <div class="side-title">功能</div>
+    <div class="side-title">組態功能</div>
     <button class="view-btn active" data-view="single">單筆組態產生</button>
     <button class="view-btn" data-view="batch">批次組態產生</button>
     <button class="view-btn" data-view="reference">IP / 電話規劃查詢</button>
