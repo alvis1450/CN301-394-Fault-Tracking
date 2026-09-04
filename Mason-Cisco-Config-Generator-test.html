@@ -614,6 +614,57 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
   .stats{grid-template-columns:1fr}
 }
 
+
+/* === CLI search enhancement === */
+.config-searchbar{align-items:center}
+.config-searchbar input{min-width:180px}
+.config-search-status{
+  flex:0 0 auto;
+  min-width:92px;
+  text-align:center;
+  font-size:10.8px;
+  color:#91abc3;
+  border:1px solid #294b68;
+  background:#0a1b29;
+  border-radius:999px;
+  padding:5px 9px;
+  white-space:nowrap;
+}
+.config-search-status.ok{color:#a9efd0;border-color:#2d6d58;background:#0d2d27}
+.config-search-status.err{color:#ffb5be;border-color:#70414a;background:#301922}
+.config-search-hit{
+  background:#ffd166;
+  color:#071019;
+  border-radius:2px;
+  padding:0 1px;
+  box-shadow:0 0 0 1px rgba(255,209,102,.28);
+}
+.config-search-hit.current{
+  background:#ff9f6e;
+  color:#071019;
+  box-shadow:0 0 0 2px rgba(255,159,110,.45),0 0 14px rgba(255,159,110,.18);
+}
+@media(max-width:900px){
+  .config-searchbar{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:7px;
+  }
+  .config-searchbar input{grid-column:1/-1}
+  .config-search-status{
+    justify-self:start;
+    min-width:0;
+    font-size:10.5px;
+  }
+  .config-searchbar .btn{min-width:126px}
+}
+@media(max-width:480px){
+  .config-searchbar{grid-template-columns:1fr}
+  .config-searchbar input,
+  .config-searchbar .btn{grid-column:1}
+  .config-searchbar .btn{width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -726,7 +777,14 @@ button:focus-visible,.device-btn:focus-visible,.view-btn:focus-visible,.tab:focu
             </div>
           </div>
           <div id="missingBox" class="missing-box"></div>
-          <div class="searchbar"><input id="configSearch" placeholder="在組態內搜尋，例如：interface Vlan105、router ospf" oninput="findInConfig()"><button class="btn ghost" onclick="findInConfig()">搜尋</button></div>
+          <div class="searchbar config-searchbar">
+            <input id="configSearch"
+                   placeholder="在組態內搜尋，例如：interface Vlan105、router ospf"
+                   oninput="findInConfig(false)"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();findInConfig(true)}">
+            <span id="configSearchStatus" class="config-search-status">輸入文字即可搜尋</span>
+            <button class="btn ghost" onclick="findInConfig(true)">搜尋 / 下一筆</button>
+          </div>
           <pre id="configOutput"></pre>
         </div>
       </div>
@@ -1177,6 +1235,8 @@ function generateConfig(){
   const fname=deriveFilename(txt);
   $('outputFileName').textContent=fname;
   $('outputTitle').textContent=getDevice().label+'｜CLI 預覽';
+  if($('configSearch')?.value.trim()) findInConfig(false);
+  else resetConfigSearchState();
 }
 function deriveFilename(txt){
   const m=txt.match(/^hostname\s+([^\r\n]+)/mi);
@@ -1209,14 +1269,97 @@ function flashOutput(msg){
   const old=$('outputFileName').textContent;$('outputFileName').textContent=msg;
   setTimeout(()=>$('outputFileName').textContent=old,1400);
 }
-function findInConfig(){
-  const q=$('configSearch').value.trim();if(!q)return;
-  const txt=$('configOutput').textContent.toLowerCase(),i=txt.indexOf(q.toLowerCase());
-  if(i<0){flashOutput('找不到：'+q);return}
-  const pre=$('configOutput');const before=$('configOutput').textContent.slice(0,i);
-  const approxLine=before.split('\n').length;
-  pre.scrollTop=Math.max(0,(approxLine-5)*20);
-  flashOutput(`找到約第 ${approxLine} 行`);
+let configSearchState={query:'',current:-1,count:0};
+
+function resetConfigSearchState(){
+  configSearchState={query:'',current:-1,count:0};
+  const status=$('configSearchStatus');
+  if(status){
+    status.textContent='輸入文字即可搜尋';
+    status.className='config-search-status';
+  }
+}
+
+function collectConfigMatches(text,query){
+  const out=[];
+  if(!query)return out;
+  const source=text.toLowerCase();
+  const target=query.toLowerCase();
+  let pos=0;
+  while(pos<=source.length-target.length){
+    const i=source.indexOf(target,pos);
+    if(i<0)break;
+    out.push({start:i,end:i+target.length});
+    pos=i+Math.max(1,target.length);
+  }
+  return out;
+}
+
+function renderConfigSearch(text,matches,current){
+  const pre=$('configOutput');
+  if(!matches.length){
+    pre.textContent=text;
+    return;
+  }
+  let html='',pos=0;
+  matches.forEach((m,idx)=>{
+    html+=esc(text.slice(pos,m.start));
+    html+=`<mark class="config-search-hit${idx===current?' current':''}" data-config-hit="${idx}">${esc(text.slice(m.start,m.end))}</mark>`;
+    pos=m.end;
+  });
+  html+=esc(text.slice(pos));
+  pre.innerHTML=html;
+}
+
+function findInConfig(next=false){
+  const input=$('configSearch');
+  const pre=$('configOutput');
+  const status=$('configSearchStatus');
+  const q=(input?.value||'').trim();
+  const text=pre.textContent;
+
+  if(!q){
+    pre.textContent=text;
+    resetConfigSearchState();
+    return;
+  }
+
+  const matches=collectConfigMatches(text,q);
+
+  if(!matches.length){
+    pre.textContent=text;
+    configSearchState={query:q,current:-1,count:0};
+    if(status){
+      status.textContent='找不到';
+      status.className='config-search-status err';
+    }
+    flashOutput('找不到：'+q);
+    return;
+  }
+
+  const sameQuery=configSearchState.query.toLowerCase()===q.toLowerCase()
+                  && configSearchState.count===matches.length;
+
+  let current=0;
+  if(next && sameQuery && configSearchState.current>=0){
+    current=(configSearchState.current+1)%matches.length;
+  }
+
+  configSearchState={query:q,current,count:matches.length};
+  renderConfigSearch(text,matches,current);
+
+  const mark=pre.querySelector(`[data-config-hit="${current}"]`);
+  if(mark){
+    mark.scrollIntoView({block:'center',inline:'nearest',behavior:'smooth'});
+  }
+
+  const before=text.slice(0,matches[current].start);
+  const line=before.split('\n').length;
+
+  if(status){
+    status.textContent=`${current+1} / ${matches.length}｜第 ${line} 行`;
+    status.className='config-search-status ok';
+  }
 }
 
 function updateTemplateInfo(){
