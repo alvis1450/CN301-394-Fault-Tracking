@@ -1026,18 +1026,571 @@ pre{font-variant-ligatures:none;tab-size:2}
   }
 }
 
+
+/* =========================================================
+   Information Architecture / Navigation Redesign
+   Primary -> Secondary -> Task
+   ========================================================= */
+.app{grid-template-columns:238px minmax(0,1fr)}
+.sidebar{padding:18px 13px}
+.sidebar .brand{padding-bottom:15px}
+.sidebar .brand h1{font-size:15.5px}
+.sidebar .brand p{font-size:10.8px;line-height:1.4}
+
+.sidebar .side-title{
+  margin:18px 9px 7px;
+  padding-top:12px;
+  font-size:11px;
+  letter-spacing:.09em;
+  color:#92abc3;
+}
+.sidebar .side-title:first-of-type{
+  margin-top:9px;
+  padding-top:0;
+  border-top:0;
+}
+.sidebar .primary-nav{
+  min-height:54px;
+  padding:10px 11px;
+}
+.sidebar .primary-nav b{
+  display:block;
+  font-size:13.5px;
+  font-weight:800;
+  color:inherit;
+}
+.sidebar .primary-nav small{
+  display:block;
+  margin-top:3px;
+  color:#7f99b2;
+  font-size:10.2px;
+  line-height:1.35;
+}
+.sidebar .primary-nav.active small{color:#9fc0d9}
+.sidebar .side-note{
+  margin-top:20px;
+  font-size:10.8px;
+}
+
+/* Compact product header */
+.hero.app-header-compact{
+  padding:14px 18px;
+  border-radius:14px;
+}
+.hero.app-header-compact h2{
+  font-size:clamp(21px,1.7vw,26px);
+  margin-bottom:3px;
+}
+.hero.app-header-compact p{
+  font-size:12px;
+  line-height:1.5;
+  max-width:none;
+}
+.hero.app-header-compact .ver{
+  padding:5px 9px;
+  font-size:10.5px;
+}
+
+/* Context / secondary navigation */
+.context-panel{
+  display:none;
+  margin-top:12px;
+  border:1px solid #294965;
+  border-radius:14px;
+  background:rgba(10,25,39,.96);
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+  overflow:hidden;
+}
+.context-panel.active{display:block}
+.context-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:13px 15px 11px;
+  border-bottom:1px solid #24435f;
+  background:linear-gradient(135deg,rgba(76,201,240,.055),rgba(121,223,178,.018));
+}
+.context-breadcrumb{
+  display:block;
+  margin-bottom:3px;
+  color:#78a4c4;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.context-head h3{
+  margin:0;
+  font-size:16px;
+  font-weight:800;
+}
+.context-head p{
+  margin:4px 0 0;
+  color:#93abc0;
+  font-size:11.5px;
+  line-height:1.55;
+}
+.context-body{padding:13px 15px 14px}
+.context-group + .context-group{
+  margin-top:13px;
+  padding-top:12px;
+  border-top:1px solid rgba(75,111,142,.22);
+}
+.context-label{
+  margin:0 0 7px;
+  color:#91abc3;
+  font-size:10.8px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.secondary-nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.context-btn{
+  min-height:38px;
+  border:1px solid #31516d;
+  border-radius:9px;
+  background:#0b1c2a;
+  color:#bdd0e2;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:800;
+}
+.context-btn:hover{
+  background:#10283b;
+  border-color:#3d6988;
+}
+.context-btn.active{
+  color:#fff;
+  background:#17415b;
+  border-color:#4a83a5;
+  box-shadow:inset 0 -2px 0 rgba(76,201,240,.42);
+}
+
+/* Device Template cards now belong to configuration workflow */
+.config-device-nav{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+  gap:8px;
+}
+.config-device-nav .device-btn{
+  min-height:66px;
+  margin:0;
+  padding:10px 11px;
+  border:1px solid #294965;
+  border-radius:10px;
+  background:#091a28;
+  color:#cadbea;
+  text-align:left;
+}
+.config-device-nav .device-btn:hover{
+  background:#10283b;
+  border-color:#3c6683;
+}
+.config-device-nav .device-btn.active{
+  background:linear-gradient(135deg,rgba(76,201,240,.16),rgba(76,201,240,.045));
+  border-color:#4b85a7;
+  box-shadow:inset 3px 0 0 var(--blue),0 5px 14px rgba(0,0,0,.12);
+  color:#fff;
+}
+.config-device-nav .device-btn b{
+  display:block;
+  font-size:12.7px;
+  line-height:1.35;
+}
+.config-device-nav .device-btn small{
+  display:block;
+  margin-top:4px;
+  color:#86a1ba;
+  font-size:10.4px;
+  line-height:1.35;
+}
+.config-device-nav .device-btn.active small{color:#a9cbe0}
+
+/* Existing global tabs are intentionally removed */
+.tabs{display:none!important}
+
+/* Content follows context navigation with less vertical waste */
+.workspace,.batch-grid,.plan-shell,.ref-wrap,.tool-shell{margin-top:12px}
+
+@media(max-width:1180px){
+  .app{grid-template-columns:224px minmax(0,1fr)}
+  .config-device-nav{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+}
+@media(max-width:900px){
+  .app{display:block}
+  .sidebar{
+    width:min(86vw,300px);
+    padding:14px 12px 24px;
+  }
+  .sidebar .primary-nav{
+    min-height:52px;
+    font-size:13px;
+  }
+  .sidebar .primary-nav b{font-size:13.5px}
+  .context-panel{margin-top:9px;border-radius:12px}
+  .context-head{
+    padding:11px 12px 10px;
+    flex-direction:column;
+    gap:6px;
+  }
+  .context-head h3{font-size:15px}
+  .context-body{padding:11px 12px 12px}
+  .config-device-nav{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px;
+  }
+  .config-device-nav .device-btn{
+    min-height:64px;
+    padding:9px 10px;
+  }
+  .secondary-nav{gap:6px}
+  .context-btn{
+    min-height:42px;
+    padding:8px 10px;
+    font-size:12px;
+  }
+}
+@media(max-width:520px){
+  .hero.app-header-compact{padding:12px 13px}
+  .hero.app-header-compact h2{font-size:19px}
+  .hero.app-header-compact p{font-size:11.5px}
+  .config-device-nav{
+    grid-template-columns:1fr!important;
+  }
+  .secondary-nav{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .context-btn{width:100%}
+}
+@media(max-width:380px){
+  .secondary-nav{grid-template-columns:1fr}
+}
+
+
+/* =========================================================
+   Mason-Cisco Final UI Baseline
+   Stable design system for desktop / laptop / tablet / mobile
+   ========================================================= */
+:root{
+  --mc-bg:#071019;
+  --mc-side:#08131f;
+  --mc-panel:#0d1b2a;
+  --mc-panel-2:#102437;
+  --mc-border:#294963;
+  --mc-border-strong:#3f718f;
+  --mc-text:#f3f7fb;
+  --mc-muted:#9db1c5;
+  --mc-primary:#4cc9f0;
+  --mc-success:#79dfb2;
+  --mc-warning:#f5ca68;
+  --mc-danger:#ff7d8c;
+  --mc-focus:rgba(76,201,240,.16);
+}
+
+/* Global visual hierarchy */
+body{
+  color:var(--mc-text);
+  background:
+    radial-gradient(circle at 88% 0%,rgba(54,126,176,.14) 0,rgba(7,16,25,0) 34%),
+    linear-gradient(180deg,#08131f 0,#071019 100%);
+}
+.main{max-width:1860px}
+.card,.context-panel,.hero{
+  border-color:var(--mc-border);
+}
+label{font-weight:650}
+.desc,.help,.note,.plan-source,.tool-note{color:#98adc0}
+
+/* Unified active state across primary / secondary / template cards */
+.sidebar .primary-nav.active,
+.context-btn.active,
+.config-device-nav .device-btn.active{
+  color:#fff;
+  background:linear-gradient(90deg,rgba(76,201,240,.17),rgba(76,201,240,.055));
+  border-color:#4a7c99;
+  box-shadow:inset 3px 0 0 var(--mc-primary),0 4px 13px rgba(0,0,0,.12);
+}
+.sidebar .primary-nav.active small,
+.config-device-nav .device-btn.active small{color:#afd0e3}
+
+/* Hover state stays quieter than active */
+.sidebar .primary-nav:hover,
+.context-btn:hover,
+.config-device-nav .device-btn:hover{
+  background:#10273a;
+  border-color:#355f7c;
+}
+
+/* Compact product header */
+.hero.app-header-compact{
+  padding:12px 16px;
+  min-height:auto;
+}
+.hero.app-header-compact h2{
+  font-size:clamp(20px,1.55vw,25px);
+  line-height:1.25;
+  margin:0 0 2px;
+}
+.hero.app-header-compact p{
+  font-size:11.7px;
+  line-height:1.45;
+}
+.hero.app-header-compact .ver{
+  padding:5px 9px;
+  font-size:10.5px;
+}
+
+/* Context navigation */
+.context-panel{margin-top:10px}
+.context-head{padding:11px 14px 10px}
+.context-head h3{font-size:15.5px}
+.context-head p{font-size:11.2px;margin-top:3px}
+.context-body{padding:11px 14px 12px}
+.context-group + .context-group{margin-top:11px;padding-top:10px}
+.context-label{margin-bottom:6px;font-size:10.6px}
+
+/* Template cards */
+.config-device-nav{
+  grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+  gap:7px;
+}
+.config-device-nav .device-btn{
+  min-height:60px;
+  padding:9px 10px;
+}
+.config-device-nav .device-btn b{font-size:12.4px}
+.config-device-nav .device-btn small{font-size:10.1px;margin-top:3px}
+
+/* Secondary buttons */
+.context-btn{
+  min-height:36px;
+  padding:7px 11px;
+  font-size:11.8px;
+}
+
+/* Task content density */
+.workspace,.batch-grid,.plan-shell,.ref-wrap,.tool-shell{margin-top:10px}
+.workspace,.batch-grid{gap:13px}
+.left{padding:15px}
+.section{
+  padding-bottom:13px;
+  margin-bottom:12px;
+}
+.stitle{margin-bottom:8px}
+.stitle h3{font-size:15px}
+.desc{font-size:12px;line-height:1.55;margin-bottom:10px}
+label{font-size:11.5px;margin-bottom:5px}
+input,select,textarea{
+  min-height:41px;
+  padding:9px 11px;
+  font-size:13px;
+}
+.btn{
+  min-height:38px;
+  padding:8px 12px;
+  font-size:12.2px;
+}
+.stats{margin-top:9px}
+.stat{padding:8px 9px}
+.note{line-height:1.6}
+
+/* CLI */
+.output-head{padding:11px 13px}
+.output-title b{font-size:13.5px}
+.output-title span{font-size:10.5px}
+.searchbar{padding:8px 11px}
+pre{
+  min-height:520px;
+  max-height:72vh;
+  padding:14px;
+  font-size:12.7px;
+  line-height:1.58;
+  white-space:pre;
+  word-break:normal;
+}
+
+/* Planning / tools */
+.plan-toolbar{padding:13px}
+.plan-summary{padding:0 13px 12px}
+.plan-content{padding:0 13px 13px}
+.plan-source{margin:0 13px 12px}
+.tool-body{padding:13px}
+.tool-panel{padding:12px}
+.tool-panel p{font-size:11.5px;line-height:1.55}
+.tool-result-grid{gap:7px;margin-top:10px}
+.tool-table-wrap{margin-top:10px}
+
+/* Sidebar */
+.app{grid-template-columns:226px minmax(0,1fr)}
+.sidebar{padding:15px 11px}
+.sidebar .brand{padding:3px 5px 13px}
+.sidebar .brand h1{font-size:14.8px}
+.sidebar .brand p{font-size:10.4px}
+.sidebar .side-title{
+  font-size:10.8px;
+  margin:15px 8px 6px;
+  padding-top:10px;
+}
+.sidebar .primary-nav{
+  min-height:50px;
+  padding:9px 10px;
+}
+.sidebar .primary-nav b{font-size:13px}
+.sidebar .primary-nav small{font-size:9.9px}
+.sidebar .side-note{
+  margin-top:16px;
+  padding:11px 8px;
+  font-size:10.4px;
+}
+
+/* 1366x768 / common engineering laptop density */
+@media(max-width:1440px){
+  .app{grid-template-columns:214px minmax(0,1fr)}
+  .main{padding:15px 17px 22px}
+  .hero.app-header-compact{padding:11px 14px}
+  .context-head{padding:10px 12px 9px}
+  .context-body{padding:10px 12px 11px}
+  .config-device-nav{grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
+  .workspace{grid-template-columns:minmax(405px,.88fr) minmax(475px,1.12fr)}
+  .workspace,.batch-grid{gap:11px}
+  .left{padding:13px}
+  .section{padding-bottom:11px;margin-bottom:10px}
+  .desc{margin-bottom:8px}
+  .output-head{padding:10px 12px}
+  pre{min-height:460px;font-size:12.4px}
+}
+
+@media(max-height:820px) and (min-width:901px){
+  .main{padding-top:12px;padding-bottom:18px}
+  .hero.app-header-compact{padding-top:9px;padding-bottom:9px}
+  .context-panel{margin-top:8px}
+  .context-head{padding-top:8px;padding-bottom:8px}
+  .context-body{padding-top:8px;padding-bottom:9px}
+  .config-device-nav .device-btn{min-height:55px}
+  .workspace,.batch-grid,.plan-shell,.ref-wrap,.tool-shell{margin-top:8px}
+  .section{padding-bottom:10px;margin-bottom:9px}
+  .stats{margin-top:7px}
+  pre{min-height:410px;max-height:67vh}
+}
+
+/* Tablet */
+@media(max-width:1180px){
+  .app{grid-template-columns:210px minmax(0,1fr)}
+  .workspace{grid-template-columns:1fr}
+  .right{position:relative;top:0}
+  pre{min-height:400px;max-height:60vh}
+}
+
+/* Mobile keeps touch targets large */
+@media(max-width:900px){
+  body{padding-top:56px}
+  .main{padding:10px 11px 22px}
+  .hero.app-header-compact{
+    padding:11px 12px;
+    border-radius:12px;
+  }
+  .hero.app-header-compact h2{font-size:19px}
+  .hero.app-header-compact p{font-size:11.5px}
+
+  .sidebar{
+    width:min(86vw,300px);
+    padding:13px 11px 24px;
+  }
+  .sidebar .primary-nav{
+    min-height:48px;
+    padding:10px 11px;
+  }
+  .sidebar .primary-nav b{font-size:13.5px}
+  .sidebar .primary-nav small{font-size:10.3px}
+
+  .context-panel{
+    margin-top:8px;
+    border-radius:11px;
+  }
+  .context-head{padding:10px 11px 9px}
+  .context-head h3{font-size:15px}
+  .context-head p{font-size:11.2px}
+  .context-body{padding:10px 11px 11px}
+
+  .config-device-nav{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px;
+  }
+  .config-device-nav .device-btn{
+    min-height:62px;
+    padding:9px 10px;
+  }
+
+  .secondary-nav{gap:6px}
+  .context-btn{
+    min-height:44px;
+    padding:9px 10px;
+    font-size:12px;
+  }
+
+  .workspace,.batch-grid{gap:10px;margin-top:9px}
+  .left{padding:13px}
+  .section{padding-bottom:12px;margin-bottom:11px}
+
+  label{font-size:12px}
+  input,select,textarea{
+    min-height:46px;
+    font-size:16px; /* prevent iOS auto zoom */
+    padding:10px 11px;
+  }
+  .btn{min-height:44px;font-size:12.5px}
+
+  .output-head{padding:10px 11px}
+  .searchbar{padding:8px 10px}
+  pre{
+    min-height:330px;
+    max-height:56vh;
+    padding:12px;
+    font-size:12px;
+    line-height:1.56;
+  }
+
+  .plan-toolbar{padding:11px}
+  .plan-summary{padding:0 11px 11px}
+  .plan-content{padding:0 11px 11px}
+  .plan-source{margin:0 11px 11px}
+  .tool-body{padding:11px}
+}
+
+/* Small phone */
+@media(max-width:520px){
+  .hero.app-header-compact p{display:none}
+  .context-head p{font-size:11px}
+  .config-device-nav{grid-template-columns:1fr!important}
+  .secondary-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .context-btn{width:100%}
+  .output-head{gap:8px}
+  .output-title b{font-size:13px}
+}
+
+/* Very small phone */
+@media(max-width:380px){
+  .secondary-nav{grid-template-columns:1fr}
+  .main{padding-left:8px;padding-right:8px}
+}
+
 </style>
 </head>
 <body>
 
 <div class="mobile-topbar">
   <button id="mobileMenuBtn" class="mobile-menu-btn" type="button"
-          aria-label="開啟設備與功能選單" aria-expanded="false">
+          aria-label="開啟主選單" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
   <div class="mobile-title">
     <b>Mason-Cisco</b>
-    <span id="mobileViewTitle">單筆組態產生</span>
+    <span id="mobileViewTitle">組態產生</span>
   </div>
   <span class="mobile-version">v1.5</span>
 </div>
@@ -1050,26 +1603,23 @@ pre{font-variant-ligatures:none;tab-size:2}
       <div><h1>Mason-Cisco Config Generator</h1><p>Cisco Configuration &amp; Network Planning Tool</p></div>
     </div>
 
-    <div class="side-title">設備 Template</div>
-    <div id="deviceNav" class="device-nav"></div>
+    <div class="side-title">組態</div>
+    <button class="view-btn primary-nav active" data-view="single" data-nav-group="config">
+      <b>組態產生</b><small>Template / 單筆 / 批次</small>
+    </button>
+    <button class="view-btn primary-nav" data-view="downloadall" data-nav-group="download">
+      <b>全部組態下載</b><small>All Templates / ZIP</small>
+    </button>
 
-    <div class="side-title">組態功能</div>
-    <button class="view-btn active" data-view="single">單筆組態產生</button>
-    <button class="view-btn" data-view="batch">批次組態產生</button>
-    <button class="view-btn" data-view="reference">IP / 電話規劃查詢</button>
-    <button class="view-btn" data-view="cnplan">CN 規劃表</button>
-    <button class="view-btn" data-view="dwbkplan">DWBK 規劃表</button>
-    <button class="view-btn" data-view="nmsplan">NMS 規劃表</button>
-    <button class="view-btn" data-view="downloadall">全部組態下載</button>
+    <div class="side-title">規劃</div>
+    <button class="view-btn primary-nav" data-view="reference" data-nav-group="planning">
+      <b>網路規劃</b><small>IP / CN / DWBK / NMS</small>
+    </button>
 
-    <div class="side-title">網路工具</div>
-    <button class="view-btn" data-view="subnetcalc">IPv4 子網路計算</button>
-    <button class="view-btn" data-view="vlsm">IPv4 子網路切割</button>
-    <button class="view-btn" data-view="portref">Protocol / Port</button>
-    <button class="view-btn" data-view="ipcheck">IP / Subnet 檢查</button>
-    <button class="view-btn" data-view="routesummary">Route Summary</button>
-    <button class="view-btn" data-view="wildcard">Wildcard / ACL</button>
-    <button class="view-btn" data-view="vlandhcp">VLAN / SVI / DHCP</button>
+    <div class="side-title">工具</div>
+    <button class="view-btn primary-nav" data-view="subnetcalc" data-nav-group="toolkit">
+      <b>Network Toolkit</b><small>IPv4 / Routing / ACL / DHCP</small>
+    </button>
 
     <div class="side-note">
       所有組態產生與參數替換皆於瀏覽器端執行，不會上傳組態內容至外部服務。
@@ -1077,36 +1627,91 @@ pre{font-variant-ligatures:none;tab-size:2}
   </aside>
 
   <main class="main">
-    <section class="hero">
+    <section class="hero app-header-compact">
       <div class="hero-top">
         <div>
           <h2>Mason-Cisco Config Generator</h2>
-          <p>依內建 Template 與設備預設資料產生完整 Cisco CLI 組態；產生前可檢查並調整站點參數。</p>
-          <div class="badges">
-            <span class="badge">內建 Template</span><span class="badge">設備預設資料</span><span class="badge">必要變數檢查</span><span class="badge">TXT / ZIP 匯出</span><span class="badge">Client-side Processing</span>
-          </div>
-          <div class="flow"><b>① 選擇 Template</b><span class="arr">→</span><b>② 選擇設備</b><span class="arr">→</span><b>③ 檢查 / 調整參數</b><span class="arr">→</span><b>④ 產生組態</b></div>
+          <p>Cisco Configuration &amp; Network Planning Tool｜組態、規劃與 Network Toolkit 集中於單一工作介面。</p>
         </div>
         <div class="ver">v1.5</div>
       </div>
     </section>
 
-    <div class="tabs">
-      <button class="tab active" data-view="single">單筆組態</button>
-      <button class="tab" data-view="batch">批次組態</button>
-      <button class="tab" data-view="reference">IP / 電話規劃</button>
-      <button class="tab" data-view="cnplan">CN 規劃</button>
-      <button class="tab" data-view="dwbkplan">DWBK 規劃</button>
-      <button class="tab" data-view="nmsplan">NMS 規劃</button>
-      <button class="tab" data-view="subnetcalc">IPv4 計算</button>
-      <button class="tab" data-view="vlsm">子網路切割</button>
-      <button class="tab" data-view="portref">Port / Protocol</button>
-      <button class="tab" data-view="ipcheck">IP 檢查</button>
-      <button class="tab" data-view="routesummary">Summary</button>
-      <button class="tab" data-view="wildcard">Wildcard / ACL</button>
-      <button class="tab" data-view="vlandhcp">VLAN / DHCP</button>
-      <button class="tab" data-view="downloadall">全部組態下載</button>
-    </div>
+
+    <section id="context-config" class="context-panel active">
+      <div class="context-head">
+        <div>
+          <span class="context-breadcrumb">組態 / 組態產生</span>
+          <h3>選擇設備 Template</h3>
+          <p>先選擇設備 Template，再選擇單筆或批次產生模式。設備選擇會套用到兩種模式。</p>
+        </div>
+      </div>
+      <div class="context-body">
+        <div class="context-group">
+          <div class="context-label">設備 Template</div>
+          <div id="deviceNav" class="device-nav config-device-nav"></div>
+        </div>
+        <div class="context-group">
+          <div class="context-label">產生模式</div>
+          <div class="secondary-nav">
+            <button class="context-btn active" data-view="single">單筆產生</button>
+            <button class="context-btn" data-view="batch">批次產生</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="context-planning" class="context-panel">
+      <div class="context-head">
+        <div>
+          <span class="context-breadcrumb">規劃 / 網路規劃</span>
+          <h3>網路規劃資料</h3>
+          <p>依資料類型切換規劃表；搜尋、複製與原始 Excel 匯出功能維持原本操作。</p>
+        </div>
+      </div>
+      <div class="context-body">
+        <div class="secondary-nav">
+          <button class="context-btn" data-view="reference">IP / 電話規劃</button>
+          <button class="context-btn" data-view="cnplan">CN 規劃</button>
+          <button class="context-btn" data-view="dwbkplan">DWBK 規劃</button>
+          <button class="context-btn" data-view="nmsplan">NMS 規劃</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="context-toolkit" class="context-panel">
+      <div class="context-head">
+        <div>
+          <span class="context-breadcrumb">工具 / Network Toolkit</span>
+          <h3>Network Toolkit</h3>
+          <p>依工作類型選擇 IPv4、Routing、ACL、LAN Services 或 Protocol Reference 工具。</p>
+        </div>
+      </div>
+      <div class="context-body">
+        <div class="context-group">
+          <div class="context-label">IP Addressing</div>
+          <div class="secondary-nav">
+            <button class="context-btn" data-view="subnetcalc">IPv4 子網路計算</button>
+            <button class="context-btn" data-view="vlsm">IPv4 子網路切割</button>
+            <button class="context-btn" data-view="ipcheck">IP / Subnet 檢查</button>
+          </div>
+        </div>
+        <div class="context-group">
+          <div class="context-label">Routing / Security</div>
+          <div class="secondary-nav">
+            <button class="context-btn" data-view="routesummary">Route Summary</button>
+            <button class="context-btn" data-view="wildcard">Wildcard / ACL</button>
+          </div>
+        </div>
+        <div class="context-group">
+          <div class="context-label">LAN Services / Reference</div>
+          <div class="secondary-nav">
+            <button class="context-btn" data-view="vlandhcp">VLAN / SVI / DHCP</button>
+            <button class="context-btn" data-view="portref">Protocol / Port</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section id="view-single" class="view active">
       <div class="workspace">
@@ -1828,7 +2433,7 @@ function init(){
 function renderDeviceNav(){
   const nav=$('deviceNav');nav.innerHTML='';
   Object.entries(DATA.devices).forEach(([key,d])=>{
-    const b=document.createElement('button');b.className='device-btn'+(key===currentDevice?' active':'');b.dataset.device=key;
+    const b=document.createElement('button');b.className='device-btn config-device-card'+(key===currentDevice?' active':'');b.dataset.device=key;b.type='button';
     b.innerHTML=`<b>${esc(d.label)}</b><small>${esc(d.sub)}｜${d.presets.length} 筆預設</small>`;
     b.onclick=()=>selectDevice(key);nav.appendChild(b);
   });
@@ -1846,16 +2451,66 @@ function selectDevice(key){
   if(window.innerWidth<=900) closeMobileNav();
 }
 
+
+const VIEW_GROUPS = {
+  config:['single','batch'],
+  planning:['reference','cnplan','dwbkplan','nmsplan'],
+  toolkit:['subnetcalc','vlsm','portref','ipcheck','routesummary','wildcard','vlandhcp'],
+  download:['downloadall']
+};
+
+const VIEW_TITLES = {
+  single:'組態產生',
+  batch:'組態產生 / 批次',
+  reference:'IP / 電話規劃',
+  cnplan:'CN 規劃',
+  dwbkplan:'DWBK 規劃',
+  nmsplan:'NMS 規劃',
+  subnetcalc:'IPv4 子網路計算',
+  vlsm:'IPv4 子網路切割',
+  portref:'Protocol / Port',
+  ipcheck:'IP / Subnet 檢查',
+  routesummary:'Route Summary',
+  wildcard:'Wildcard / ACL',
+  vlandhcp:'VLAN / SVI / DHCP',
+  downloadall:'全部組態下載'
+};
+
+function viewGroupOf(v){
+  return Object.keys(VIEW_GROUPS).find(g=>VIEW_GROUPS[g].includes(v))||'';
+}
+
+function updateContextNavigation(v){
+  const group=viewGroupOf(v);
+  const config=$('context-config');
+  const planning=$('context-planning');
+  const toolkit=$('context-toolkit');
+
+  if(config)config.classList.toggle('active',group==='config');
+  if(planning)planning.classList.toggle('active',group==='planning');
+  if(toolkit)toolkit.classList.toggle('active',group==='toolkit');
+
+  document.querySelectorAll('.sidebar .primary-nav[data-nav-group]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.navGroup===group);
+  });
+
+  document.querySelectorAll('.context-btn[data-view]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.view===v);
+  });
+
+  const mt=$('mobileViewTitle');
+  if(mt)mt.textContent=VIEW_TITLES[v]||'Mason-Cisco';
+}
+
 function bindViews(){
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 }
 function switchView(v){
+  const target=$('view-'+v);
+  if(!target)return;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  $('view-'+v).classList.add('active');
-  document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
-  const activeBtn=[...document.querySelectorAll('.view-btn[data-view]')].find(x=>x.dataset.view===v);
-  const mt=$('mobileViewTitle');
-  if(mt&&activeBtn) mt.textContent=activeBtn.textContent.trim();
+  target.classList.add('active');
+  updateContextNavigation(v);
   closeMobileNav();
   if(window.innerWidth<=900) window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -3455,6 +4110,7 @@ function initNetworkToolkitPhase2(){
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 init();
+updateContextNavigation('single');
 initNetworkTools();
 initNetworkToolkitPhase2();
 </script>
